@@ -118,5 +118,5 @@ Resources:
             apis:
               custom:
                 endpoint:
-                  uri: !GetAtt LambdaSkill.Arn
+                  uri: !GetAtt LambdaFunction.Arn
       VendorId: !Ref ASKVendorId
