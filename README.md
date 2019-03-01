@@ -5,3 +5,7 @@ Demo alexa skill using a go lambda function, deployed with cloudformation
 * show how to use cloudformation to deploy everything in one run (Alexa, Lambda, IAM roles and policies)
 * demonstrate golang lambda structure with localization support
 * build skill from code (generate JSON required for the Alexa skill from the code)
+
+
+## I18N / L10N
+https://phraseapp.com/blog/posts/internationalization-i18n-go/
