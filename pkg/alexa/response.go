@@ -49,3 +49,23 @@ func NewDialogDelegateResponse() Response {
 
 	return r
 }
+
+//NewSimpleResponse builds a session response
+func NewSimpleResponse(title string, text string) Response {
+	r := Response{
+		Version: "1.0",
+		Body: alexa.ResBody{
+			OutputSpeech: &alexa.Payload{
+				Type: "PlainText",
+				Text: text,
+			},
+			Card: &alexa.Payload{
+				Type:    "Simple",
+				Title:   title,
+				Content: text,
+			},
+			ShouldEndSession: true,
+		},
+	}
+	return r
+}

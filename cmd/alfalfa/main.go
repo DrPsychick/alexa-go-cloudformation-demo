@@ -1,9 +1,10 @@
 package main
 
 import (
-	"gopkg.in/urfave/cli.v1"
 	"log"
 	"os"
+
+	"gopkg.in/urfave/cli.v1"
 )
 
 import _ "github.com/joho/godotenv/autoload"
@@ -17,17 +18,19 @@ var commands = []cli.Command{
 		Action: runServer,
 	},
 	{
-		Name:   "generate",
-		Usage:  "Generate Alexa skill files",
+		Name:   "make",
+		Usage:  "Make Alexa skill files",
 		Action: runMake,
 	},
 }
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "unknown"
+	app.Name = "Alfalfa"
+	app.Usage = "It does stuff and stuff"
 	app.Version = version
 	app.Commands = commands
+	app.Action = runLambda
 
 	err := app.Run(os.Args)
 	if err != nil {

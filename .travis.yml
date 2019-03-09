@@ -22,7 +22,7 @@ script:
 before_deploy:
   - pip install --upgrade --user awscli
   - mkdir ./deploy
-  - go build -a -ldflags "-s -X main.Version=$(git describe --tags --always)" -o ./deploy/app ./cmd/queryaws
+  - go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/queryaws
 
 # Needs $CF_TEMPLATE_OUT, $CF_STACKNAME
 deploy:
