@@ -17,14 +17,18 @@ func NewApplication(l log.Logger, s stats.Statter) *Application {
 	}
 }
 
-func (a *Application) QueryAWS(r interface{}) (interface{}, error) {
-	return nil, nil
+func (a *Application) Handle() {
+	panic("implement me or panic hard")
+}
+
+func (a *Application) Help() (string, string) {
+	return "", ""
 }
 
 func (a *Application) Logger() log.Logger {
 	return a.logger
 }
 
-func (a *Application) Handle() {
-	panic("implement me or panic hard")
+func (a *Application) Statter() stats.Statter {
+	return a.statter
 }

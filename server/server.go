@@ -1,35 +1,40 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 type Application interface {
-	Handle(alexa.Request) (alexa.Response, error)
+	Handle()
+	Help() (string, string)
 }
 
 // NewMux creates a new Mux instance.
 func NewServer(app Application) {
-	lambda.Start(Handler)
+	lambda.Start(HandleRequest)
 }
 
-// Handler is the lambda hander
-func Handler(request alexa.Request) (alexa.Response, error) {
-	return DispatchIntents(request), nil
-}
+type Handler func(alexa.Request) (alexa.Response, error)
 
-// DispatchIntents dispatches each intent to the right handler
-func DispatchIntents(request alexa.Request) alexa.Response {
-	var response alexa.Response
-	switch request.Body.Intent.Name {
-	case "hello":
-		response = handleHello(request)
-	case alexa.HelpIntent:
-		response = handleHelp()
+// HandleRequest is the lambda hander
+func HandleRequest(app Application) Handler {
+	return func(r alexa.Request) (alexa.Response, error) {
+		name := r.Body.Intent.Name
+
+		switch name {
+		case "hello":
+			return handleHello(r), nil
+
+		case alexa.HelpIntent:
+			title, text := app.Help()
+			return alexa.NewSimpleResponse(title, text), nil
+		}
+
+		return alexa.Response{}, fmt.Errorf("server: unknown intent %s", name)
 	}
-
-	return response
 }
 
 func handleHello(request alexa.Request) alexa.Response {
@@ -46,8 +51,4 @@ func handleHello(request alexa.Request) alexa.Response {
 		text = "Hello, World"
 	}
 	return alexa.NewSimpleResponse(title, text)
-}
-
-func handleHelp() alexa.Response {
-	return alexa.NewSimpleResponse("Help for Hello", "To receive a greeting, ask hello to say hello")
 }
