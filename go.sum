@@ -1,3 +1,5 @@
+bou.ke/monkey v1.0.1 h1:zEMLInw9xvNakzUUPjfS4Ds6jYPqCFx3m7bRmG5NH2U=
+bou.ke/monkey v1.0.1/go.mod h1:FgHuK96Rv2Nlf+0u1OOVDpCMdsWyOFmeeketDHE7LIg=
 github.com/aws/aws-lambda-go v1.9.0 h1:r9TWtk8ozLYdMW+aelUeWny8z2mjghJCMx6/uUwOLNo=
 github.com/aws/aws-lambda-go v1.9.0/go.mod h1:zUsUQhAUjYzR8AuduJPCfhBuKWUaDbQiPOG+ouzmE1A=
 github.com/cactus/go-statsd-client v3.1.1+incompatible h1:p97okCU2aaeSxQ6KzMdGEwQkiGBMys71/J0XWoirbJY=
@@ -5,6 +7,7 @@ github.com/cactus/go-statsd-client v3.1.1+incompatible/go.mod h1:cMRcwZDklk7hXp+
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/drpsychick/alexa-go-cloudformation-demo v0.0.0-20190307101557-23d9cb034d01 h1:U5+JIgBg6u0Oyz/FthP17p1NW0MzNizL1VtAsIO+vMQ=
 github.com/go-zoo/bone v0.0.0-20190117145001-d7ce1372afa7 h1:9j1EAzjykFGj2YY/+Y1TcEQMf5eAEOzbnPUMT9YYb5g=
 github.com/go-zoo/bone v0.0.0-20190117145001-d7ce1372afa7/go.mod h1:HI3Lhb7G3UQcAwEhOJ2WyNcsFtQX1WYHa0Hl4OBbhW8=
 github.com/hamba/cmd v1.0.0 h1:Y1CALuyALRxrcmWrMBQedIYbWQGc0CFDhIouCk73RuM=

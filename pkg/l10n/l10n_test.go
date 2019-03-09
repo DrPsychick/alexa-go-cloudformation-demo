@@ -1,12 +1,11 @@
 package l10n_test
 
 import (
-	"math/rand"
-	"testing"
-
 	"bou.ke/monkey"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"github.com/stretchr/testify/assert"
+	"math/rand"
+	"testing"
 )
 
 const Greeting l10n.Key = "greeting"
