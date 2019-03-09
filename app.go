@@ -1,4 +1,4 @@
-package
+package alfalfa
 
 import (
     "github.com/hamba/pkg/log"
