@@ -37,7 +37,7 @@ func handleHello(request alexa.Request) alexa.Response {
 	switch request.Body.Locale {
 	case alexa.LocaleAustralianEnglish:
 		text = "G'day mate!"
-	case alexa.LocaleGerman:
+	case alexa.LocaleGermanGerman:
 		text = "Hallo Welt"
 	case alexa.LocaleJapanese:
 		text = "こんにちは世界"
