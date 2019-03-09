@@ -1,29 +1,34 @@
-package
+package alfalfa
 
 import (
-    "github.com/hamba/pkg/log"
-    "github.com/aws/aws-lambda-go"
+	"github.com/hamba/pkg/log"
+	"github.com/hamba/pkg/stats"
 )
 
-type Handler interface {
-    Handle() (response, error)
-}
-
 type Application struct {
-    logger  log.Logger
-    Handler Handler
+	logger  log.Logger
+	statter stats.Statter
 }
 
-func NewApplication(l log.Logger) *Application {
-    return &Application{
-        logger: l,
-    }
+func NewApplication(l log.Logger, s stats.Statter) *Application {
+	return &Application{
+		logger:  l,
+		statter: s,
+	}
 }
 
-func (a *Application) Handle() (..., error) {
-    response, err := a.Handler.Handle(r)
+func (a *Application) Handle() {
+	panic("implement me or panic hard")
+}
+
+func (a *Application) Help() (string, string) {
+	return "", ""
 }
 
 func (a *Application) Logger() log.Logger {
-    return a.logger
+	return a.logger
+}
+
+func (a *Application) Statter() stats.Statter {
+	return a.statter
 }
