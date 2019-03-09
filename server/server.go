@@ -8,7 +8,7 @@ import (
 )
 
 type Application interface {
-	Handle()
+	QueryAWS(r interface{}) (interface{}, error)
 }
 
 // NewMux creates a new Mux instance.
