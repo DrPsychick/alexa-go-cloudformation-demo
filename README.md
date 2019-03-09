@@ -15,3 +15,16 @@ https://phraseapp.com/blog/posts/internationalization-i18n-go/
 
 ## golang context
 * don't "misuse" context to pass logger etc. instead make the application satisfy the required interfaces
+
+# Tools
+## Install `ask cli` on macOS
+requires Homebrew
+```
+brew install npm
+npm install -g ask-cli
+```
+Setup ask-cli
+```
+ask init
+# follow instructions, link ask to an aws account (required for cloudformation Alexa skill to assume S3 role)
+```
