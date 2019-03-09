@@ -7,9 +7,6 @@ go:
   - "1.x"
 env:
   - GO111MODULE=on
-  - PROJECT=queryaws
-  - CF_TEMPLATE_OUT=alexa-cloudformation.yaml
-  - CF_STACKNAME=<you stack name>
 
 before_install:
   - go mod download
@@ -27,6 +24,7 @@ before_deploy:
   - mkdir ./deploy
   - go build -a -ldflags "-s -X main.Version=$(git describe --tags --always)" -o ./deploy/app ./cmd/queryaws
 
+# Needs $CF_TEMPLATE_OUT, $CF_STACKNAME
 deploy:
   provider: script
   script: bash scripts/deploy.sh
