@@ -28,5 +28,3 @@ func runServer(c *cli.Context) error {
 func runMake(c *cli.Context) error {
 
 }
-
-func newServer(app *queryaws.Application) http.Handler

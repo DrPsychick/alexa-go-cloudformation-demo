@@ -1,4 +1,58 @@
 package queryaws
 
-type App interface {
-    Handle() 
+import (
+	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"github.com/arienmalec/alexa-go"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/go-zoo/bone"
+	"github.com/json-iterator/go"
+	"net/http"
+)
+
+type Application interface {
+	Handle()
+}
+
+// NewMux creates a new Mux instance.
+func NewServer(app *Application) http.Handler {
+	mux := bone.New()
+	mux.GetFunc("/test", requestHandlerTest(app))
+
+	return mux
+}
+
+func handleHelp(request alexa.Request) alexa.Response {
+	title := "Help"
+	SetLocale(request.Body.Locale)
+	r := alexa.NewSimpleTerminateResponse()
+	r.Body.OutputSpeech = &alexa.Payload{
+		Type:  OutputSpeechPlainText,
+		Text:  GetText("handle_help_response"),
+		Title: title,
+	}
+	r.Body.Reprompt = &alexa.Reprompt{
+		OutputSpeech: alexa.Payload{
+			Type: OutputSpeechPlainText,
+			Text: GetText("handle_help_reprompt"),
+		},
+	}
+	return r
+}
+
+// WriteHtmlResponse encodes html content to the ResponseWriter.
+func WriteJsonResponse(w http.ResponseWriter, code int, v interface{}) error {
+	raw, err := jsoniter.Marshal(v)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+
+	if _, err = w.Write(raw); err != nil {
+		return err
+	}
+
+	return nil
+}
