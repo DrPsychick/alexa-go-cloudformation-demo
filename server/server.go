@@ -1,56 +1,53 @@
-package queryaws
+package server
 
 import (
-	"net/http"
-
-	"github.com/go-zoo/bone"
-	"github.com/json-iterator/go"
+	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 type Application interface {
-	QueryAWS(r interface{}) (interface{}, error)
+	Handle(alexa.Request) (alexa.Response, error)
 }
 
 // NewMux creates a new Mux instance.
-func NewServer(app *Application) http.Handler {
-	mux := bone.New()
-	//mux.GetFunc("/test", requestHandlerTest(app))
-
-	return mux
+func NewServer(app Application) {
+	lambda.Start(Handler)
 }
 
-//func handleHelp(request alexa.Request) alexa.Response {
-//	title := "Help"
-//	SetLocale(request.Body.Locale)
-//	r := alexa.NewSimpleTerminateResponse()
-//	r.Body.OutputSpeech = &alexa.Payload{
-//		Type:  OutputSpeechPlainText,
-//		Text:  GetText("handle_help_response"),
-//		Title: title,
-//	}
-//	r.Body.Reprompt = &alexa.Reprompt{
-//		OutputSpeech: alexa.Payload{
-//			Type: OutputSpeechPlainText,
-//			Text: GetText("handle_help_reprompt"),
-//		},
-//	}
-//	return r
-//}
+// Handler is the lambda hander
+func Handler(request alexa.Request) (alexa.Response, error) {
+	return DispatchIntents(request), nil
+}
 
-// WriteHtmlResponse encodes html content to the ResponseWriter.
-func WriteJsonResponse(w http.ResponseWriter, code int, v interface{}) error {
-	raw, err := jsoniter.Marshal(v)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return err
+// DispatchIntents dispatches each intent to the right handler
+func DispatchIntents(request alexa.Request) alexa.Response {
+	var response alexa.Response
+	switch request.Body.Intent.Name {
+	case "hello":
+		response = handleHello(request)
+	case alexa.HelpIntent:
+		response = handleHelp()
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
+	return response
+}
 
-	if _, err = w.Write(raw); err != nil {
-		return err
+func handleHello(request alexa.Request) alexa.Response {
+	title := "Saying Hello"
+	var text string
+	switch request.Body.Locale {
+	case alexa.LocaleAustralianEnglish:
+		text = "G'day mate!"
+	case alexa.LocaleGerman:
+		text = "Hallo Welt"
+	case alexa.LocaleJapanese:
+		text = "こんにちは世界"
+	default:
+		text = "Hello, World"
 	}
+	return alexa.NewSimpleResponse(title, text)
+}
 
-	return nil
+func handleHelp() alexa.Response {
+	return alexa.NewSimpleResponse("Help for Hello", "To receive a greeting, ask hello to say hello")
 }
