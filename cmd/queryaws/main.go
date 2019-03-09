@@ -1,6 +1,8 @@
 package main
 
 import (
+	"gopkg.in/urfave/cli.v1"
+	"log"
 	"os"
 	"github.com/hamba/cmd"
 )
@@ -18,7 +20,7 @@ var commands = []cli.Command{
 	{
 		Name: "generate",
 		Usage: "Generate Alexa skill files",
-		Action: runGenerate,
+		Action: runMake,
 	}
 }
 
@@ -28,5 +30,8 @@ func main() {
 	app.Version = version
 	app.Commands = commands
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

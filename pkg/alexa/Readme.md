@@ -1,0 +1,1 @@
+stolen and extended from https://github.com/soloworks/go-alexa-models
