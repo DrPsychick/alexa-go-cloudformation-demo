@@ -1,20 +1,36 @@
 package alexa
 
-import (
-	"github.com/arienmalec/alexa-go"
-)
+type Payload struct {
+	Type    string `json:"type,omitempty"`
+	Title   string `json:"title,omitempty"`
+	Text    string `json:"text,omitempty"`
+	SSML    string `json:"ssml,omitempty"`
+	Content string `json:"content,omitempty"`
+	Image   Image  `json:"image,omitempty"`
+}
+
+type Image struct {
+	SmallImageURL string `json:"smallImageUrl,omitempty"`
+	LargeImageURL string `json:"largeImageUrl,omitempty"`
+}
+
+type Reprompt struct {
+	OutputSpeech Payload `json:"outputSpeech,omitempty"`
+}
 
 // Response is the response back to the response speech service
 type Response struct {
 	Version           string                 `json:"version"`
 	SessionAttributes map[string]interface{} `json:"sessionAttributes,omitempty"`
-	Body              struct {
-		OutputSpeech     *alexa.Payload     `json:"outputSpeech,omitempty"`
-		Card             *alexa.Payload     `json:"card,omitempty"`
-		Reprompt         *alexa.Reprompt    `json:"reprompt,omitempty"`
-		Directives       []alexa.Directives `json:"directives,omitempty"`
-		ShouldEndSession bool               `json:"shouldEndSession"`
-	} `json:"response"`
+	Body              ResponseBody           `json:"response"`
+}
+
+type ResponseBody struct {
+	OutputSpeech     *Payload     `json:"outputSpeech,omitempty"`
+	Card             *Payload     `json:"card,omitempty"`
+	Reprompt         *Reprompt    `json:"reprompt,omitempty"`
+	Directives       []Directives `json:"directives,omitempty"`
+	ShouldEndSession bool         `json:"shouldEndSession"`
 }
 
 // NewEmptyResponse builds an empty response
@@ -33,7 +49,7 @@ func NewSimpleTerminateResponse() Response {
 func NewSpeechResponse(speech string) Response {
 	r := NewEmptyResponse()
 	r.Body.ShouldEndSession = true
-	r.Body.OutputSpeech = &alexa.Payload{
+	r.Body.OutputSpeech = &Payload{
 		Type: "PlainText",
 		Text: speech,
 	}
@@ -45,21 +61,21 @@ func NewSpeechResponse(speech string) Response {
 func NewDialogDelegateResponse() Response {
 	r := NewEmptyResponse()
 	r.Body.ShouldEndSession = false
-	r.Body.Directives = append(r.Body.Directives, alexa.Directives{Type: DirectiveTypeDialogDelegate})
+	r.Body.Directives = append(r.Body.Directives, Directives{Type: DirectiveTypeDialogDelegate})
 
 	return r
 }
 
-//NewSimpleResponse builds a session response
+// NewSimpleResponse builds a session response
 func NewSimpleResponse(title string, text string) Response {
 	r := Response{
 		Version: "1.0",
-		Body: alexa.ResBody{
-			OutputSpeech: &alexa.Payload{
+		Body: ResponseBody{
+			OutputSpeech: &Payload{
 				Type: "PlainText",
 				Text: text,
 			},
-			Card: &alexa.Payload{
+			Card: &Payload{
 				Type:    "Simple",
 				Title:   title,
 				Content: text,
@@ -67,5 +83,6 @@ func NewSimpleResponse(title string, text string) Response {
 			ShouldEndSession: true,
 		},
 	}
+
 	return r
 }

@@ -1,7 +1,6 @@
 package alexa
 
 import (
-	"github.com/arienmalec/alexa-go"
 	"strings"
 )
 
@@ -32,10 +31,10 @@ var directiveTypeStrings = [...]string{
 
 // Directives is imformation
 type Directives struct {
-	Type          DirectiveType        `json:"type,omitempty"`
-	SlotToElicit  string               `json:"slotToElicit,omitempty"`
-	UpdatedIntent *alexa.UpdatedIntent `json:"UpdatedIntent,omitempty"`
-	PlayBehavior  string               `json:"playBehavior,omitempty"`
+	Type          DirectiveType  `json:"type,omitempty"`
+	SlotToElicit  string         `json:"slotToElicit,omitempty"`
+	UpdatedIntent *UpdatedIntent `json:"UpdatedIntent,omitempty"`
+	PlayBehavior  string         `json:"playBehavior,omitempty"`
 	AudioItem     struct {
 		Stream struct {
 			Token                string `json:"token,omitempty"`
