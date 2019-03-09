@@ -55,12 +55,14 @@ func (d *DirectiveType) UnmarshalJSON(data []byte) error {
 	dt := DirectiveTypeUndefined
 	// Convert to string whilst removing quotes
 	x := string(data)[1 : len(data)-1]
+
 	// Find the type in the range of values
 	for i, s := range directiveTypeStrings {
 		if strings.ToLower(s) == strings.ToLower(x) {
 			dt = DirectiveType(i)
 		}
 	}
+
 	*d = dt
 	return nil
 }
