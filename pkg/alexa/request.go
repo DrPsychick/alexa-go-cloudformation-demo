@@ -4,6 +4,19 @@ package alexa
 
 type RequestType int
 
+const (
+	// RequestTypeUndefined means incoming value incorrect or not supported
+	RequestTypeUndefined RequestType = iota
+	// RequestTypeLaunch is constant `LaunchRequest`
+	RequestTypeLaunch
+	// RequestTypeIntent is constant `IntentRequest`
+	RequestTypeIntent
+	// RequestTypeSessionEnded is constant `SessionEndedRequest`
+	RequestTypeSessionEnded
+	// RequestTypeCanFulfillIntent is constant `CanFulfillIntentRequest`
+	RequestTypeCanFulfillIntent
+)
+
 var requestTypeStrings = [...]string{
 	"Undefined", // Placeholder - should never be this
 	"LaunchRequest",
