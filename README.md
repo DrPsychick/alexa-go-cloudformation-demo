@@ -1,4 +1,4 @@
-# alexa-go-cloudformation-demo
+# alfalfa (ALexA Lambda Fun Aws)
 Demo alexa skill using a go lambda function, deployed with cloudformation
 
 ## Purpose
@@ -27,4 +27,15 @@ Setup ask-cli
 ```
 ask init
 # follow instructions, link ask to an aws account (required for cloudformation Alexa skill to assume S3 role)
+```
+
+## Test cloudformation locally
+* you need to setup AWS credentials which can be used to execute cloudfromation
+```
+export AWS_ACCESS_KEY_ID=<yourAccessKeyId>
+export AWS_SECRET_ACCESS_KEY=<yourSecretAccessKey>
+export AWS_DEFAULT_REGION=eu-west-1
+export CF_STACK_NAME=alexa-demo
+export ASKS3Bucket=<yourS3Bucket>
+(cd ./cloudformation; ./deploy.sh)
 ```

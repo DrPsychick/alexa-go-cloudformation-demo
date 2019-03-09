@@ -1,20 +1,21 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31 # REQUIRED for AWS::Serverless
+Transform: AWS::Serverless-2016-10-31
+# REQUIRED for AWS::Serverless
 Parameters:
   LambdaEnv1:
     Description: Demo to pass cloudformation parameter to ENV of lambda
     Type: String
   ASKClientId:
-    Description: Alexa security profile Client ID : https://developer.amazon.com/settings/console/securityprofile/overview.html
+    Description: Alexa security profile Client ID, see https://developer.amazon.com/settings/console/securityprofile/overview.html
     Type: String
   ASKClientSecret:
     Description: Alexa security profile Client Secret
     Type: String
   ASKRefreshToken:
-    Description: Login with Amazon refresh token: `ask util generate-lwa-tokens`
+    Description: Login with Amazon refresh token, see "ask util generate-lwa-tokens"
     Type: String
   ASKVendorId:
-    Description: A vendor ID from your developer account: `ask api list-vendors`
+    Description: A vendor ID from your developer account, see "ask api list-vendors"
     Type: String
   ASKS3Bucket:
     Description: S3 bucket name to fetch the Alexa skill ZIP file from
@@ -25,20 +26,20 @@ Parameters:
 
 Resources:
   LambdaFunction:
-  Type: AWS::Serverless::Function
-  Properties:
-    Handler: app
-    Runtime: go1.x
-    Role: !GetAtt LambdaRole.Arn
-    CodeUri: ../deploy
-    Events:
-      AlexaSkillEvent:
-        Type: AlexaSkill
-    Environment:
-      Variables:
-        LAMBDA_ENV1: !Ref LambdaEnv1
-    MemorySize: 128
-    Timeout: 5
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app
+      Runtime: go1.x
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ../deploy
+      Events:
+        AlexaSkillEvent:
+          Type: AlexaSkill
+      Environment:
+        Variables:
+          LAMBDA_ENV1: !Ref LambdaEnv1
+      MemorySize: 128
+      Timeout: 5
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:

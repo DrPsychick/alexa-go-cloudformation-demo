@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-aws cloudformation package --template-file cloudformation.yaml --output-template-file $CF_TEMPLATE_OUT --s3-bucket cf-templates-6zv6ngwbcox6-eu-west-1
+aws cloudformation validate-template --template-body file://cloudformation.yml || exit 1
+aws cloudformation package --template-file cloudformation.yml --output-template-file cf-template-package.yml --s3-bucket $ASKS3Bucket
 
-aws cloudformation deploy --template-file $CF_TEMPLATE_OUT --stack-name $CF_STACKNAME  --capabilities CAPABILITY_IAM || {
-    aws cloudformation describe-stack-events --stack-name $CF_STACKNAME;
-    aws cloudformation delete-stack --stack-name $CF_STACKNAME;
+aws cloudformation deploy --template-file cf-template-package.yml --stack-name $CF_STACK_NAME --capabilities CAPABILITY_IAM || {
+    aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME;
+    aws cloudformation delete-stack --stack-name $CF_STACK_NAME;
 }
