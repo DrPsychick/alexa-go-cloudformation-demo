@@ -1,5 +1,3 @@
-github.com/arienmalec/alexa-go v0.0.0-20181025212142-975687393e90 h1:/UEvmje8rZLGNjx6pTKMtVxrN8xcFMWCAcODiEBCsaI=
-github.com/arienmalec/alexa-go v0.0.0-20181025212142-975687393e90/go.mod h1:r3auYxsVOE8VOWVAGQn8eoZSwarziuVK+35Pi4dgtcM=
 github.com/aws/aws-lambda-go v1.9.0 h1:r9TWtk8ozLYdMW+aelUeWny8z2mjghJCMx6/uUwOLNo=
 github.com/aws/aws-lambda-go v1.9.0/go.mod h1:zUsUQhAUjYzR8AuduJPCfhBuKWUaDbQiPOG+ouzmE1A=
 github.com/cactus/go-statsd-client v3.1.1+incompatible h1:p97okCU2aaeSxQ6KzMdGEwQkiGBMys71/J0XWoirbJY=

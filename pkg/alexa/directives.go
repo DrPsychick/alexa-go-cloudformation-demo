@@ -1,7 +1,6 @@
 package alexa
 
 import (
-	"github.com/arienmalec/alexa-go"
 	"strings"
 )
 
@@ -32,10 +31,10 @@ var directiveTypeStrings = [...]string{
 
 // Directives is imformation
 type Directives struct {
-	Type          DirectiveType        `json:"type,omitempty"`
-	SlotToElicit  string               `json:"slotToElicit,omitempty"`
-	UpdatedIntent *alexa.UpdatedIntent `json:"UpdatedIntent,omitempty"`
-	PlayBehavior  string               `json:"playBehavior,omitempty"`
+	Type          DirectiveType  `json:"type,omitempty"`
+	SlotToElicit  string         `json:"slotToElicit,omitempty"`
+	UpdatedIntent *UpdatedIntent `json:"UpdatedIntent,omitempty"`
+	PlayBehavior  string         `json:"playBehavior,omitempty"`
 	AudioItem     struct {
 		Stream struct {
 			Token                string `json:"token,omitempty"`
@@ -56,12 +55,14 @@ func (d *DirectiveType) UnmarshalJSON(data []byte) error {
 	dt := DirectiveTypeUndefined
 	// Convert to string whilst removing quotes
 	x := string(data)[1 : len(data)-1]
+
 	// Find the type in the range of values
 	for i, s := range directiveTypeStrings {
 		if strings.ToLower(s) == strings.ToLower(x) {
 			dt = DirectiveType(i)
 		}
 	}
+
 	*d = dt
 	return nil
 }
