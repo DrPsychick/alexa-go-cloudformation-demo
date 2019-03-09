@@ -3,6 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 # REQUIRED for AWS::Serverless
 Parameters:
   LambdaEnv1:
+    Default: FooBar
     Description: Demo to pass cloudformation parameter to ENV of lambda
     Type: String
   ASKClientId:
@@ -71,37 +72,37 @@ Resources:
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
             Resource: "arn:aws:rlogs:*:*:*"
-  AlexaS3Role:
-    Type: AWS::IAM::Role
-    Properties:
-      Path: "/"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Effect: "Allow"
-            Principal:
-              AWS:
-                - "arn:aws:iam::373747914350:user/ask-cli"
-            Action:
-              "sts:AssumeRole"
-  AlexaS3Policy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: "cf-alexa_s3_policy"
-      Roles:
-      -
-        Ref: "AlexaS3Role"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Effect: "Allow"
-            Action:
-              - "s3:ListBucket"
-              - "s3:GetObject"
-              - "s3:GetObjectVersion"
-            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket ] ]
+#  AlexaS3Role:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      Path: "/"
+#      AssumeRolePolicyDocument:
+#        Version: "2012-10-17"
+#        Statement:
+#          -
+#            Effect: "Allow"
+#            Principal:
+#              Service:
+#                - "alexa-appkit.amazon.com"
+#            Action:
+#              "sts:AssumeRole"
+#  AlexaS3Policy:
+#    Type: AWS::IAM::Policy
+#    Properties:
+#      PolicyName: "cf-alexa_s3_policy"
+#      Roles:
+#      -
+#        Ref: "AlexaS3Role"
+#      PolicyDocument:
+#        Version: "2012-10-17"
+#        Statement:
+#          -
+#            Effect: "Allow"
+#            Action:
+#              - "s3:ListBucket"
+#              - "s3:GetObject"
+#              - "s3:GetObjectVersion"
+#            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket ] ]
   # Skill ZIP file needs to be uploaded manually to S3 before executing cloudformation
   AlexaSkill:
     Type: Alexa::ASK::Skill
@@ -112,7 +113,7 @@ Resources:
         RefreshToken: !Ref ASKRefreshToken
       SkillPackage:
         S3Bucket: !Ref ASKS3Bucket
-        S3BucketRole: !Ref AlexaS3Role
+        #S3BucketRole: !Ref AlexaS3Role
         S3Key: !Ref ASKS3Key
         Overrides:
           Manifest:
