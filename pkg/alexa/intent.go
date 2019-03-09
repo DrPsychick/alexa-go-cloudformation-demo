@@ -1,5 +1,9 @@
 package alexa
 
+import (
+	"github.com/arienmalec/alexa-go"
+)
+
 // built in intents
 const (
 	//HelpIntent is the Alexa built-in Help Intent
@@ -14,7 +18,7 @@ const (
 
 // Intent is the Alexa skill intent
 type Intent struct {
-	Name               string             `json:"name"`
-	Slots              map[string]Slot    `json:"slots"`
-	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
+	Name               string                `json:"name"`
+	Slots              map[string]alexa.Slot `json:"slots"`
+	ConfirmationStatus ConfirmationStatus    `json:"confirmationStatus"`
 }

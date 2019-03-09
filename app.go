@@ -1,4 +1,4 @@
-package queryaws
+package alfalfa
 
 import (
     "github.com/hamba/pkg/log"
