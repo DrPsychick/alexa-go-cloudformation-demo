@@ -80,8 +80,8 @@ Resources:
           -
             Effect: "Allow"
             Principal:
-              Service:
-                - "login.amazon.com" # TODO: not working!
+              AWS:
+                - "arn:aws:iam::373747914350:user/ask-cli"
             Action:
               "sts:AssumeRole"
   AlexaS3Policy:
@@ -111,7 +111,7 @@ Resources:
         RefreshToken: !Ref ASKRefreshToken
       SkillPackage:
         S3Bucket: !Ref ASKS3Bucket
-        # S3BucketRole: !Ref AlexaS3Role # see above, not working!
+        S3BucketRole: !Ref AlexaS3Role
         S3Key: !Ref ASKS3Key
         Overrides:
           Manifest:
