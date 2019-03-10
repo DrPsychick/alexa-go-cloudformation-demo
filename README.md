@@ -10,7 +10,7 @@ Demo alexa skill using a go lambda function, deployed with cloudformation
 https://phraseapp.com/blog/posts/internationalization-i18n-go/
 
 ## code structure
-* `/cmd/queryaws` -> `queryaws` is the default command (for lambda)
+* `/cmd/alfalfa` -> `alfalfa` is the default command (for lambda)
 * `queryaws generate` is the command to generate the Alexa skill json files
 
 ## golang context
@@ -30,7 +30,12 @@ ask init
 ```
 
 ## Test cloudformation locally
-* you need to setup AWS credentials which can be used to execute cloudfromation
+* you need to setup AWS credentials which can be used to execute cloudformation
+* this cloudformation user needs permissions for
+  * `cloudformation`
+  * `lambda`
+  * `IAM roles and policies`
+  * `S3`
 ```
 export AWS_ACCESS_KEY_ID=<yourAccessKeyId>
 export AWS_SECRET_ACCESS_KEY=<yourSecretAccessKey>
