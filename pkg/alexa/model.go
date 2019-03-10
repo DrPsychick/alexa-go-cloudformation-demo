@@ -5,15 +5,27 @@ type Model struct {
 }
 
 type InteractionModel struct {
-	Language Language      `json:"languageModel"`
-	Dialog   Dialog        `json:"dialog"`
-	Prompts  []ModelPrompt `json:"prompts"`
+	Language LanguageModel  `json:"languageModel"`
+	Dialog   *Dialog        `json:"dialog"`
+	Prompts  *[]ModelPrompt `json:"prompts"`
 }
 
-type Language struct {
+type LanguageModel struct {
 	Invocation string        `json:"invocationName"`
 	Intents    []ModelIntent `json:"intents"`
 	Types      []ModelType   `json:"types,omitempty"`
+}
+
+type ModelIntent struct {
+	Name    string       `json:"name"`
+	Samples []string     `json:"samples"`
+	Slots   *[]ModelSlot `json:"slots,omitempty"`
+}
+
+type ModelSlot struct {
+	Name    string   `json:"name"`
+	Type    string   `json:"type"`
+	Samples []string `json:"samples"`
 }
 
 type ModelType struct {
@@ -22,28 +34,27 @@ type ModelType struct {
 }
 
 type TypeValue struct {
+	Id   string    `json:"id,omitempty"`
 	Name NameValue `json:"name"`
 }
 
 type NameValue struct {
-	Value string `json:"value"`
-}
-
-type ModelIntent struct {
-	Name    string   `json:"name"`
-	Samples []string `json:"samples"`
-	Slots   []struct {
-		Name    string   `json:"name"`
-		Type    string   `json:"type"`
-		Samples []string `json:"samples"`
-	} `json:"slots,omitempty"`
+	Value    string   `json:"value"`
+	Synonyms []string `json:"synonyms,omitempty"`
 }
 
 type Dialog struct {
-	Intents    []DialogIntent `json:"intents"`
-	Delegation string         `json:"delegationStrategy"`
+	Delegation DialogDelegation `json:"delegationStrategy"`
+	Intents    []DialogIntent   `json:"intents"`
 }
 
+type DialogDelegation string
+
+const (
+	SkillResponse DialogDelegation = "SKILL_RESPONSE"
+)
+
+// TODO: named structs (or setting them will be a pain in the ass)
 type DialogIntent struct {
 	Name         string `json:"name"`
 	Confirmation bool   `json:"confirmationRequired"`
@@ -56,8 +67,8 @@ type DialogIntent struct {
 		Elicitation  bool   `json:"elicitationRequired"`
 		Prompts      struct {
 			Elicitation string `json:"elicitation"`
-		} `json:"prompts"`
-	} `json:"slots"`
+		} `json:"prompts,omitempty"`
+	} `json:"slots,omitempty"`
 }
 
 type ModelPrompt struct {

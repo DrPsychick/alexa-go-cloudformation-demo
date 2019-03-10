@@ -7,17 +7,24 @@ type Skill struct {
 type Manifest struct {
 	Version     string     `json:"manifestVersion"`
 	Publishing  Publishing `json:"publishingInformation"`
-	Apis        Apis       `json:"apis,omitempty""`
+	Apis        *Apis      `json:"apis,omitempty"`
 	Permissions []string   `json:"permissions"`
 	Privacy     Privacy    `json:"privacyAndCompliance"`
 }
 
 type Publishing struct {
-	Locales   map[string]LocaleDef `json:"locales"`
+	Locales   map[Locale]LocaleDef `json:"locales"`
 	Worldwide bool                 `json:"isAvailableWorldwide"`
 	Category  string               `json:"category"`
 	Countries []Country            `json:"distributionCountries"`
 }
+
+type Locale string
+
+const (
+	German          Locale = "de-DE"
+	AmericanEnglish Locale = "en-US"
+)
 
 //type locale struct {
 //	German		localeDef	`json:"de-DE,omitempty"`
@@ -35,14 +42,14 @@ type LocaleDef struct {
 type Country string
 
 type Apis struct {
-	Custom     Custom   `json:"custom,omitempty"`
-	Interfaces []string `json:"interfaces,omitempty"`
+	Custom     *Custom  `json:"custom"`
+	Interfaces []string `json:"interfaces"`
 }
 type Custom struct {
-	Endpoint Endpoint `json:"endpoint,omitempty"`
+	Endpoint *Endpoint `json:"endpoint"`
 }
 type Endpoint struct {
-	Uri string `json:"uri,omitempty"`
+	Uri string `json:"uri"`
 }
 
 type Privacy struct {
