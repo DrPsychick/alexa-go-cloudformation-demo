@@ -1,22 +1,22 @@
 package alexa
 
-type skill struct {
-	Manifest manifest `json:"manifest"`
+type Skill struct {
+	Manifest Manifest `json:"manifest"`
 }
 
-type manifest struct {
+type Manifest struct {
 	Version     string     `json:"manifestVersion"`
-	Publishing  publishing `json:"publishingInformation"`
-	Apis        apis       `json:"apis,omitempty""`
+	Publishing  Publishing `json:"publishingInformation"`
+	Apis        Apis       `json:"apis,omitempty""`
 	Permissions []string   `json:"permissions"`
-	Privacy     privacy    `json:"privacyAndCompliance"`
+	Privacy     Privacy    `json:"privacyAndCompliance"`
 }
 
-type publishing struct {
-	Locales   map[string]localeDef `json:"locales"`
+type Publishing struct {
+	Locales   map[string]LocaleDef `json:"locales"`
 	Worldwide bool                 `json:"isAvailableWorldwide"`
 	Category  string               `json:"category"`
-	Countries []country            `json:"distributionCountries"`
+	Countries []Country            `json:"distributionCountries"`
 }
 
 //type locale struct {
@@ -24,7 +24,7 @@ type publishing struct {
 //	USEnglish	localeDef	`json:"en-US,omitempty"`
 //}
 
-type localeDef struct {
+type LocaleDef struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Summary     string   `json:"summary"`
@@ -32,44 +32,53 @@ type localeDef struct {
 	Keywords    []string `json:"keywords`
 }
 
-type country string
+type Country string
 
-type apis struct {
-	Custom     custom   `json:"custom"`
-	Interfaces []string `json:"interfaces"`
+type Apis struct {
+	Custom     Custom   `json:"custom,omitempty"`
+	Interfaces []string `json:"interfaces,omitempty"`
 }
-type custom struct {
-	Endpoint endpoint `json:"endpoint"`
+type Custom struct {
+	Endpoint Endpoint `json:"endpoint,omitempty"`
 }
-type endpoint struct {
-	Uri string `json:"uri"`
+type Endpoint struct {
+	Uri string `json:"uri,omitempty"`
 }
 
-type privacy struct {
+type Privacy struct {
 	Compliant bool `json:"isExportCompliant"`
 	Ads       bool `json:"containsAds"`
 }
 
-var example = skill{
-	Manifest: manifest{
-		Publishing: publishing{
-			Locales: map[string]localeDef{
+/*
+var Example = Skill{
+	Manifest: Manifest{
+		Version: "1.0",
+		Publishing: Publishing{
+			Locales: map[string]LocaleDef{
 				"de-DE": {
 					Name:        "name",
 					Description: "description",
 					Summary:     "summary",
-					Keywords:    []string{},
-					Examples:    []string{},
+					Keywords:    []string{"Demo"},
+					Examples:    []string{"tell me how much beer people drink in germany"},
 				},
 			},
+			Category: "mycategory",
+			Countries: []Country{"DE"},
 		},
-		Apis: apis{
-			Custom: custom{
-				Endpoint: endpoint{
+		Apis: Apis{
+			Custom: Custom{
+				Endpoint: Endpoint{
 					Uri: "arn:...",
 				},
 			},
 			Interfaces: []string{},
 		},
+		Permissions: []string{},
+		Privacy: Privacy{
+			Compliant: true,
+		},
 	},
 }
+*/
