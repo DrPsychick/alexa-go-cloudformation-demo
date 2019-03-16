@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform: 'AWS::Serverless-2016-10-31'
 # REQUIRED for AWS::Serverless
 Parameters:
   LambdaEnv1:
@@ -72,6 +72,20 @@ Resources:
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
             Resource: "arn:aws:rlogs:*:*:*"
+  // workaround: give **PUBLIC** access to Alexa skill.json
+  AlexaS3Access:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref: ASKS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal: "*"
+            Action:
+              - "s3:GetObject"
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, !Ref ASKS3Key ] ]
 #  AlexaS3Role:
 #    Type: AWS::IAM::Role
 #    Properties:

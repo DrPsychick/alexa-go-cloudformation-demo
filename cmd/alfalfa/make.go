@@ -32,9 +32,9 @@ var skill = alexa.Skill{
 		//	},
 		//	Interfaces: []string{},
 		//},
-		Permissions: []string{},
-		Privacy: alexa.Privacy{
-			Compliant: true,
+		Permissions: &[]alexa.Permission{},
+		Privacy: &alexa.Privacy{
+			IsExportCompliant: true,
 		},
 	},
 }

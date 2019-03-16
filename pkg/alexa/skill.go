@@ -1,17 +1,20 @@
 package alexa
 
+// Alexa `skill.json` top element
 type Skill struct {
 	Manifest Manifest `json:"manifest"`
 }
 
+// `skill.json` manifest definition
 type Manifest struct {
-	Version     string     `json:"manifestVersion"`
-	Publishing  Publishing `json:"publishingInformation"`
-	Apis        *Apis      `json:"apis,omitempty"`
-	Permissions []string   `json:"permissions"`
-	Privacy     Privacy    `json:"privacyAndCompliance"`
+	Version     string        `json:"manifestVersion"`
+	Publishing  Publishing    `json:"publishingInformation"`
+	Apis        *Apis         `json:"apis,omitempty"`
+	Permissions *[]Permission `json:"permissions"`
+	Privacy     *Privacy      `json:"privacyAndCompliance"`
 }
 
+// Publishing information
 type Publishing struct {
 	Locales   map[Locale]LocaleDef `json:"locales"`
 	Worldwide bool                 `json:"isAvailableWorldwide"`
@@ -19,18 +22,7 @@ type Publishing struct {
 	Countries []Country            `json:"distributionCountries"`
 }
 
-type Locale string
-
-const (
-	German          Locale = "de-DE"
-	AmericanEnglish Locale = "en-US"
-)
-
-//type locale struct {
-//	German		localeDef	`json:"de-DE,omitempty"`
-//	USEnglish	localeDef	`json:"en-US,omitempty"`
-//}
-
+// Description for each locale
 type LocaleDef struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
@@ -39,53 +31,86 @@ type LocaleDef struct {
 	Keywords    []string `json:"keywords"`
 }
 
+// Country constants
 type Country string
 
+const (
+	CountryAustrialia   Country = "AU"
+	CountryCanada       Country = "CA"
+	CountryGermany      Country = "DE"
+	CountryGreatBritain Country = "GB"
+	CountryIndia        Country = "IN"
+	CountryItaly        Country = "IT"
+	CountryJapan        Country = "JP"
+	CountryUnitedStates Country = "US"
+)
+
+// Alexa connected APIs
 type Apis struct {
-	Custom     *Custom  `json:"custom"`
-	Interfaces []string `json:"interfaces"`
+	Custom *Custom `json:"custom"`
+	//FlashBriefing *FlashBriefing `json:"flashBriefing"`
+	//Health     *Health	`json:"health"`
+	Interfaces *[]string `json:"interfaces"`
 }
+
+// Custom API endpoint
 type Custom struct {
+	Endpoint   *Endpoint             `json:"endpoint"`
+	Regions    *map[Region]RegionDef `json:"regions,omitempty"`
+	Interfaces *[]Interface          `json:"interfaces"`
+}
+
+// Endpoint definition
+type Endpoint struct {
+	Uri                string `json:"uri"`
+	SslCertificateType string `json:"sslCertificateType,omitempty"`
+}
+
+type Region string
+
+const (
+	RegionNorthAmerica Region = "NA"
+	RegionEurope       Region = "EU"
+	RegionFarEast      Region = "FE"
+)
+
+type RegionDef struct {
 	Endpoint *Endpoint `json:"endpoint"`
 }
-type Endpoint struct {
-	Uri string `json:"uri"`
+
+// API interface
+type Interface struct {
+	Type InterfaceType `json:"type"`
 }
 
+type InterfaceType string
+
+const (
+	InterfaceTypeAlexaPresentationAPL    InterfaceType = "ALEXA_PRESENTATION_APL"
+	InterfaceTypeAudioPlayer             InterfaceType = "AUDIO_PLAYER"
+	InterfaceTypeCanFulfillIntentRequest InterfaceType = "CAN_FULFILL_INTENT_REQUEST"
+	InterfaceTypeGadgetController        InterfaceType = "GADGET_CONTROLLER"
+	InterfaceTypeGameEngine              InterfaceType = "GAME_ENGINE"
+	InterfaceTypeRenderTemplate          InterfaceType = "RENDER_TEMPLATE"
+	InterfaceTypeVideoApp                InterfaceType = "VIDEO_APP"
+)
+
+// Permission string
+type Permission struct {
+	Name string `json:"name"`
+}
+
+// Privacy definition
 type Privacy struct {
-	Compliant bool `json:"isExportCompliant"`
-	Ads       bool `json:"containsAds"`
+	IsExportCompliant bool                         `json:"isExportCompliant"`
+	ContainsAds       bool                         `json:"containsAds"`
+	AllowsPurchases   bool                         `json:"allowsPurchases"`
+	UsesPersonalInfo  bool                         `json:"usesPersonalInfo"`
+	IsChildDirected   bool                         `json:"isChildDirected"`
+	Locales           *map[Locale]PrivacyLocaleDef `json:"locales"`
 }
 
-/*
-var Example = Skill{
-	Manifest: Manifest{
-		Version: "1.0",
-		Publishing: Publishing{
-			Locales: map[string]LocaleDef{
-				"de-DE": {
-					Name:        "name",
-					Description: "description",
-					Summary:     "summary",
-					Keywords:    []string{"Demo"},
-					Examples:    []string{"tell me how much beer people drink in germany"},
-				},
-			},
-			Category: "mycategory",
-			Countries: []Country{"DE"},
-		},
-		Apis: Apis{
-			Custom: Custom{
-				Endpoint: Endpoint{
-					Uri: "arn:...",
-				},
-			},
-			Interfaces: []string{},
-		},
-		Permissions: []string{},
-		Privacy: Privacy{
-			Compliant: true,
-		},
-	},
+type PrivacyLocaleDef struct {
+	PrivacyPolicyUrl string `json:"privacyPolicyUrl"`
+	TermsOfUse       string `json:"termsOfUse"`
 }
-*/

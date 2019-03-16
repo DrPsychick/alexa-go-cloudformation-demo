@@ -45,7 +45,8 @@ export ASKS3Bucket=<yourS3Bucket>
 (cd ./cloudformation; ./deploy.sh)
 ```
 
-# Cloudformation
+# Links/References
+## Cloudformation
 * https://docs.aws.amazon.com/cli/latest/reference/cloudformation/index.html#cli-aws-cloudformation
 * Cloudformation `AWS::Serverless::*` and `Transformation`
   * https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template-basics.html
@@ -54,3 +55,7 @@ export ASKS3Bucket=<yourS3Bucket>
 * Alexa `Alexa::ASK::Skill`
   * https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ask-skill-skillpackage.html
 * ASK CLI overview: https://developer.amazon.com/docs/smapi/ask-cli-intro.html
+
+## Alexa schemas
+* Skill: https://developer.amazon.com/de/docs/smapi/skill-manifest.html
+* Interaction Model: https://developer.amazon.com/de/docs/smapi/interaction-model-schema.html

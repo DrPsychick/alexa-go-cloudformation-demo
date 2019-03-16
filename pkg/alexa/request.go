@@ -37,7 +37,7 @@ type Request struct {
 		Type        RequestType `json:"type"`
 		RequestID   string      `json:"requestId"`
 		Timestamp   string      `json:"timestamp"`
-		Locale      string      `json:"locale"`
+		Locale      Locale      `json:"locale"`
 		Intent      Intent      `json:"intent,omitempty"`
 		Reason      string      `json:"reason,omitempty"`
 		DialogState string      `json:"dialogState,omitempty"`
