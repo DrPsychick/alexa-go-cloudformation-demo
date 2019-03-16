@@ -36,7 +36,7 @@ type LocaleDef struct {
 	Description string   `json:"description"`
 	Summary     string   `json:"summary"`
 	Examples    []string `json:"examplePhrases"`
-	Keywords    []string `json:"keywords`
+	Keywords    []string `json:"keywords"`
 }
 
 type Country string

@@ -44,3 +44,13 @@ export CF_STACK_NAME=alexa-demo
 export ASKS3Bucket=<yourS3Bucket>
 (cd ./cloudformation; ./deploy.sh)
 ```
+
+# Cloudformation
+* https://docs.aws.amazon.com/cli/latest/reference/cloudformation/index.html#cli-aws-cloudformation
+* Cloudformation `AWS::Serverless::*` and `Transformation`
+  * https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template-basics.html
+  * https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template.html
+  * https://github.com/awslabs/serverless-application-model/blob/master/examples/2016-10-31/hello-world-golang/template.yaml
+* Alexa `Alexa::ASK::Skill`
+  * https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ask-skill-skillpackage.html
+* ASK CLI overview: https://developer.amazon.com/docs/smapi/ask-cli-intro.html
