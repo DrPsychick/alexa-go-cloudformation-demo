@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 # check for required variables
 if [ -z "$ASKS3Bucket" \
     -o -z "$ASKS3Key" \
