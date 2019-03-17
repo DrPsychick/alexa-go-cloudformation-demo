@@ -14,7 +14,7 @@ if [ -z "$ASKS3Bucket" \
 fi
 
 # build for local execution (may be different arch)
-(GOARCH=""; GOOS=""; make build)
+(GOARCH=""; GOOS=""; go build -a ./cmd/alfalfa)
 
 # generate Alexa Skill files with local build
 mkdir -p ./alexa/interactionModels/custom

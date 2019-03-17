@@ -39,6 +39,10 @@ ask init
   
 #### Set variables manually
 ```
+export GO111MODULE=on
+# required for lambda
+export GOARCH=amd64
+export GOOS=linux
 export AWS_ACCESS_KEY_ID=<AccessKeyId>
 export AWS_SECRET_ACCESS_KEY=<SecretAccessKey>
 export AWS_DEFAULT_REGION=<AWSRegion>
@@ -53,7 +57,7 @@ export ASKVendorId=<VendorId>
 
 #### Using `.env` file
 * write plain variable assignements into `.env` file (do NOT commit, it's also in `.gitignore`)
-* make sure you escape the `|` in the `ASKRefreshToken` like this: `Atzr\\|...`
+* make sure you escape the `|` in the `ASKRefreshToken` like this: `Atzr\|...`
 * export the variables:
 
 ```export $(grep -v '^#' .env | xargs)```
