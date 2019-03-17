@@ -1,20 +1,14 @@
-package server
+package lambda
 
 import (
 	"fmt"
 
 	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 type Application interface {
 	Handle()
 	Help() (string, string)
-}
-
-// NewMux creates a new Mux instance.
-func NewServer(app Application) {
-	lambda.Start(HandleRequest)
 }
 
 type Handler func(alexa.Request) (alexa.Response, error)
