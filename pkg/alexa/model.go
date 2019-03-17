@@ -1,15 +1,18 @@
 package alexa
 
+// Model is the root of an interactionModel
 type Model struct {
 	Model InteractionModel `json:"interactionModel"`
 }
 
+// InteractionModel defines the base model structure
 type InteractionModel struct {
 	Language LanguageModel  `json:"languageModel"`
 	Dialog   *Dialog        `json:"dialog"`
 	Prompts  *[]ModelPrompt `json:"prompts"`
 }
 
+// LanguageModel
 type LanguageModel struct {
 	Invocation string        `json:"invocationName"`
 	Intents    []ModelIntent `json:"intents"`
@@ -45,7 +48,7 @@ type NameValue struct {
 
 type Dialog struct {
 	Delegation DialogDelegation `json:"delegationStrategy"`
-	Intents    []DialogIntent   `json:"intents"`
+	Intents    *[]DialogIntent  `json:"intents"`
 }
 
 type DialogDelegation string
@@ -54,27 +57,31 @@ const (
 	SkillResponse DialogDelegation = "SKILL_RESPONSE"
 )
 
-// TODO: named structs (or setting them will be a pain in the ass)
 type DialogIntent struct {
-	Name         string `json:"name"`
-	Confirmation bool   `json:"confirmationRequired"`
-	Prompts      struct {
-	} `json:"prompts"`
-	Slots []struct {
-		Name         string `json:"name"`
-		Type         string `json:"type"`
-		Confirmation bool   `json:"confirmationRequired"`
-		Elicitation  bool   `json:"elicitationRequired"`
-		Prompts      struct {
-			Elicitation string `json:"elicitation"`
-		} `json:"prompts,omitempty"`
-	} `json:"slots,omitempty"`
+	Name         string             `json:"name"`
+	Confirmation bool               `json:"confirmationRequired"`
+	Prompts      struct{}           `json:"prompts"`
+	Slots        []DialogIntentSlot `json:"slots"`
+}
+
+type DialogIntentSlot struct {
+	Name         string      `json:"name"`
+	Type         string      `json:"type"`
+	Confirmation bool        `json:"confirmationRequired"`
+	Elicitation  bool        `json:"elicitationRequired"`
+	Prompts      SlotPrompts `json:"prompts,omitempty"`
+}
+
+type SlotPrompts struct {
+	Elicitation string `json:"elicitation"`
 }
 
 type ModelPrompt struct {
-	Id         string `json:"id"`
-	Variations []struct {
-		Type  string `json:"type"`
-		Value string `json:"value"`
-	} `json:"variations"`
+	Id         string             `json:"id"`
+	Variations []PromptVariations `json:"variations"`
+}
+
+type PromptVariations struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }

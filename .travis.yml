@@ -6,7 +6,10 @@ go:
   - "1.12.x"
   - "1.x"
 env:
-  - GO111MODULE=on
+  global:
+    - GO111MODULE=on
+    - GOARCH=amd64
+    - GOOS=linux
 
 before_install:
   - go mod download
@@ -29,7 +32,7 @@ deploy:
   provider: script
   script: bash cloudformation/deploy.sh
   on:
-    tags: true
+    #tags: true
     branch: master
 
 notifications:

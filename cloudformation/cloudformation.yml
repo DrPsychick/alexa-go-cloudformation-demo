@@ -81,11 +81,12 @@ Resources:
         Version: "2012-10-17"
         Statement:
           -
+            Sid: "Cloudformation-AlexaS3Access"
             Effect: "Allow"
             Principal: "*"
             Action:
               - "s3:GetObject"
-            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, !Ref ASKS3Key ] ]
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, "/", !Ref ASKS3Key ] ]
 #  AlexaS3Role:
 #    Type: AWS::IAM::Role
 #    Properties:
@@ -120,6 +121,7 @@ Resources:
   # Skill ZIP file needs to be uploaded manually to S3 before executing cloudformation
   AlexaSkill:
     Type: Alexa::ASK::Skill
+    DependsOn: AlexaS3Access
     Properties:
       AuthenticationConfiguration:
         ClientId: !Ref ASKClientId
