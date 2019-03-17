@@ -6,6 +6,7 @@ import (
 
 // stolen from: https://github.com/soloworks/go-alexa-models
 
+// RequestType enum
 type RequestType int
 
 const (
@@ -29,6 +30,7 @@ var requestTypeStrings = [...]string{
 	"CanFulfillIntentRequest",
 }
 
+// Request we get from Alexa
 type Request struct {
 	Version string  `json:"version"`
 	Session Session `json:"session"`

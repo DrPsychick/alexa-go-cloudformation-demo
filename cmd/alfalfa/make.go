@@ -23,7 +23,7 @@ var skill = alexa.Skill{
 					Examples:    []string{"tell me how much beer people drink in germany"},
 				},
 			},
-			Category:  "mycategory",
+			Category:  alexa.CategoryOrganizersAndAssistants,
 			Countries: []alexa.Country{"DE"},
 		},
 		//Apis: alexa.Apis{
@@ -48,9 +48,11 @@ var models = map[alexa.Locale]alexa.Model{
 var modelGerman = alexa.Model{
 	Model: alexa.InteractionModel{
 		Language: alexa.LanguageModel{
-			Invocation: "Bier fakten",
+			Invocation: "bier fakten",
 			Intents: []alexa.ModelIntent{
 				{Name: "AMAZON.CancelIntent", Samples: []string{}},
+				{Name: "AMAZON.HelpIntent", Samples: []string{}},
+				{Name: "AMAZON.StopIntent", Samples: []string{}},
 				{Name: "CustomIntent", Samples: []string{
 					"Schiess' los",
 					"Auf geht's",
@@ -74,6 +76,7 @@ var modelGerman = alexa.Model{
 					{Name: alexa.NameValue{Value: "Deutschland"}},
 				}},
 				{Name: "BEER_PeopleCategory", Values: []alexa.TypeValue{
+					{Name: alexa.NameValue{Value: "Alle"}},
 					{Name: alexa.NameValue{Value: "Frauen"}},
 					{Name: alexa.NameValue{Value: "Männern"}},
 					{Name: alexa.NameValue{Value: "Transen"}},
@@ -83,11 +86,26 @@ var modelGerman = alexa.Model{
 			},
 		},
 		Dialog: &alexa.Dialog{
-			Intents: []alexa.DialogIntent{
-				{Name: "BeerStatsIntent", Confirmation: false},
+			Delegation: alexa.SkillResponse,
+			Intents: &[]alexa.DialogIntent{
+				{Name: "BeerStatsIntent", Confirmation: false, Slots: []alexa.DialogIntentSlot{
+					{Name: "Country", Type: "BEER_Countries", Prompts: alexa.SlotPrompts{
+						Elicitation: "Elicit.Intent-BeerStatsIntent.IntentSlot-Country",
+					}},
+					{Name: "PeopleCategory", Type: "BEER_PeopleCategory", Prompts: alexa.SlotPrompts{
+						Elicitation: "Elicit.Intent-BeerStatsIntent.IntentSlot-PeopleCategory",
+					}},
+				}},
 			},
 		},
-		Prompts: &[]alexa.ModelPrompt{},
+		Prompts: &[]alexa.ModelPrompt{
+			{Id: "Elicit.Intent-BeerStatsIntent.IntentSlot-Country", Variations: []alexa.PromptVariations{
+				{Type: "PlainText", Value: "Für welches Land möchtest du Bier Statistiken?"},
+			}},
+			{Id: "Elicit.Intent-BeerStatsIntent.IntentSlot-PeopleCategory", Variations: []alexa.PromptVariations{
+				{Type: "PlainText", Value: "Für welche Personengruppe möchtest du Bier Statistiken?"},
+			}},
+		},
 	},
 }
 
