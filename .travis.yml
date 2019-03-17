@@ -10,6 +10,10 @@ env:
     - GO111MODULE=on
     - GOARCH=amd64
     - GOOS=linux
+addons:
+  apt:
+    packages:
+      - python3
 
 before_install:
   - go mod download
@@ -34,6 +38,7 @@ deploy:
   script: bash cloudformation/deploy.sh
   on:
     #tags: true
+    go: "1.12.x"
     branch: master
 
 notifications:
