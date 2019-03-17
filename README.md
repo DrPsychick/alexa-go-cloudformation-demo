@@ -30,20 +30,39 @@ ask init
 ```
 
 ## Test cloudformation locally
-* you need to setup AWS credentials which can be used to execute cloudformation
+* you need to setup AWS credentials which can be used to execute cloudformation (see `~/.aws/credentials`)
 * this cloudformation user needs permissions for
   * `cloudformation`
   * `lambda`
   * `IAM roles and policies`
   * `S3`
+  
+#### Set variables manually
 ```
-export AWS_ACCESS_KEY_ID=<yourAccessKeyId>
-export AWS_SECRET_ACCESS_KEY=<yourSecretAccessKey>
-export AWS_DEFAULT_REGION=eu-west-1
-export CF_STACK_NAME=alexa-demo
-export ASKS3Bucket=<yourS3Bucket>
-(cd ./cloudformation; ./deploy.sh)
+export AWS_ACCESS_KEY_ID=<AccessKeyId>
+export AWS_SECRET_ACCESS_KEY=<SecretAccessKey>
+export AWS_DEFAULT_REGION=<AWSRegion>
+export CF_STACK_NAME=<StackName>
+export ASKS3Bucket=<S3Bucket>
+export ASKS3Key=<S3File>
+export ASKClientId=<ClientId>
+export ASKClientSecret=<ClientSecret>
+export ASKRefreshToken=<RefreshToken>
+export ASKVendorId=<VendorId>
 ```
+
+#### Using `.env` file
+* write plain variable assignements into `.env` file (do NOT commit, it's also in `.gitignore`)
+* make sure you escape the `|` in the `ASKRefreshToken` like this: `Atzr\\|...`
+* export the variables:
+
+```export $(grep -v '^#' .env | xargs)```
+
+### Run `deploy.sh`
+* generates `skill.json` and `locale.json` files for Alexa
+
+```bash ./cloudformation/deploy.sh```
+
 
 # Links/References
 ## Cloudformation

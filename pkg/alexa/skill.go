@@ -1,11 +1,11 @@
 package alexa
 
-// Alexa `skill.json` top element
+// Skill Alexa `skill.json` top element
 type Skill struct {
 	Manifest Manifest `json:"manifest"`
 }
 
-// `skill.json` manifest definition
+// Manifest definition for `skill.json`
 type Manifest struct {
 	Version     string        `json:"manifestVersion"`
 	Publishing  Publishing    `json:"publishingInformation"`
@@ -22,7 +22,7 @@ type Publishing struct {
 	Countries []Country            `json:"distributionCountries"`
 }
 
-// Description for each locale
+// LocaleDef description of each locale
 type LocaleDef struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
@@ -35,17 +35,25 @@ type LocaleDef struct {
 type Country string
 
 const (
-	CountryAustrialia   Country = "AU"
-	CountryCanada       Country = "CA"
-	CountryGermany      Country = "DE"
+	// Country Australia
+	CountryAustrialia Country = "AU"
+	// Country Canada
+	CountryCanada Country = "CA"
+	// Country Germany
+	CountryGermany Country = "DE"
+	// Country Great Britain
 	CountryGreatBritain Country = "GB"
-	CountryIndia        Country = "IN"
-	CountryItaly        Country = "IT"
-	CountryJapan        Country = "JP"
+	// Country India
+	CountryIndia Country = "IN"
+	// Country Italia
+	CountryItaly Country = "IT"
+	// Country Japan
+	CountryJapan Country = "JP"
+	// Country United States
 	CountryUnitedStates Country = "US"
 )
 
-// Alexa connected APIs
+// Apis Alexa will be connected to
 type Apis struct {
 	Custom *Custom `json:"custom"`
 	//FlashBriefing *FlashBriefing `json:"flashBriefing"`
@@ -69,30 +77,42 @@ type Endpoint struct {
 type Region string
 
 const (
+	// Alexa Region North America
 	RegionNorthAmerica Region = "NA"
-	RegionEurope       Region = "EU"
-	RegionFarEast      Region = "FE"
+	// Alexa Region Europe
+	RegionEurope Region = "EU"
+	// Alexa Region Far East
+	RegionFarEast Region = "FE"
 )
 
+// RegionDef for regional endpoints
 type RegionDef struct {
 	Endpoint *Endpoint `json:"endpoint"`
 }
 
-// API interface
+// Interface definition for API
 type Interface struct {
 	Type InterfaceType `json:"type"`
 }
 
+// InterfaceType string reference
 type InterfaceType string
 
 const (
-	InterfaceTypeAlexaPresentationAPL    InterfaceType = "ALEXA_PRESENTATION_APL"
-	InterfaceTypeAudioPlayer             InterfaceType = "AUDIO_PLAYER"
+	// Interface Type ???
+	InterfaceTypeAlexaPresentationAPL InterfaceType = "ALEXA_PRESENTATION_APL"
+	// Interface Type ???
+	InterfaceTypeAudioPlayer InterfaceType = "AUDIO_PLAYER"
+	// Interface Type for Lambda
 	InterfaceTypeCanFulfillIntentRequest InterfaceType = "CAN_FULFILL_INTENT_REQUEST"
-	InterfaceTypeGadgetController        InterfaceType = "GADGET_CONTROLLER"
-	InterfaceTypeGameEngine              InterfaceType = "GAME_ENGINE"
-	InterfaceTypeRenderTemplate          InterfaceType = "RENDER_TEMPLATE"
-	InterfaceTypeVideoApp                InterfaceType = "VIDEO_APP"
+	// Interface Type ???
+	InterfaceTypeGadgetController InterfaceType = "GADGET_CONTROLLER"
+	// Interface Type ???
+	InterfaceTypeGameEngine InterfaceType = "GAME_ENGINE"
+	// Interface Type ???
+	InterfaceTypeRenderTemplate InterfaceType = "RENDER_TEMPLATE"
+	// Interface Type ???
+	InterfaceTypeVideoApp InterfaceType = "VIDEO_APP"
 )
 
 // Permission string

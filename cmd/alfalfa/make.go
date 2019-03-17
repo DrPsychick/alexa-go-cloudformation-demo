@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"gopkg.in/urfave/cli.v1"
+	"io/ioutil"
+	"log"
 )
 
 // Alexa skill definition (to generate skill.json)
@@ -39,8 +41,8 @@ var skill = alexa.Skill{
 	},
 }
 
-var models = []alexa.Model{
-	modelGerman,
+var models = map[alexa.Locale]alexa.Model{
+	"de-DE": modelGerman,
 }
 
 var modelGerman = alexa.Model{
@@ -93,12 +95,19 @@ func runMake(c *cli.Context) error {
 	if c.Bool("skill") {
 		res, _ := json.Marshal(skill)
 		fmt.Println(string(res))
+		if err := ioutil.WriteFile("./alexa/skill.json", res, 0644); err != nil {
+			log.Fatal(err)
+		}
+
 	}
 
 	if c.Bool("models") {
-		for m := range models {
-			res, _ := json.Marshal(models[m])
+		for l, m := range models {
+			res, _ := json.Marshal(m)
 			fmt.Println(string(res))
+			if err := ioutil.WriteFile("./alexa/interactionModels/custom/"+string(l)+".json", res, 0644); err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 	return nil

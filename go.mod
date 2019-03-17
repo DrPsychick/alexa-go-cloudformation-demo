@@ -1,5 +1,7 @@
 module github.com/DrPsychick/alexa-go-cloudformation-demo
 
+go 1.12
+
 require (
 	github.com/aws/aws-lambda-go v1.9.0
 	github.com/hamba/cmd v1.0.0

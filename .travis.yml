@@ -27,7 +27,7 @@ before_deploy:
 # Needs $CF_TEMPLATE_OUT, $CF_STACKNAME
 deploy:
   provider: script
-  script: bash scripts/deploy.sh
+  script: bash cloudformation/deploy.sh
   on:
     tags: true
     branch: master
