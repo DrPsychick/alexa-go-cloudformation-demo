@@ -29,6 +29,7 @@ before_deploy:
 
 # Needs $CF_TEMPLATE_OUT, $CF_STACKNAME
 deploy:
+  skip_cleanup: true
   provider: script
   script: bash cloudformation/deploy.sh
   on:
