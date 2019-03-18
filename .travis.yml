@@ -13,7 +13,7 @@ env:
 addons:
   apt:
     packages:
-      - python3
+      - python3-pip
 
 before_install:
   - go mod download
@@ -27,7 +27,8 @@ script:
   #- goveralls -coverprofile=profile.cov -service=travis-ci
 
 before_deploy:
-  - alias python=/usr/bin/python3
+  - pip --version
+  - pip3 --version
   - pip3 install --upgrade --user awscli
   - mkdir ./deploy
   - go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa
