@@ -40,7 +40,7 @@ if [ $ret -eq 0 ]; then
 elif [ $ret -eq 255 ]; then
     echo "No changes made..."
 else
-    aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME;
+    # do NOT run this on travis, it exposes ALL parameter values: aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME;
     aws cloudformation delete-stack --stack-name $CF_STACK_NAME;
 fi
 )
