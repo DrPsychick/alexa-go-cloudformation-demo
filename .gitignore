@@ -1,3 +1,8 @@
 /.env
 /.idea
 /alfalfa
+/alexa/interactionModels/
+/alexa/skill.json
+/alexa/alexa-demo.zip
+/deploy
+/cloudformation/*-package.yml

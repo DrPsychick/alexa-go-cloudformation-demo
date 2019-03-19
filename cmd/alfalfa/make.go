@@ -16,13 +16,13 @@ var skill = alexa.Skill{
 		Publishing: alexa.Publishing{
 			Locales: map[alexa.Locale]alexa.LocaleDef{
 				"de-DE": {
-					Name:        "name",
+					Name:        "DemoSkill",
 					Description: "description",
 					Summary:     "summary",
 					Keywords:    []string{"Demo"},
 					Examples:    []string{"tell me how much beer people drink in germany"},
-                    SmallIconUri: "https://github.com/DrPsychick/alexa-go-cloudformation-demo/icon.png",
-                    LargeIconUri: "https://github.com/DrPsychick/alexa-go-cloudformation-demo/icon.png",
+                    SmallIconUri: "https://github.com/DrPsychick/alexa-go-cloudformation-demo/tree/development/alexa/assets/images/de-DE_small.png",
+                    LargeIconUri: "https://github.com/DrPsychick/alexa-go-cloudformation-demo/tree/development/alexa/assets/images/de-DE_small.png",
 				},
 			},
 			Category:  alexa.CategoryOrganizersAndAssistants,

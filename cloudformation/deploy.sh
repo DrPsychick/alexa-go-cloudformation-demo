@@ -14,6 +14,8 @@ if [ -z "$ASKS3Bucket" \
    exit 1
 fi
 
+export ASKSkillDescription="Skill description $(date +%Y-%m-%d\ %H:%M)"
+
 # build for local execution (may be different arch)
 (GOARCH=""; GOOS=""; go build -a ./cmd/alfalfa)
 
@@ -28,11 +30,40 @@ aws s3 cp ./alexa/$ASKS3Key s3://$ASKS3Bucket/
 aws cloudformation validate-template --template-body file://cloudformation.yml || exit 1
 aws cloudformation package --template-file cloudformation.yml --output-template-file cf-template-package.yml --s3-bucket $ASKS3Bucket
 
+# # stack exists?
+# if [ -z "$(aws cloudformation describe-stacks | grep '"StackName": "'$CF_STACK_NAME'"')" ]; then
+#     aws cloudformation create-stack \
+#         --template-file cf-template-package.yml \
+#         --stack-name $CF_STACK_NAME \
+#         --capabilities CAPABILITY_IAM \
+#         --parameters ParameterKey=ASKClientId,ParameterValue=$ASKClientId \
+#             ParameterKey=ASKClientSecret,ParameterValue=$ASKClientSecret \
+#             ParameterKey=ASKRefreshToken,ParameterValue=$ASKRefreshToken \
+#             ParameterKey=ASKVendorId,ParameterValue=$ASKVendorId \
+#             ParameterKey=ASKS3Bucket,ParameterValue=$ASKS3Bucket \
+#             ParameterKey=ASKS3Key,ParameterValue=$ASKS3Key
+#     ret=$?
+# else
+#     # update stack
+#     aws cloudformation update-stack \
+#         --template-body cf-template-package.yml \
+#         --stack-name $CF_STACK_NAME \
+#         --capabilities CAPABILITY_IAM \
+#         --parameters ParameterKey=ASKClientId,ParameterValue=$ASKClientId \
+#             ParameterKey=ASKClientSecret,ParameterValue=$ASKClientSecret \
+#             ParameterKey=ASKRefreshToken,ParameterValue=$ASKRefreshToken \
+#             ParameterKey=ASKVendorId,ParameterValue=$ASKVendorId \
+#             ParameterKey=ASKS3Bucket,ParameterValue=$ASKS3Bucket \
+#             ParameterKey=ASKS3Key,ParameterValue=$ASKS3Key
+#     ret=$?
+# fi
+
 aws cloudformation deploy \
     --template-file cf-template-package.yml \
     --stack-name $CF_STACK_NAME \
     --capabilities CAPABILITY_IAM \
-    --parameter-overrides ASKClientId=$ASKClientId ASKClientSecret=$ASKClientSecret ASKRefreshToken=$ASKRefreshToken ASKVendorId=$ASKVendorId ASKS3Bucket=$ASKS3Bucket ASKS3Key=$ASKS3Key
+    --parameter-overrides ASKClientId=$ASKClientId ASKClientSecret=$ASKClientSecret ASKRefreshToken=$ASKRefreshToken ASKVendorId=$ASKVendorId ASKS3Bucket=$ASKS3Bucket ASKS3Key=$ASKS3Key ASKSkillDescription="$ASKSkillDescription"
+
 ret=$?
 echo "exitcode: $ret"
 if [ $ret -eq 0 ]; then

@@ -82,3 +82,6 @@ export ASKVendorId=<VendorId>
 ## Alexa schemas
 * Skill: https://developer.amazon.com/de/docs/smapi/skill-manifest.html
 * Interaction Model: https://developer.amazon.com/de/docs/smapi/interaction-model-schema.html
+
+## Further reading
+* maybe try CodePipeline with Alexa? https://stelligent.com/2017/07/25/use-aws-codepipeline-to-deploy-amazon-alexa-skill/
