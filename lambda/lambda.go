@@ -26,12 +26,22 @@ func HandleRequest(app Application) Handler {
 			title, text := app.Help()
 			return alexa.NewSimpleResponse(title, text), nil
 
+		case "LaunchRequest":
+			return handleLaunch(r), nil
+
 		case "CustomIntent":
 			return handleStats(r), nil
 		}
 
 		return alexa.Response{}, fmt.Errorf("server: unknown intent %s", name)
 	}
+}
+
+func handleLaunch(request alexa.Request) alexa.Response {
+	title := "Launch"
+	text := "Los geht's!"
+	//reprompt := "Wie bitte?"
+	return alexa.NewSimpleResponse(title, text)
 }
 
 func handleHello(request alexa.Request) alexa.Response {
