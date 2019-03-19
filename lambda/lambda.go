@@ -63,8 +63,10 @@ func handleDemo(request alexa.Request) alexa.Response {
 	r := alexa.NewSimpleResponse(title, text)
 	r.Body.OutputSpeech.Type = "SSML"
 	r.Body.OutputSpeech.SSML = "<speak>" +
-		"<voice name=\"Justin\"><lang xml:lang=\"en-US\">pace</lang></voice>" +
-		"<voice name=\"Hans\">iss <emphasis level=\"strong\">geil!</emphasis></voice>" +
+		"<voice name=\"Kendra\"><lang xml:lang=\"en-US\">" +
+		"<emphasis level=\"strong\">pace</emphasis>" +
+		"</lang></voice>" +
+		"<voice name=\"Marlene\">iss <emphasis level=\"strong\">geil!</emphasis></voice>" +
 		"</speak>"
 	return r
 }
