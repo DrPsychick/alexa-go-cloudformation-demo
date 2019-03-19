@@ -6,7 +6,7 @@ Parameters:
     Default: FooBar
     Description: Demo to pass cloudformation parameter to ENV of lambda
     Type: String
-  ASKSkillDescription:
+  ASKSkillTestingInstructions:
     Description: Skill description (change with every deploy to force skill update)
     Type: String
   ASKClientId:
@@ -138,7 +138,7 @@ Resources:
           Manifest:
 # TODO: use 'updatesDescription' for overrides
             publishingInformation:
-              testingInstructions: !Ref ASKSkillDescription
+              testingInstructions: !Ref ASKSkillTestingInstructions
             apis:
               custom:
                 endpoint:

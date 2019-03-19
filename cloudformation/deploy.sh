@@ -14,7 +14,7 @@ if [ -z "$ASKS3Bucket" \
    exit 1
 fi
 
-export ASKSkillDescription="Skill description $(date +%Y-%m-%d\ %H:%M)"
+export ASKSkillTestingInstructions="Demo Alexa skill... $(date +%Y-%m-%d\ %H:%M)"
 
 # build for local execution (may be different arch)
 (GOARCH=""; GOOS=""; go build -a ./cmd/alfalfa)
@@ -62,7 +62,13 @@ aws cloudformation deploy \
     --template-file cf-template-package.yml \
     --stack-name $CF_STACK_NAME \
     --capabilities CAPABILITY_IAM \
-    --parameter-overrides ASKClientId=$ASKClientId ASKClientSecret=$ASKClientSecret ASKRefreshToken=$ASKRefreshToken ASKVendorId=$ASKVendorId ASKS3Bucket=$ASKS3Bucket ASKS3Key=$ASKS3Key ASKSkillDescription="$ASKSkillDescription"
+    --parameter-overrides ASKClientId=$ASKClientId \
+        ASKClientSecret=$ASKClientSecret \
+        ASKRefreshToken=$ASKRefreshToken \
+        ASKVendorId=$ASKVendorId \
+        ASKS3Bucket=$ASKS3Bucket \
+        ASKS3Key=$ASKS3Key \
+        ASKSkillTestingInstructions="$ASKSkillTestingInstructions"
 
 ret=$?
 echo "exitcode: $ret"

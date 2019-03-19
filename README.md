@@ -62,10 +62,33 @@ export ASKVendorId=<VendorId>
 
 ```export $(grep -v '^#' .env | xargs)```
 
-### Run `deploy.sh`
-* generates `skill.json` and `locale.json` files for Alexa
+### Build and Run `deploy.sh`
+* build
+
+```go build -a -o ./deploy/app ./cmd/alfalfa```
+
+* run `deploy.sh`
+    * generates `skill.json` and `<locale>.json` files for Alexa and uploads to S3
+    * packages lambda function and uploads to S3
+    * deploys via cloudformation
 
 ```bash ./cloudformation/deploy.sh```
+
+
+# TODOs
+Before first "release"
+* [ ] simplify skill and models definition with helper functions
+    * [ ] basic structure refactoring + documentation
+* [ ] add documentation and examples
+    * [ ] simple app example explanation in docs
+* [ ] implement and integrate `l10n` package
+    * [ ] support SSML output
+        * [ ] support phoneme https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#phoneme
+    * [ ] test coverage of package
+    * [ ] externalize and make package public
+* [ ] complete (defined portions) of `alexa` package (enums, consts, ...)
+    * [ ] test coverage of package
+    * [ ] externalize and make package public
 
 
 # Links/References

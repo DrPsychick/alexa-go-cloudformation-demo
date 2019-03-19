@@ -22,7 +22,11 @@ func (a *Application) Handle() {
 }
 
 func (a *Application) Help() (string, string) {
-	return "", ""
+	return "Help", "No help available!"
+}
+
+func (a *Application) Stop() (string, string) {
+	return "Stop", "Ok!"
 }
 
 func (a *Application) Logger() log.Logger {

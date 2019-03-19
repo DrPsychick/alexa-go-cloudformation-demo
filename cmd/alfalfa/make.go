@@ -16,18 +16,18 @@ var skill = alexa.Skill{
 		Publishing: alexa.Publishing{
 			Locales: map[alexa.Locale]alexa.LocaleDef{
 				"de-DE": {
-					Name:        "DemoSkill",
-					Description: "description",
-					Summary:     "summary",
-					Keywords:    []string{"Demo"},
-					Examples:    []string{"tell me how much beer people drink in germany"},
-                    SmallIconUri: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_small.png",
-                    LargeIconUri: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_large.png",
+					Name:         "DemoSkill",
+					Description:  "Demo for the golang meetup",
+					Summary:      "Demo for deploying Alexa + Lambda with cloudformation",
+					Keywords:     []string{"Cloudformation Demo"},
+					Examples:     []string{"Schiess los"},
+					SmallIconUri: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_small.png",
+					LargeIconUri: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_large.png",
 				},
 			},
-			Category:  alexa.CategoryOrganizersAndAssistants,
-			Countries: []alexa.Country{"DE"},
-            TestingInstructions: "Demo Alexa skill...",
+			Category:            alexa.CategoryOrganizersAndAssistants,
+			Countries:           []alexa.Country{"DE"},
+			TestingInstructions: "Demo Alexa skill...",
 		},
 		//Apis: alexa.Apis{
 		//	Custom: alexa.Custom{
@@ -56,7 +56,7 @@ var modelGerman = alexa.Model{
 				{Name: "AMAZON.CancelIntent", Samples: []string{}},
 				{Name: "AMAZON.HelpIntent", Samples: []string{}},
 				{Name: "AMAZON.StopIntent", Samples: []string{}},
-				{Name: "CustomIntent", Samples: []string{
+				{Name: "DemoIntent", Samples: []string{
 					"Schiess' los",
 					"Auf geht's",
 					"Hop hop",
@@ -82,8 +82,7 @@ var modelGerman = alexa.Model{
 					{Name: alexa.NameValue{Value: "Alle"}},
 					{Name: alexa.NameValue{Value: "Frauen"}},
 					{Name: alexa.NameValue{Value: "Männern"}},
-					{Name: alexa.NameValue{Value: "Transen"}},
-					{Name: alexa.NameValue{Value: "Homosexuellen"}},
+					{Name: alexa.NameValue{Value: "Teenagern"}},
 					{Name: alexa.NameValue{Value: "Intellektuellen"}},
 				}},
 			},
