@@ -21,10 +21,13 @@ var skill = alexa.Skill{
 					Summary:     "summary",
 					Keywords:    []string{"Demo"},
 					Examples:    []string{"tell me how much beer people drink in germany"},
+                    SmallIconUri: "https://github.com/DrPsychick/alexa-go-cloudformation-demo/icon.png",
+                    LargeIconUri: "https://github.com/DrPsychick/alexa-go-cloudformation-demo/icon.png",
 				},
 			},
 			Category:  alexa.CategoryOrganizersAndAssistants,
 			Countries: []alexa.Country{"DE"},
+            TestingInstructions: "Demo Alexa skill...",
 		},
 		//Apis: alexa.Apis{
 		//	Custom: alexa.Custom{

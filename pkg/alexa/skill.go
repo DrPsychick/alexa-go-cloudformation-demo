@@ -20,6 +20,7 @@ type Publishing struct {
 	Worldwide bool                 `json:"isAvailableWorldwide"`
 	Category  Category             `json:"category"`
 	Countries []Country            `json:"distributionCountries"`
+    TestingInstructions string `json:"testingInstructions"`
 }
 
 // LocaleDef description of each locale
@@ -29,6 +30,8 @@ type LocaleDef struct {
 	Summary     string   `json:"summary"`
 	Examples    []string `json:"examplePhrases"`
 	Keywords    []string `json:"keywords"`
+    SmallIconUri string `json:"smallIconUri"`
+    LargeIconUri string `json:"largeIconUri"`
 }
 
 // Country constants
