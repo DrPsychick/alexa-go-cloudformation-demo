@@ -136,10 +136,9 @@ Resources:
         S3Key: !Ref ASKS3Key
         Overrides:
           Manifest:
+# TODO: use 'updatesDescription' for overrides
             publishingInformation:
-              locales:
-                de-DE:
-                  description: !Ref ASKSkillDescription
+              testingInstructions: !Ref ASKSkillDescription
             apis:
               custom:
                 endpoint:
