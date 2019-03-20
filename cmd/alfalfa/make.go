@@ -51,7 +51,7 @@ var models = map[alexa.Locale]alexa.Model{
 var modelGerman = alexa.Model{
 	Model: alexa.InteractionModel{
 		Language: alexa.LanguageModel{
-			Invocation: "bier fakten",
+			Invocation: "golang meetup",
 			Intents: []alexa.ModelIntent{
 				{Name: "AMAZON.CancelIntent", Samples: []string{}},
 				{Name: "AMAZON.HelpIntent", Samples: []string{}},
