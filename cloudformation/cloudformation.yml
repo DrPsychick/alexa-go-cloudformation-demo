@@ -6,6 +6,9 @@ Parameters:
     Default: FooBar
     Description: Demo to pass cloudformation parameter to ENV of lambda
     Type: String
+  ASKSkillTestingInstructions:
+    Description: Skill description (change with every deploy to force skill update)
+    Type: String
   ASKClientId:
     Description: Alexa security profile Client ID, see https://developer.amazon.com/settings/console/securityprofile/overview.html
     Type: String
@@ -133,6 +136,9 @@ Resources:
         S3Key: !Ref ASKS3Key
         Overrides:
           Manifest:
+# TODO: use 'updatesDescription' for overrides
+            publishingInformation:
+              testingInstructions: !Ref ASKSkillTestingInstructions
             apis:
               custom:
                 endpoint:
