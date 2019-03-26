@@ -1,11 +1,11 @@
 package alexa
 
-// Skill Alexa `skill.json` top element
+// Skill is the Alexa `skill.json` top element
 type Skill struct {
 	Manifest Manifest `json:"manifest"`
 }
 
-// Manifest definition for `skill.json`
+// Manifest is the parent for all other elements
 type Manifest struct {
 	Version     string        `json:"manifestVersion"`
 	Publishing  Publishing    `json:"publishingInformation"`
@@ -16,43 +16,43 @@ type Manifest struct {
 
 // Publishing information
 type Publishing struct {
-	Locales   map[Locale]LocaleDef `json:"locales"`
-	Worldwide bool                 `json:"isAvailableWorldwide"`
-	Category  Category             `json:"category"`
-	Countries []Country            `json:"distributionCountries"`
-    TestingInstructions string `json:"testingInstructions"`
+	Locales             map[Locale]LocaleDef `json:"locales"`
+	Worldwide           bool                 `json:"isAvailableWorldwide"`
+	Category            Category             `json:"category"`
+	Countries           []Country            `json:"distributionCountries"`
+	TestingInstructions string               `json:"testingInstructions"`
 }
 
 // LocaleDef description of each locale
 type LocaleDef struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Summary     string   `json:"summary"`
-	Examples    []string `json:"examplePhrases"`
-	Keywords    []string `json:"keywords"`
-    SmallIconUri string `json:"smallIconUri"`
-    LargeIconUri string `json:"largeIconUri"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Summary      string   `json:"summary"`
+	Examples     []string `json:"examplePhrases"`
+	Keywords     []string `json:"keywords"`
+	SmallIconUri string   `json:"smallIconUri"`
+	LargeIconUri string   `json:"largeIconUri"`
 }
 
 // Country constants
 type Country string
 
 const (
-	// CountryAustralia
+	// CountryAustralia is AU
 	CountryAustrialia Country = "AU"
-	// CountryCanada
+	// CountryCanada is CA
 	CountryCanada Country = "CA"
-	// CountryGermany
+	// CountryGermany is DE
 	CountryGermany Country = "DE"
-	// CountryGreatBritain
+	// CountryGreatBritain is GB
 	CountryGreatBritain Country = "GB"
-	// CountryIndia
+	// CountryIndia is IN
 	CountryIndia Country = "IN"
-	// CountryItalia
+	// CountryItalia is IT
 	CountryItaly Country = "IT"
-	// CountryJapan
+	// CountryJapan is JP
 	CountryJapan Country = "JP"
-	// CountryUnitedStates
+	// CountryUnitedStates is US
 	CountryUnitedStates Country = "US"
 )
 
@@ -96,7 +96,7 @@ const (
 	//NAVIGATION_AND_TRIP_PLANNER
 	//NEWS
 	//NOVELTY
-	// CategoryOrganizersAndAssistants
+	// CategoryOrganizersAndAssistants is ORGANIZERS_AND_ASSISTANTS
 	CategoryOrganizersAndAssistants Category = "ORGANIZERS_AND_ASSISTANTS"
 	//PETS_AND_ANIMAL
 	//PODCAST
@@ -147,11 +147,11 @@ type Endpoint struct {
 type Region string
 
 const (
-	// RegionNorthAmerica
+	// RegionNorthAmerica is NA
 	RegionNorthAmerica Region = "NA"
-	// RegionEurope
+	// RegionEurope is EU
 	RegionEurope Region = "EU"
-	// RegionFarEast
+	// RegionFarEast is FE
 	RegionFarEast Region = "FE"
 )
 
@@ -169,19 +169,19 @@ type Interface struct {
 type InterfaceType string
 
 const (
-	// InterfaceTypeAlexaPresentationAPL
+	// InterfaceTypeAlexaPresentationAPL is ALEXA_PRESENTATION_APL
 	InterfaceTypeAlexaPresentationAPL InterfaceType = "ALEXA_PRESENTATION_APL"
-	// InterfaceTypeAudioPlayer
+	// InterfaceTypeAudioPlayer is AUDIO_PLAYER
 	InterfaceTypeAudioPlayer InterfaceType = "AUDIO_PLAYER"
-	// InterfaceTypeCanFulfillIntentRequest
+	// InterfaceTypeCanFulfillIntentRequest is CAN_FULFILL_INTENT_REQUEST
 	InterfaceTypeCanFulfillIntentRequest InterfaceType = "CAN_FULFILL_INTENT_REQUEST"
-	// InterfaceTypeGadgetController
+	// InterfaceTypeGadgetController is GADGET_CONTROLLER
 	InterfaceTypeGadgetController InterfaceType = "GADGET_CONTROLLER"
-	// InterfaceTypeGameEngine
+	// InterfaceTypeGameEngine is GAME_ENGINE
 	InterfaceTypeGameEngine InterfaceType = "GAME_ENGINE"
-	// InterfaceTypeRenderTemplate
+	// InterfaceTypeRenderTemplate is RENDER_TEMPLATE
 	InterfaceTypeRenderTemplate InterfaceType = "RENDER_TEMPLATE"
-	// InterfaceTypeVideoApp
+	// InterfaceTypeVideoApp is VIDEO_APP
 	InterfaceTypeVideoApp InterfaceType = "VIDEO_APP"
 )
 
