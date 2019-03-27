@@ -643,17 +643,20 @@ func TestMeetingSkill(t *testing.T) {
 }
 
 func TestFlashBriefing(t *testing.T) {
-	testHelper(t, "Flash Briefing Example", awsFlashBriefingExample)
+	res := testHelper(t, "Flash Briefing Example", awsFlashBriefingExample)
+	assert.Contains(t, string(res), "flashBriefing")
+	assert.Contains(t, string(res), "feeds")
 }
 
 func TestVideoSkill(t *testing.T) {
 	testHelper(t, "Video Skill Example", awsVideoSkillExample)
 }
 
-func testHelper(t *testing.T, name string, manifest []byte) {
+func testHelper(t *testing.T, name string, manifest []byte) []byte {
 	var skill Skill
 	err := json.Unmarshal(manifest, &skill)
 	assert.Nil(t, err, "Unmarshal of %s returned error: %s", name, err)
 	res, err := json.Marshal(skill)
 	assert.NotEmpty(t, string(res), "Marshal of %s must return JSON", name)
+	return res
 }

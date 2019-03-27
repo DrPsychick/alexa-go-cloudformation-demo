@@ -10,7 +10,7 @@ type Manifest struct {
 	Version     string        `json:"manifestVersion"`
 	Publishing  Publishing    `json:"publishingInformation"`
 	Apis        *Apis         `json:"apis,omitempty"`
-	Permissions *[]Permission `json:"permissions"`
+	Permissions *[]Permission `json:"permissions,omitempty"`
 	Privacy     *Privacy      `json:"privacyAndCompliance"`
 }
 
@@ -56,86 +56,232 @@ const (
 	CountryUnitedStates Country = "US"
 )
 
-// Category of the Skill
+// Category of the Skill that is used for filtering in the Alexa App https://developer.amazon.com/de/docs/smapi/skill-manifest.html#category-enum
 type Category string
 
 const (
-	//ALARMS_AND_CLOCKS
-	//ASTROLOGY
-	//BUSINESS_AND_FINANCE
-	//CALCULATORS
-	//CALENDARS_AND_REMINDERS
-	//CHILDRENS_EDUCATION_AND_REFERENCE
-	//CHILDRENS_GAMES
-	//CHILDRENS_MUSIC_AND_AUDIO
-	//CHILDRENS_NOVELTY_AND_HUMOR
-	//COMMUNICATION
-	//CONNECTED_CAR
-	//COOKING_AND_RECIPE
-	//CURRENCY_GUIDES_AND_CONVERTERS
-	//DATING
-	//DELIVERY_AND_TAKEOUT
-	//DEVICE_TRACKING
-	//EDUCATION_AND_REFERENCE
-	//EVENT_FINDERS
-	//EXERCISE_AND_WORKOUT
-	//FASHION_AND_STYLE
-	//FLIGHT_FINDERS
-	//FRIENDS_AND_FAMILY
-	//GAME_INFO_AND_ACCESSORY
-	//GAMES
-	//HEALTH_AND_FITNESS
-	//HOTEL_FINDERS
-	//KNOWLEDGE_AND_TRIVIA
-	//MOVIE_AND_TV_KNOWLEDGE_AND_TRIVIA
-	//MOVIE_INFO_AND_REVIEWS
-	//MOVIE_SHOWTIMES
-	//MUSIC_AND_AUDIO_ACCESSORIES
-	//MUSIC_AND_AUDIO_KNOWLEDGE_AND_TRIVIA
-	//MUSIC_INFO_REVIEWS_AND_RECOGNITION_SERVICE
-	//NAVIGATION_AND_TRIP_PLANNER
-	//NEWS
-	//NOVELTY
+	// CategoryAlarmsAndClocks is ALARMS_AND_CLOCKS
+	CategoryAlarmsAndClocks Category = "ALARMS_AND_CLOCKS"
+	// CategoryAstrology is ASTROLOGY
+	CategoryAstrology Category = "ASTROLOGY"
+	// CategoryBusinessAndFinance is BUSINESS_AND_FINANCE
+	CategoryBusinessAndFinance Category = "BUSINESS_AND_FINANCE"
+	// CategoryCalculators is CALCULATORS
+	CategoryCalculators Category = "CALCULATORS"
+	// CategoryCalendarsAndReminders is CALENDARS_AND_REMINDERS
+	CategoryCalendarsAndReminders Category = "CALENDARS_AND_REMINDERS"
+	// CategoryChildrensEducationAndReference is CHILDRENS_EDUCATION_AND_REFERENCE
+	CategoryChildrensEducationAndReference Category = "CHILDRENS_EDUCATION_AND_REFERENCE"
+	// CategoryChildrensGames is CHILDRENS_GAMES
+	CategoryChildrensGames Category = "CHILDRENS_GAMES"
+	// CategoryChildrensMusicAndAudio is CHILDRENS_MUSIC_AND_AUDIO
+	CategoryChildrensMusicAndAudio Category = "CHILDRENS_MUSIC_AND_AUDIO"
+	// CategoryChildrensNoveltyAndHumor is CHILDRENS_NOVELTY_AND_HUMOR
+	CategoryChildrensNoveltyAndHumor Category = "CHILDRENS_NOVELTY_AND_HUMOR"
+	// CategoryCommunication is COMMUNICATION
+	CategoryCommunication Category = "COMMUNICATION"
+	// CategoryConnectedCar is CONNECTED_CAR
+	CategoryConnectedCar Category = "CONNECTED_CAR"
+	// CategoryCookingAndRecipe is COOKING_AND_RECIPE
+	CategoryCookingAndRecipe Category = "COOKING_AND_RECIPE"
+	// CategoryCurrencyGuidesAndConverters is CURRENCY_GUIDES_AND_CONVERTERS
+	CategoryCurrencyGuidesAndConverters Category = "CURRENCY_GUIDES_AND_CONVERTERS"
+	// CategoryDating is DATING
+	CategoryDating Category = "DATING"
+	// CategoryDeliveryAndTakeout is DELIVERY_AND_TAKEOUT
+	CategoryDeliveryAndTakeout Category = "DELIVERY_AND_TAKEOUT"
+	// CategoryDeviceTracking is DEVICE_TRACKING
+	CategoryDeviceTracking Category = "DEVICE_TRACKING"
+	// CategoryEducationAndReference is EDUCATION_AND_REFERENCE
+	CategoryEducationAndReference Category = "EDUCATION_AND_REFERENCE"
+	// CategoryEventFinders is EVENT_FINDERS
+	CategoryEventFinders Category = "EVENT_FINDERS"
+	// CategoryExerciseAndWorkout is EXERCISE_AND_WORKOUT
+	CategoryExerciseAndWorkout Category = "EXERCISE_AND_WORKOUT"
+	// CategoryFashionAndStyle is FASHION_AND_STYLE
+	CategoryFashionAndStyle Category = "FASHION_AND_STYLE"
+	// CategoryFlightFinders is FLIGHT_FINDERS
+	CategoryFlightFinders Category = "FLIGHT_FINDERS"
+	// CategoryFriendsAndFamily is FRIENDS_AND_FAMILY
+	CategoryFriendsAndFamily Category = "FRIENDS_AND_FAMILY"
+	// CategoryGameInfoAndAccessory is GAME_INFO_AND_ACCESSORY
+	CategoryGameInfoAndAccessory Category = "GAME_INFO_AND_ACCESSORY"
+	// CategoryGames is GAMES
+	CategoryGames Category = "GAMES"
+	// CategoryHealthAndFitness is HEALTH_AND_FITNESS
+	CategoryHealthAndFitness Category = "HEALTH_AND_FITNESS"
+	// CategoryHotelFinders is HOTEL_FINDERS
+	CategoryHotelFinders Category = "HOTEL_FINDERS"
+	// CategoryKnowledgeAndTrivia is KNOWLEDGE_AND_TRIVIA
+	CategoryKnowledgeAndTrivia Category = "KNOWLEDGE_AND_TRIVIA"
+	// CategoryMovieAndTvKnowledgeAndTrivia is MOVIE_AND_TV_KNOWLEDGE_AND_TRIVIA
+	CategoryMovieAndTvKnowledgeAndTrivia Category = "MOVIE_AND_TV_KNOWLEDGE_AND_TRIVIA"
+	// CategoryMovieInfoAndReviews is MOVIE_INFO_AND_REVIEWS
+	CategoryMovieInfoAndReviews Category = "MOVIE_INFO_AND_REVIEWS"
+	// CategoryMovieShowtimes is MOVIE_SHOWTIMES
+	CategoryMovieShowtimes Category = "MOVIE_SHOWTIMES"
+	// CategoryMusicAndAudioAccessories is MUSIC_AND_AUDIO_ACCESSORIES
+	CategoryMusicAndAudioAccessories Category = "MUSIC_AND_AUDIO_ACCESSORIES"
+	// CategoryMusicAndAudioKnowledgeAndTrivia is MUSIC_AND_AUDIO_KNOWLEDGE_AND_TRIVIA
+	CategoryMusicAndAudioKnowledgeAndTrivia Category = "MUSIC_AND_AUDIO_KNOWLEDGE_AND_TRIVIA"
+	// CategoryMusicInfoReviewsAndRecognitionService is MUSIC_INFO_REVIEWS_AND_RECOGNITION_SERVICE
+	CategoryMusicInfoReviewsAndRecognitionService Category = "MUSIC_INFO_REVIEWS_AND_RECOGNITION_SERVICE"
+	// CategoryNavigationAndTripPlanner is NAVIGATION_AND_TRIP_PLANNER
+	CategoryNavigationAndTripPlanner Category = "NAVIGATION_AND_TRIP_PLANNER"
+	// CategoryNews is NEWS
+	CategoryNews Category = "NEWS"
+	// CategoryNovelty is NOVELTY
+	CategoryNovelty Category = "NOVELTY"
 	// CategoryOrganizersAndAssistants is ORGANIZERS_AND_ASSISTANTS
 	CategoryOrganizersAndAssistants Category = "ORGANIZERS_AND_ASSISTANTS"
-	//PETS_AND_ANIMAL
-	//PODCAST
-	//PUBLIC_TRANSPORTATION
-	//RELIGION_AND_SPIRITUALITY
-	//RESTAURANT_BOOKING_INFO_AND_REVIEW
-	//SCHOOLS
-	//SCORE_KEEPING
-	//SELF_IMPROVEMENT
-	//SHOPPING
-	//SMART_HOME
-	//SOCIAL_NETWORKING
-	//SPORTS_GAMES
-	//SPORTS_NEWS
-	//STREAMING_SERVICE
-	//TAXI_AND_RIDESHARING
-	//TO_DO_LISTS_AND_NOTES
-	//TRANSLATORS
-	//TV_GUIDES
-	//UNIT_CONVERTERS
-	//WEATHER
-	//WINE_AND_BEVERAGE
-	//ZIP_CODE_LOOKUP
+	// CategoryPetsAndAnimal is PETS_AND_ANIMAL
+	CategoryPetsAndAnimal Category = "PETS_AND_ANIMAL"
+	// CategoryPodcast is PODCAST
+	CategoryPodcast Category = "PODCAST"
+	// CategoryPublicTransportation is PUBLIC_TRANSPORTATION
+	CategoryPublicTransportation Category = "PUBLIC_TRANSPORTATION"
+	// CategoryReligionAndSpirituality is RELIGION_AND_SPIRITUALITY
+	CategoryReligionAndSpirituality Category = "RELIGION_AND_SPIRITUALITY"
+	// CategoryRestaurantBookingInfoAndReview is RESTAURANT_BOOKING_INFO_AND_REVIEW
+	CategoryRestaurantBookingInfoAndReview Category = "RESTAURANT_BOOKING_INFO_AND_REVIEW"
+	// CategorySchools is SCHOOLS
+	CategorySchools Category = "SCHOOLS"
+	// CategoryScoreKeeping is SCORE_KEEPING
+	CategoryScoreKeeping Category = "SCORE_KEEPING"
+	// CategorySelfImprovement is SELF_IMPROVEMENT
+	CategorySelfImprovement Category = "SELF_IMPROVEMENT"
+	// CategoryShopping is SHOPPING
+	CategoryShopping Category = "SHOPPING"
+	// CategorySmartHome is SMART_HOME
+	CategorySmartHome Category = "SMART_HOME"
+	// CategorySocialNetworking is SOCIAL_NETWORKING
+	CategorySocialNetworking Category = "SOCIAL_NETWORKING"
+	// CategorySportsGames is SPORTS_GAMES
+	CategorySportsGames Category = "SPORTS_GAMES"
+	// CategorySportsNews is SPORTS_NEWS
+	CategorySportsNews Category = "SPORTS_NEWS"
+	// CategoryStreamingService is STREAMING_SERVICE
+	CategoryStreamingService Category = "STREAMING_SERVICE"
+	// CategoryTaxiAndRidesharing is TAXI_AND_RIDESHARING
+	CategoryTaxiAndRidesharing Category = "TAXI_AND_RIDESHARING"
+	// CategoryToDoListsAndNotes is TO_DO_LISTS_AND_NOTES
+	CategoryToDoListsAndNotes Category = "TO_DO_LISTS_AND_NOTES"
+	// CategoryTranslators is TRANSLATORS
+	CategoryTranslators Category = "TRANSLATORS"
+	// CategoryTvGuides is TV_GUIDES
+	CategoryTvGuides Category = "TV_GUIDES"
+	// CategoryUnitConverters is UNIT_CONVERTERS
+	CategoryUnitConverters Category = "UNIT_CONVERTERS"
+	// CategoryWeather is WEATHER
+	CategoryWeather Category = "WEATHER"
+	// CategoryWineAndBeverage is WINE_AND_BEVERAGE
+	CategoryWineAndBeverage Category = "WINE_AND_BEVERAGE"
+	// CategoryZipCodeLookup is ZIP_CODE_LOOKUP
+	CategoryZipCodeLookup Category = "ZIP_CODE_LOOKUP"
 )
 
-// Apis Alexa will be connected to
+// Apis of the Alexa Skill https://developer.amazon.com/de/docs/smapi/skill-manifest.html#apis
 type Apis struct {
-	Custom *Custom `json:"custom"`
-	//FlashBriefing *FlashBriefing `json:"flashBriefing"`
+	AlexaForBusiness *AlexaForBusiness `json:"alexaForBusiness,omitempty"`
+	Custom           *Custom           `json:"custom,omitempty"`
+	//SmartHome *SmartHome `json:"smartHome"`
+	FlashBriefing *FlashBriefing `json:"flashBriefing"`
 	//Health     *Health	`json:"health"`
-	Interfaces *[]string `json:"interfaces"`
+	//HouseholdList *HouseholdList `json:"householdList"`
+	//Video *Video `json:"video"`
+	Interfaces *[]string `json:"interfaces,omitempty"`
+}
+
+// AlexaForBusiness API are available in English only
+type AlexaForBusiness struct {
+	Endpoint   *Endpoint             `json:"endpoint"`
+	Regions    *map[Region]RegionDef `json:"regions"`
+	Interfaces *[]Interface          `json:"interfaces"`
 }
 
 // Custom API endpoint
 type Custom struct {
 	Endpoint   *Endpoint             `json:"endpoint"`
-	Regions    *map[Region]RegionDef `json:"regions,omitempty"`
+	Regions    *map[Region]RegionDef `json:"regions"`
 	Interfaces *[]Interface          `json:"interfaces"`
 }
+
+// FlashBriefing API endpoint
+type FlashBriefing struct {
+	Locales map[Locale]FlashBriefingLocaleDef `json:"locales"`
+}
+
+// FlashBriefingLocaleDef is locale definition for flashBriefing API
+type FlashBriefingLocaleDef struct {
+	CustomErrorMessage string                    `json:"customErrorMessage"`
+	Feeds              []FlashBriefingLocaleFeed `json:"feeds"`
+}
+
+// FlashBriefingLocaleFeed is a feed definition for flashBriefing API
+type FlashBriefingLocaleFeed struct {
+	Name            string          `json:"name"`
+	IsDefault       bool            `json:"isDefault"`
+	VuiPreamble     string          `json:"vuiPreamble"`
+	UpdateFrequency UpdateFrequency `json:"updateFrequency"`
+	Genre           ContentGenre    `json:"genre"`
+	ImageUri        string          `json:"imageUri"`
+	ContentType     ContentType     `json:"contentType"`
+	Url             string          `json:"url"`
+}
+
+// UpdateFrequency is an enum for flashBriefing feed update frequency
+type UpdateFrequency string
+
+const (
+	// UpdateFrequencyDaily is DAILY
+	UpdateFrequencyDaily UpdateFrequency = "DAILY"
+	// UpdateFrequencyHourly is HOURLY
+	UpdateFrequencyHourly UpdateFrequency = "HOURLY"
+	// UpdateFrequencyWeekly is WEEKLY
+	UpdateFrequencyWeekly UpdateFrequency = "WEEKLY"
+)
+
+// ContentGenre is an enum for flashBriefing feed content genre
+type ContentGenre string
+
+const (
+	// ContentGenreHeadlineNews is HEADLINE_NEWS
+	ContentGenreHeadlineNews ContentGenre = "HEADLINE_NEWS"
+	// ContentGenreBusiness is BUSINESS
+	ContentGenreBusiness ContentGenre = "BUSINESS"
+	// ContentGenrePolitics is POLITICS
+	ContentGenrePolitics ContentGenre = "POLITICS"
+	// ContentGenreEntertainment is ENTERTAINMENT
+	ContentGenreEntertainment ContentGenre = "ENTERTAINMENT"
+	// ContentGenreTechnology is TECHNOLOGY
+	ContentGenreTechnology ContentGenre = "TECHNOLOGY"
+	// ContentGenreHumor is HUMOR
+	ContentGenreHumor ContentGenre = "HUMOR"
+	// ContentGenreLifestyle is LIFESTYLE
+	ContentGenreLifestyle ContentGenre = "LIFESTYLE"
+	// ContentGenreSports is SPORTS
+	ContentGenreSports ContentGenre = "SPORTS"
+	// ContentGenreScience is SCIENCE
+	ContentGenreScience ContentGenre = "SCIENCE"
+	// ContentGenreHealthAndFitness is HEALTH_AND_FITNESS
+	ContentGenreHealthAndFitness ContentGenre = "HEALTH_AND_FITNESS"
+	// ContentGenreArtsAndCulture is ARTS_AND_CULTURE
+	ContentGenreArtsAndCulture ContentGenre = "ARTS_AND_CULTURE"
+	// ContentGenreProductivityAndUtilities is PRODUCTIVITY_AND_UTILITIES
+	ContentGenreProductivityAndUtilities ContentGenre = "PRODUCTIVITY_AND_UTILITIES"
+	// ContentGenreOther is OTHER
+	ContentGenreOther ContentGenre = "OTHER"
+)
+
+// ContentType is an enum for flashBriefing feed content type
+type ContentType string
+
+const (
+	// ContentTypeText is TEXT
+	ContentTypeText ContentType = "TEXT"
+	// ContentTypeAudio is AUDIO
+	ContentTypeAudio ContentType = "AUDIO"
+)
 
 // Endpoint definition
 type Endpoint struct {
