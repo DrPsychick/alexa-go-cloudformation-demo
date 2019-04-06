@@ -5,57 +5,65 @@ import (
 	"math/rand"
 )
 
+// Registry is the Locale registry
+type Registry struct {
+	DefaultLocale string
+	locales       map[string]*Locale
+}
+
 // DefaultRegistry is the standard registry used
 var DefaultRegistry = &Registry{
 	DefaultLocale: "",
-	//fallbacks: map[string]*Locale{},
-	locales: map[string]*Locale{},
+	locales:       map[string]*Locale{},
 }
 
+// Locale is a representation of Keys in a specific language (and can have a fallback Locale)
 type Locale struct {
 	Name         string  // de-DE, en-US, ...
 	Fallback     *Locale // points to fallback (or nil)
 	TextSnippets Snippets
 }
 
+// Key defines the type of a text key
 type Key string
 
+// Snippets is the actual representation of key -> array of texts in locale
 type Snippets map[Key][]string
 
-type Registry struct {
-	DefaultLocale string
-	fallbacks     map[string]*Locale
-	locales       map[string]*Locale
-}
-
+// RegisterFunc defines the functions to be passed to Register
 type RegisterFunc func(cfg *Config)
 
+// Config contains the options for Locale registration
 type Config struct {
 	DefaultLocale bool
 	FallbackFor   string
 }
 
+// AsDefault sets the given Locale the default
 func AsDefault() RegisterFunc {
 	return func(cfg *Config) {
 		cfg.DefaultLocale = true
 	}
 }
 
+// AsFallbackFor registers the locale as fallback Locale for the given Locale name
 func AsFallbackFor(name string) RegisterFunc {
 	return func(cfg *Config) {
 		cfg.FallbackFor = name
 	}
 }
 
-func Register(l *Locale, opts ...RegisterFunc) error {
-	return DefaultRegistry.Register(l, opts...)
+// Register registers a new Locale in the DefaultRegistry
+func Register(locale *Locale, opts ...RegisterFunc) error {
+	return DefaultRegistry.Register(locale, opts...)
 }
 
-func Resolve(n string) (*Locale, error) {
-	return DefaultRegistry.Resolve(n)
+// Resolve returns the matching Locale from the DefaultRegistry
+func Resolve(name string) (*Locale, error) {
+	return DefaultRegistry.Resolve(name)
 }
 
-// Register registers a new locale, fails if it already exists
+// Register registers a new locale and fails if it already exists
 func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 	_, ok := r.locales[l.Name]
 	if ok {
@@ -96,15 +104,14 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 	return nil
 }
 
-func (r *Registry) Resolve(name string) (*Locale, error) {
+// Resolve returns the Locale matching the given name or an error
+func (r Registry) Resolve(name string) (*Locale, error) {
 	l, ok := r.locales[name]
 	if !ok {
 		return nil, fmt.Errorf("locale %s not found", name)
 	}
 	return l, nil
 }
-
-////////////////
 
 // Get returns the translation for the snippet
 func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
@@ -133,8 +140,3 @@ func (l Locale) GetSnippet(k Key, args ...interface{}) string {
 
 	return string(k)
 }
-
-//// Register the given locale
-//func Register(l *Locale) {
-//	locales[l.Name] = l
-//}

@@ -1,7 +1,6 @@
 package l10n_test
 
 import (
-	"fmt"
 	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -55,21 +54,17 @@ var enUS = &l10n.Locale{
 //}
 
 func TestRegistry(t *testing.T) {
-	l10n.Register(enUS, l10n.AsDefault())
-	l, err := l10n.Resolve(enUS.Name)
-	assert.Nil(t, err, "register locale %s must resolve", enUS.Name)
-	assert.Equal(t, enUS, l)
-	assert.Equal(t, "Hello", l.GetSnippet(Greeting))
-}
-
-func TestFallback(t *testing.T) {
 	l10n.Register(deDE, l10n.AsDefault())
-	err := l10n.Register(enUS, l10n.AsDefault(), l10n.AsFallbackFor("de-DE"))
-	assert.Nil(t, err, "Register of locale %s failed: %s", enUS.Name, err)
-	fmt.Printf("Default %s\n", l10n.DefaultRegistry.DefaultLocale)
+	l, err := l10n.Resolve(deDE.Name)
+	assert.Nil(t, err, "register locale %s must resolve", deDE.Name)
+	assert.Equal(t, deDE, l)
+	assert.Equal(t, "Howdi", l.GetSnippet(Greeting))
 
-	l, _ := l10n.Resolve("de-DE")
+	err = l10n.Register(enUS, l10n.AsDefault(), l10n.AsFallbackFor("de-DE"))
+	assert.Nil(t, err, "Register of locale %s failed: %s", enUS.Name, err)
+
+	l, _ = l10n.Resolve("de-DE")
 	assert.NotNil(t, l.Fallback)
 
-	assert.Equal(t, "Bugger off...", l.GetSnippet(ByeBye))
+	assert.Equal(t, "Have a nice day!", l.GetSnippet(ByeBye))
 }
