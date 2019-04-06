@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/hamba/cmd"
 	"log"
 	"os"
 
@@ -18,8 +19,20 @@ var commands = []cli.Command{
 		Action: runServer,
 	},
 	{
-		Name:   "make",
-		Usage:  "Make Alexa skill files",
+		Name:  "make",
+		Usage: "Make Alexa skill files",
+		Flags: cmd.Flags{
+			cli.BoolFlag{
+				Name:   "skill",
+				Usage:  "Generate Alexa skill.json",
+				EnvVar: "ALFALFA_MAKE_SKILL",
+			},
+			cli.BoolFlag{
+				Name:   "models",
+				Usage:  "Generate Alexa interaction model JSON files",
+				EnvVar: "ALFALFA_MAKE_MODELS",
+			},
+		}.Merge(cmd.CommonFlags, cmd.ServerFlags),
 		Action: runMake,
 	},
 }

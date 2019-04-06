@@ -1,10 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform: 'AWS::Serverless-2016-10-31'
 # REQUIRED for AWS::Serverless
 Parameters:
   LambdaEnv1:
     Default: FooBar
     Description: Demo to pass cloudformation parameter to ENV of lambda
+    Type: String
+  ASKSkillTestingInstructions:
+    Description: Skill description (change with every deploy to force skill update)
     Type: String
   ASKClientId:
     Description: Alexa security profile Client ID, see https://developer.amazon.com/settings/console/securityprofile/overview.html
@@ -72,6 +75,21 @@ Resources:
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
             Resource: "arn:aws:rlogs:*:*:*"
+# workaround: give **PUBLIC** access to Alexa skill.json
+  AlexaS3Access:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ASKS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "Cloudformation-AlexaS3Access"
+            Effect: "Allow"
+            Principal: "*"
+            Action:
+              - "s3:GetObject"
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, "/", !Ref ASKS3Key ] ]
 #  AlexaS3Role:
 #    Type: AWS::IAM::Role
 #    Properties:
@@ -106,6 +124,7 @@ Resources:
   # Skill ZIP file needs to be uploaded manually to S3 before executing cloudformation
   AlexaSkill:
     Type: Alexa::ASK::Skill
+    DependsOn: AlexaS3Access
     Properties:
       AuthenticationConfiguration:
         ClientId: !Ref ASKClientId
@@ -117,6 +136,9 @@ Resources:
         S3Key: !Ref ASKS3Key
         Overrides:
           Manifest:
+# TODO: use 'updatesDescription' for overrides
+            publishingInformation:
+              testingInstructions: !Ref ASKSkillTestingInstructions
             apis:
               custom:
                 endpoint:

@@ -1,5 +1,6 @@
 package alexa
 
+// Payload of response
 type Payload struct {
 	Type    string `json:"type,omitempty"`
 	Title   string `json:"title,omitempty"`
@@ -9,11 +10,13 @@ type Payload struct {
 	Image   Image  `json:"image,omitempty"`
 }
 
+// Image definition
 type Image struct {
 	SmallImageURL string `json:"smallImageUrl,omitempty"`
 	LargeImageURL string `json:"largeImageUrl,omitempty"`
 }
 
+// Reprompt
 type Reprompt struct {
 	OutputSpeech Payload `json:"outputSpeech,omitempty"`
 }
@@ -25,6 +28,7 @@ type Response struct {
 	Body              ResponseBody           `json:"response"`
 }
 
+// ResponseBody contains Speech Card etc.
 type ResponseBody struct {
 	OutputSpeech     *Payload     `json:"outputSpeech,omitempty"`
 	Card             *Payload     `json:"card,omitempty"`
