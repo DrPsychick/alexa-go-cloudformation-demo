@@ -5,11 +5,13 @@ import (
 	"github.com/hamba/pkg/stats"
 )
 
+// Application defines the base application
 type Application struct {
 	logger  log.Logger
 	statter stats.Statter
 }
 
+// NewApplication returns an Application with the logger and statter
 func NewApplication(l log.Logger, s stats.Statter) *Application {
 	return &Application{
 		logger:  l,
@@ -17,22 +19,26 @@ func NewApplication(l log.Logger, s stats.Statter) *Application {
 	}
 }
 
-func (a *Application) Handle() {
-	panic("implement me or panic hard")
-}
+//func (a *Application) Handle() {
+//	panic("implement me or panic hard")
+//}
 
+// Help is the response to a help request
 func (a *Application) Help() (string, string) {
 	return "Help", "No help available!"
 }
 
+// Stop is the response to stop the skill
 func (a *Application) Stop() (string, string) {
 	return "Stop", "Ok!"
 }
 
+// Logger returns the application logger
 func (a *Application) Logger() log.Logger {
 	return a.logger
 }
 
+// Statter returns the application statter
 func (a *Application) Statter() stats.Statter {
 	return a.statter
 }

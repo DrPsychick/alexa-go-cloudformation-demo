@@ -21,8 +21,8 @@ var skill = alexa.Skill{
 					Summary:      "Demo for deploying Alexa + Lambda with cloudformation",
 					Keywords:     []string{"Cloudformation Demo"},
 					Examples:     []string{"Schiess los"},
-					SmallIconUri: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_small.png",
-					LargeIconUri: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_large.png",
+					SmallIconURI: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_small.png",
+					LargeIconURI: "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_large.png",
 				},
 			},
 			Category:            alexa.CategoryOrganizersAndAssistants,
@@ -32,7 +32,7 @@ var skill = alexa.Skill{
 		//Apis: alexa.Apis{
 		//	Custom: alexa.Custom{
 		//		Endpoint: alexa.Endpoint{
-		//			Uri: "arn:...",
+		//			URI: "arn:...",
 		//		},
 		//	},
 		//	Interfaces: []string{},
@@ -130,5 +130,6 @@ func runMake(c *cli.Context) error {
 			}
 		}
 	}
+
 	return nil
 }

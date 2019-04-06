@@ -75,6 +75,7 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 	for _, opt := range opts {
 		opt(&cfg)
 	}
+
 	fmt.Printf("%s: Fallback -%s-\n", l.Name, cfg.FallbackFor)
 	// order matters, first anything that can fail, then changing data
 	if cfg.FallbackFor != "" {
@@ -124,7 +125,7 @@ func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
 	return fmt.Sprintf(s[k][r], args...), nil
 }
 
-// GetText returns the translation for the selected language
+// GetSnippet returns the translation for the selected language
 func (l Locale) GetSnippet(k Key, args ...interface{}) string {
 	r, err := l.TextSnippets.Get(k, args...)
 	if err == nil {

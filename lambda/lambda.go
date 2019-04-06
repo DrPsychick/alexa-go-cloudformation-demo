@@ -7,7 +7,7 @@ import (
 )
 
 type Application interface {
-	Handle()
+	//Handle()
 	Help() (string, string)
 	Stop() (string, string)
 }
