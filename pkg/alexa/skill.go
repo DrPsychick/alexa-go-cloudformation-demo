@@ -30,8 +30,8 @@ type LocaleDef struct {
 	Summary      string   `json:"summary"`
 	Examples     []string `json:"examplePhrases"`
 	Keywords     []string `json:"keywords"`
-	SmallIconUri string   `json:"smallIconUri"`
-	LargeIconUri string   `json:"largeIconUri"`
+	SmallIconURI string   `json:"smallIconUri"`
+	LargeIconURI string   `json:"largeIconUri"`
 }
 
 // Country constants
@@ -39,7 +39,7 @@ type Country string
 
 const (
 	// CountryAustralia is AU
-	CountryAustrialia Country = "AU"
+	CountryAustralia Country = "AU"
 	// CountryCanada is CA
 	CountryCanada Country = "CA"
 	// CountryGermany is DE
@@ -48,7 +48,7 @@ const (
 	CountryGreatBritain Country = "GB"
 	// CountryIndia is IN
 	CountryIndia Country = "IN"
-	// CountryItalia is IT
+	// CountryItaly is IT
 	CountryItaly Country = "IT"
 	// CountryJapan is JP
 	CountryJapan Country = "JP"
@@ -224,9 +224,9 @@ type FlashBriefingLocaleFeed struct {
 	VuiPreamble     string          `json:"vuiPreamble"`
 	UpdateFrequency UpdateFrequency `json:"updateFrequency"`
 	Genre           ContentGenre    `json:"genre"`
-	ImageUri        string          `json:"imageUri"`
+	ImageURI        string          `json:"imageUri"`
 	ContentType     ContentType     `json:"contentType"`
-	Url             string          `json:"url"`
+	URL             string          `json:"url"`
 }
 
 // UpdateFrequency is an enum for flashBriefing feed update frequency
@@ -285,7 +285,7 @@ const (
 
 // Endpoint definition
 type Endpoint struct {
-	Uri                string `json:"uri"`
+	URI                string `json:"uri"`
 	SslCertificateType string `json:"sslCertificateType,omitempty"`
 }
 
@@ -343,11 +343,11 @@ type Privacy struct {
 	AllowsPurchases   bool                        `json:"allowsPurchases"`
 	UsesPersonalInfo  bool                        `json:"usesPersonalInfo"`
 	IsChildDirected   bool                        `json:"isChildDirected"`
-	Locales           map[Locale]PrivacyLocaleDef `json:"locales,omitempty"`
+	Locales           map[Locale]PrivacyLocaleDef `json:"locales"`
 }
 
-// PrivacyLocaleDef
+// PrivacyLocaleDef defines
 type PrivacyLocaleDef struct {
-	PrivacyPolicyUrl string `json:"privacyPolicyUrl"`
+	PrivacyPolicyURL string `json:"privacyPolicyUrl"`
 	TermsOfUse       string `json:"termsOfUse"`
 }
