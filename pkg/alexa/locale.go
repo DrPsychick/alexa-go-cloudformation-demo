@@ -1,32 +1,34 @@
 package alexa
 
+// Locale defines the type of the Locale* consts
 type Locale string
 
 // locales
 const (
-	// LocaleItalian is the locale for Italian
-	LocaleItalian Locale = "it-IT"
-
-	// LocaleGerman is the locale for standard dialect German
-	LocaleGerman Locale = "de-DE"
-
+	// LocaleAmericanEnglish is the locale for American English
+	LocaleAmericanEnglish Locale = "en-US"
 	// LocaleAustralianEnglish is the locale for Australian English
 	LocaleAustralianEnglish Locale = "en-AU"
-
-	//LocaleCanadianEnglish is the locale for Canadian English
-	LocaleCanadianEnglish Locale = "en-CA"
-
-	//LocaleBritishEnglish is the locale for UK English
+	// LocaleBritishEnglish is the locale for UK English
 	LocaleBritishEnglish Locale = "en-GB"
-
+	// LocaleCanadianEnglish is the locale for Canadian English
+	LocaleCanadianEnglish Locale = "en-CA"
+	// LocaleCanadianFrench is the locale for Canadian French
+	LocaleCanadianFrench Locale = "fr-CA"
+	// LocaleFrenchFrench is the locale for French (France)
+	LocaleFrench Locale = "fr-FR"
+	// LocaleGerman is the locale for standard dialect German (Germany)
+	LocaleGerman Locale = "de-DE"
 	//LocaleIndianEnglish is the locale for Indian English
 	LocaleIndianEnglish Locale = "en-IN"
-
-	//LocaleAmericanEnglish is the locale for American English
-	LocaleAmericanEnglish Locale = "en-US"
-
-	// LocaleJapanese is the locale for Japanese
+	// LocaleItalian is the locale for Italian (Italy)
+	LocaleItalian Locale = "it-IT"
+	// LocaleJapanese is the locale for Japanese (Japan)
 	LocaleJapanese Locale = "ja-JP"
+	// LocaleMexicanSpanish is the locale for Mexican Spanish
+	LocaleMexicanSpanish Locale = "es-MX"
+	// LocaleSpanish is the Locale for Spanish (Spain)
+	LocaleSpanish Locale = "es-ES"
 )
 
 // IsEnglish returns true if locale is English
