@@ -105,6 +105,7 @@ Before first "release"
 ## Alexa schemas
 * Skill: https://developer.amazon.com/de/docs/smapi/skill-manifest.html
 * Interaction Model: https://developer.amazon.com/de/docs/smapi/interaction-model-schema.html
+* Utterance rules: https://developer.amazon.com/docs/custom-skills/create-intents-utterances-and-slots.html#h3_intentref_rules
 
 ## Further reading
 * maybe try CodePipeline with Alexa? https://stelligent.com/2017/07/25/use-aws-codepipeline-to-deploy-amazon-alexa-skill/
