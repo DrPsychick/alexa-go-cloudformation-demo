@@ -40,6 +40,11 @@ var skill = alexa.Skill{
 		Permissions: &[]alexa.Permission{},
 		Privacy: &alexa.Privacy{
 			IsExportCompliant: true,
+			//Locales: &map[alexa.Locale]alexa.PrivacyLocaleDef{
+			//	"de-DE": {
+			//
+			//	},
+			//},
 		},
 	},
 }

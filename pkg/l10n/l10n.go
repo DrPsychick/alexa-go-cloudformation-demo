@@ -3,7 +3,12 @@ package l10n
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 // Registry is the Locale registry
 type Registry struct {
@@ -13,8 +18,7 @@ type Registry struct {
 
 // DefaultRegistry is the standard registry used
 var DefaultRegistry = &Registry{
-	DefaultLocale: "",
-	locales:       map[string]*Locale{},
+	locales: map[string]*Locale{},
 }
 
 // Locale is a representation of Keys in a specific language (and can have a fallback Locale)
@@ -39,12 +43,12 @@ type Config struct {
 	FallbackFor   string
 }
 
-// AsDefault sets the given Locale the default
-func AsDefault() RegisterFunc {
-	return func(cfg *Config) {
-		cfg.DefaultLocale = true
-	}
-}
+//// AsDefault sets the given Locale the default
+//func AsDefault() RegisterFunc {
+//	return func(cfg *Config) {
+//		cfg.DefaultLocale = true
+//	}
+//}
 
 // AsFallbackFor registers the locale as fallback Locale for the given Locale name
 func AsFallbackFor(name string) RegisterFunc {
@@ -76,7 +80,6 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 		opt(&cfg)
 	}
 
-	fmt.Printf("%s: Fallback -%s-\n", l.Name, cfg.FallbackFor)
 	// order matters, first anything that can fail, then changing data
 	if cfg.FallbackFor != "" {
 		// fallback locale must be registered
@@ -89,16 +92,15 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 		if orig.Fallback != nil {
 			return fmt.Errorf("fallback for locale %s is already registered", orig.Name)
 		}
-		fmt.Printf("Setting fallback for %s to %s\n", orig.Name, l.Name)
 
 		// set the fallback
 		r.locales[cfg.FallbackFor].Fallback = l
 	}
 
-	// set locale as default
-	if cfg.DefaultLocale {
-		r.DefaultLocale = l.Name
-	}
+	//// set locale as default
+	//if cfg.DefaultLocale {
+	//	r.DefaultLocale = l.Name
+	//}
 
 	r.locales[l.Name] = l
 
@@ -119,24 +121,22 @@ func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
 	if len(s[k]) < 1 {
 		return "", fmt.Errorf("key not defined %s", string(k))
 	}
+	if len(s[k]) == 1 {
+		return fmt.Sprintf(s[k][0], args...), nil
+	}
 	l := len(s[k])
 	r := rand.Intn(l)
-	//fmt.Printf("length: %d rand: %d", l, r)
 	return fmt.Sprintf(s[k][r], args...), nil
 }
 
-// GetSnippet returns the translation for the selected language
+// GetSnippet returns the translation for the selected language (and follows fallback chain)
 func (l Locale) GetSnippet(k Key, args ...interface{}) string {
 	r, err := l.TextSnippets.Get(k, args...)
 	if err == nil {
 		return r
 	}
 	if l.Fallback != nil {
-		fmt.Printf("Using fallback: %s\n", l.Fallback.Name)
-		r, err = l.Fallback.TextSnippets.Get(k, args...)
-		if err == nil {
-			return r
-		}
+		return l.Fallback.GetSnippet(k, args...)
 	}
 
 	return string(k)
