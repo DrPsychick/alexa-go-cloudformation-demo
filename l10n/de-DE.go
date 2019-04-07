@@ -38,13 +38,6 @@ var deDE = l10n.Locale{
 				"damit die Nachbarn sehen, dass ich sie nicht schlage!</voice>" +
 				"</speak>",
 		},
-		SaySomethingSSML: []string{
-			"<speak>Sie: <voice name=\"Marlene\">Schatz? Ich fühl mich in letzter Zeit so dick und hässlich, " +
-				"ich brauch dringend ein Kompliment!</voice>" +
-				"Er: <voice name=\"Hans\">Du hast eine hervorragende Beobachtungsgabe, Schatz!</voice></speak>",
-			"<speak>Er: <voice name=\"Hans\">Wenn meine Frau singt, gehe ich immer aus dem Haus, " +
-				"damit die Nachbarn sehen, dass ich  sie nicht schlage!</voice></speak>",
-		},
 	},
 	// Utterances: map[l10n.Key][]string{ SaySomethingUtterances: []string{}, },
 }
