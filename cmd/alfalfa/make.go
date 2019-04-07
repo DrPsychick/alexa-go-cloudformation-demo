@@ -61,6 +61,15 @@ var modelGerman = alexa.Model{
 					"Auf geht's",
 					"Hop hop",
 				}},
+				{Name: "SSMLDemoIntent", Samples: []string{
+					"Zeig' was du kannst!",
+					"Immer her damit.",
+					"Was kann SSML?",
+				}},
+				{Name: "SaySomething", Samples: []string{
+					"Erzähl' mir was",
+					"Sag was",
+				}},
 				{
 					Name: "BeerStatsIntent",
 					Samples: []string{
