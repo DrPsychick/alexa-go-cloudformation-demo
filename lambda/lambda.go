@@ -2,9 +2,9 @@ package lambda
 
 import (
 	"fmt"
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 )
 
 type Application interface {
@@ -12,7 +12,7 @@ type Application interface {
 	Help() (string, string)
 	Stop(l *l10n.Locale) (string, string, string)
 	SSMLDemo(l *l10n.Locale) (string, string, string)
-	SaySomething(l *l10n.Locale) (string, string)
+	SaySomething(l *l10n.Locale) (string, string, string)
 }
 
 type Handler func(alexa.Request) (alexa.Response, error)
@@ -46,7 +46,7 @@ func HandleRequest(app Application) Handler {
 				return handleSSMLResponse(app.SSMLDemo(l)), nil
 
 			case "SaySomething":
-				return handleSimpleResponse(app.SaySomething(l)), nil
+				return handleSSMLResponse(app.SaySomething(l)), nil
 
 			case "DemoIntent":
 				return handleDemo(r), nil

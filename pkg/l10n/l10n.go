@@ -26,6 +26,7 @@ type Locale struct {
 	Name         string  // de-DE, en-US, ...
 	Fallback     *Locale // points to fallback (or nil)
 	TextSnippets Snippets
+	// Utterances
 }
 
 // Key defines the type of a text key

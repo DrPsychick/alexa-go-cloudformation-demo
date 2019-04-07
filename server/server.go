@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 )
 
 type Application interface {

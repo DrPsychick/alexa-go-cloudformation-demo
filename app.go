@@ -1,8 +1,8 @@
 package alfalfa
 
 import (
-	loca "github.com/DrPsychick/alexa-go-cloudformation-demo/l10n"
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	loca "github.com/drpsychick/alexa-go-cloudformation-demo/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
 )
@@ -36,8 +36,8 @@ func (a *Application) Stop(l *l10n.Locale) (string, string, string) {
 }
 
 // SimpleResponse handles simple title + text response
-func (a *Application) SaySomething(l *l10n.Locale) (string, string) {
-	return l.GetSnippet(loca.SaySomethingTitle), l.GetSnippet(loca.SaySomething)
+func (a *Application) SaySomething(l *l10n.Locale) (string, string, string) {
+	return l.GetSnippet(loca.SaySomethingTitle), l.GetSnippet(loca.SaySomething), l.GetSnippet(loca.SaySomethingSSML)
 }
 
 // SSMLDemo is the intent to demonstrate SSML output with Alexa

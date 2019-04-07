@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/DrPsychick/alexa-go-cloudformation-demo"
+	"github.com/drpsychick/alexa-go-cloudformation-demo"
 	"github.com/hamba/cmd"
 )
 

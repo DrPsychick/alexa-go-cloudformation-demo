@@ -1,6 +1,6 @@
 package l10n
 
-import "github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
+import "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 
 var enUS = l10n.Locale{
 	Name:     "en-US",

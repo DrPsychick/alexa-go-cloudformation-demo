@@ -1,7 +1,7 @@
 package l10n
 
 import (
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 )
 
 var deDE = l10n.Locale{
@@ -26,5 +26,13 @@ var deDE = l10n.Locale{
 			"Jetzt sag ich dir mal was... Kannst du das wirklich glauben?" +
 				"Ich hätte es nie für möglich gehalten!",
 		},
+		SaySomethingSSML: []string{
+			"<speak>Sie: <voice name=\"Marlene\">Schatz? Ich fühl mich in letzter Zeit so dick und hässlich, " +
+				"ich brauch dringend ein Kompliment!</voice>" +
+				"Er: <voice name=\"Hans\">Du hast eine hervorragende Beobachtungsgabe, Schatz!</voice></speak>",
+			"<speak>Er: <voice name=\"Hans\">Wenn meine Frau singt, gehe ich immer aus dem Haus, " +
+				"damit die Nachbarn sehen, dass ich  sie nicht schlage!</voice></speak>",
+		},
 	},
+	// Utterances: map[l10n.Key][]string{ SaySomethingUtterances: []string{}, },
 }
