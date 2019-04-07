@@ -338,12 +338,12 @@ type Permission struct {
 
 // Privacy definition
 type Privacy struct {
-	IsExportCompliant bool                        `json:"isExportCompliant"`
-	ContainsAds       bool                        `json:"containsAds"`
-	AllowsPurchases   bool                        `json:"allowsPurchases"`
-	UsesPersonalInfo  bool                        `json:"usesPersonalInfo"`
-	IsChildDirected   bool                        `json:"isChildDirected"`
-	Locales           map[Locale]PrivacyLocaleDef `json:"locales"`
+	IsExportCompliant bool                         `json:"isExportCompliant"`
+	ContainsAds       bool                         `json:"containsAds"`
+	AllowsPurchases   bool                         `json:"allowsPurchases"`
+	UsesPersonalInfo  bool                         `json:"usesPersonalInfo"`
+	IsChildDirected   bool                         `json:"isChildDirected"`
+	Locales           *map[Locale]PrivacyLocaleDef `json:"locales,omitempty"`
 }
 
 // PrivacyLocaleDef defines
