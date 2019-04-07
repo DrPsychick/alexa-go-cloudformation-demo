@@ -72,7 +72,7 @@ var modelGerman = alexa.Model{
 					"Was kann SSML?",
 				}},
 				{Name: "SaySomething", Samples: []string{
-					"Erzähl' mir was",
+					"Erzaehl' mir was",
 					"Sag was",
 				}},
 				{
