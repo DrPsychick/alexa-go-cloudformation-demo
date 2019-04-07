@@ -1,7 +1,7 @@
 package l10n
 
 import (
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 )
 
 // just register the locale and fallback to enUS

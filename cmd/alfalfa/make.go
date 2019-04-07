@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"log"
@@ -67,9 +67,9 @@ var modelGerman = alexa.Model{
 					"Hop hop",
 				}},
 				{Name: "SSMLDemoIntent", Samples: []string{
-					"Zeig' was du kannst.",
-					"Immer her damit.",
-					"Was kann SSML?",
+					"Zeig' was du kannst",
+					"Immer her damit",
+					"Was kann SSML",
 				}},
 				{Name: "SaySomething", Samples: []string{
 					"Erzähl' mir was",

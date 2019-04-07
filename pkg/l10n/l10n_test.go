@@ -1,7 +1,7 @@
 package l10n_test
 
 import (
-	"github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

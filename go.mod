@@ -1,4 +1,4 @@
-module github.com/DrPsychick/alexa-go-cloudformation-demo
+module github.com/drpsychick/alexa-go-cloudformation-demo
 
 go 1.12
 

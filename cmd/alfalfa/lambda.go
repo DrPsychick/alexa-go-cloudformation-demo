@@ -1,8 +1,8 @@
 package main
 
 import (
-	lambda2 "github.com/DrPsychick/alexa-go-cloudformation-demo/lambda"
 	"github.com/aws/aws-lambda-go/lambda"
+	lambda2 "github.com/drpsychick/alexa-go-cloudformation-demo/lambda"
 	"github.com/hamba/cmd"
 	"github.com/hamba/pkg/log"
 	"gopkg.in/urfave/cli.v1"

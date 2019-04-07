@@ -1,6 +1,6 @@
 package l10n
 
-import "github.com/DrPsychick/alexa-go-cloudformation-demo/pkg/l10n"
+import "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 
 const (
 	GreetingTitle     l10n.Key = "greeting_title"
@@ -11,6 +11,7 @@ const (
 	Stop              l10n.Key = "stop"
 	SaySomethingTitle l10n.Key = "saysomething_title"
 	SaySomething      l10n.Key = "saysomething"
+	SaySomethingSSML  l10n.Key = "saysomething_ssml"
 )
 
 func init() {
