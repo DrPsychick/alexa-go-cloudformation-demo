@@ -2,7 +2,6 @@ package alfalfa
 
 import (
 	loca "github.com/drpsychick/alexa-go-cloudformation-demo/l10n"
-
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
