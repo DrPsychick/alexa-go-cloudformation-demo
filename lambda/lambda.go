@@ -50,14 +50,24 @@ func handleHelp(app Application) alexa.Handler {
 
 func handleStop(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(r *alexa.Request) alexa.Response {
-		title, text, _ := app.Stop(r.Locale)
+		l, err := l10n.Resolve(string(r.Body.Locale))
+		if err != nil {
+			return alexa.NewErrorResponse(err)
+		}
+
+		title, text, _ := app.Stop(l)
 		return alexa.NewSimpleResponse(title, text)
 	})
 }
 
 func handleSSMLResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(r *alexa.Request) alexa.Response {
-		title, text, ssmlText := app.SSMLDemo(r.Locale)
+		l, err := l10n.Resolve(string(r.Body.Locale))
+		if err != nil {
+			return alexa.NewErrorResponse(err)
+		}
+
+		title, text, ssmlText := app.SSMLDemo(l)
 
 		resp := alexa.NewSimpleResponse(title, text)
 		resp.Body.OutputSpeech.Type = "SSML"
