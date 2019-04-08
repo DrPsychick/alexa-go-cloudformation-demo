@@ -1,3 +1,10 @@
+[![Build Status](https://travis-ci.org/DrPsychick/alexa-go-cloudformation-demo.svg?branch=master)](https://travis-ci.org/DrPsychick/alexa-go-cloudformation-demo)
+[![Coverage Status](https://coveralls.io/repos/github/DrPsychick/alexa-go-cloudformation-demo/badge.svg?branch=master)](https://coveralls.io/github/DrPsychick/alexa-go-cloudformation-demo?branch=master)
+[![Contributors](https://img.shields.io/github/contributors/drpsychick/alexa-go-cloudformation-demo.svg)](https://github.com/drpsychick/alexa-go-cloudformation-demo/graphs/contributors)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/drpsychick/alexa-go-cloudformation-demo.svg)](https://github.com/drpsychick/alexa-go-cloudformation-demo/pulls)
+[![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/drpsychick/alexa-go-cloudformation-demo.svg)](https://github.com/drpsychick/alexa-go-cloudformation-demo/pulls?q=is%3Apr+is%3Aclosed)
+[![GitHub stars](https://img.shields.io/github/stars/drpsychick/alexa-go-cloudformation-demo.svg)](https://github.com/drpsychick/alexa-go-cloudformation-demo)
+
 # alfalfa (ALexA Lambda Fun Aws)
 Demo alexa skill using a go lambda function, deployed with cloudformation
 
@@ -5,6 +12,8 @@ Demo alexa skill using a go lambda function, deployed with cloudformation
 * show how to use cloudformation to deploy everything in one run (Alexa, Lambda, IAM roles and policies)
 * demonstrate golang lambda structure with localization support
 * build skill from code (generate JSON required for the Alexa skill from the code)
+* demonstrate good code design: keeping it simple and separated
+* demonstrate good integration with travis and coveralls
 
 ## I18N / L10N
 https://phraseapp.com/blog/posts/internationalization-i18n-go/
