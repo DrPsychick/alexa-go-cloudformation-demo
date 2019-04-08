@@ -95,3 +95,81 @@ skill.RenderSkill()
 skill.RenderModel("de-DE")
 [...]
 ```
+
+## Defining a flow -> NO!
+```go
+var simpleFlow = alexa.DialogFlow{
+	Intent: "SaySomething",
+	Samples: []string{
+		"Say something",
+		"Tell me something",
+		"What's up",
+	},
+	Responses: []Response{
+		{text: "Yeah, right!", ssml: "<speak>Jop</speak>"},
+	}
+}
+```
+
+### Generic flow, referencing locale -> NO!
+```go
+var enUS = &alexa.Locale{
+    Name: "en-US",
+    Intents: []Intent{
+        Intent{
+            Name: "SaySomething"
+            Samples: []string{
+                "Say something",
+                "Tell me something",
+                "What's up",
+            },
+            Responses: []Response{
+                { Text: "Yeah, right!", SSML: "<speak>Jop</speak>" },
+            },
+        },
+    },
+}
+
+for _, i := range l.Intents {
+    simpleIntent := alexa.SimpleIntent{
+    	Intent: i.Name,
+    	Samples: i.Samples,
+    	Responses: i.Responses,
+    }
+    app.RegisterIntent(simpleIntent)
+}
+
+```
+
+## Make it simple!
+```go
+// de-DE.go
+// only key -> value. Convention defines the structure
+var deDE = &l10n.Locale{
+	Snippets: [l10n.Key][]string{
+		MyIntentTitle: []string{
+			"Title",
+		},
+		MyIntentText: []string{
+			"Text",
+		},
+		MyIntentSSML: []string{
+			"<speak>Text</speak>"
+		},
+	},
+}
+[...]
+
+// app.go
+// Links intent to response (flow)
+func (a *Application) handleMyIntent(l *Locale) (string, string, string) {
+	return l.GetSnippet(MyIntentTitle), l.GetSnippet(MyIntentText), l.GetSnippet(MyIntentSSML)
+}
+
+// More complex function
+func (a *Application) handleComplexIntent(l *Locale, s Slots, ...) (string, string, string) {
+	// do something based on the slots provided
+	// trigger reprompt if unclear, ...
+	return title, text, ssml // and more: Media (visual Alexa), Sounds, ...?
+}
+```
