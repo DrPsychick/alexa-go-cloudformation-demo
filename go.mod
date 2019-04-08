@@ -3,7 +3,7 @@ module github.com/drpsychick/alexa-go-cloudformation-demo
 go 1.12
 
 require (
-	bou.ke/monkey v1.0.1 // indirect
+	bou.ke/monkey v1.0.1
 	github.com/aws/aws-lambda-go v1.9.0
 	github.com/hamba/cmd v1.0.0
 	github.com/hamba/pkg v1.0.0

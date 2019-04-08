@@ -1,8 +1,8 @@
-package l10n
+package loca
 
 import "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 
-var enUS = l10n.Locale{
+var enUS = &l10n.Locale{
 	Name:     "en-US",
 	Fallback: nil,
 	TextSnippets: map[l10n.Key][]string{
