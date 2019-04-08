@@ -9,6 +9,5 @@ require (
 	github.com/hamba/pkg v1.0.0
 	github.com/joho/godotenv v1.3.0
 	github.com/stretchr/testify v1.3.0
-	golang.org/x/lint v0.0.0-20190313153728-d0100b6bd8b3 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
