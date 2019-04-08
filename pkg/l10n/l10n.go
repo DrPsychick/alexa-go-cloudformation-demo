@@ -23,9 +23,11 @@ var DefaultRegistry = &Registry{
 
 // Locale is a representation of Keys in a specific language (and can have a fallback Locale)
 type Locale struct {
-	Name         string  // de-DE, en-US, ...
-	Fallback     *Locale // points to fallback (or nil)
-	TextSnippets Snippets
+	Name            string  // de-DE, en-US, ...
+	Invocation      string  // "mein skill"
+	Fallback        *Locale // points to fallback (or nil)
+	TextSnippets    Snippets
+	IntentResponses IntentResponses
 	// Utterances
 }
 
@@ -34,6 +36,15 @@ type Key string
 
 // Snippets is the actual representation of key -> array of texts in locale
 type Snippets map[Key][]string
+
+// Responses is the representation of a list of IntentResponses
+type IntentResponses map[Key]IntentResponse
+
+type IntentResponse struct {
+	Title []string
+	Text  []string
+	SSML  []string
+}
 
 // RegisterFunc defines the functions to be passed to Register
 type RegisterFunc func(cfg *Config)

@@ -28,6 +28,13 @@ var deDE = &l10n.Locale{
 			"Willst a watschn?",
 		},
 	},
+	IntentResponses: l10n.IntentResponses{
+		Greeting: l10n.IntentResponse{
+			Title: []string{"title"},
+			Text:  []string{"text a", "text b"},
+			SSML:  []string{"<speak>foo bar</speak>"},
+		},
+	},
 }
 
 var enUS = &l10n.Locale{

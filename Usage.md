@@ -20,44 +20,75 @@ int.AddSample("Erzähl mir was")
 
 In a loop over locales
 ```go
+type Locale = struct{
+	Name: string,
+	Invocation: string,
+	Description: string,
+	[...]
+}
+
+var enUS = &Locale{
+	Name: "en-US",
+	Invocation: "my demo",
+	Description: "A demo skill",
+	
+}
+
+var locales = []*Locale{
+	enUS, deDE
+}
+[...]
+skill := NewSkill(Type)
+skill.AddCategory(...)
+
+int := skill.AddIntent("MyIntent")
+int.AddSlot("name", "type")
+[...]
+skill.AddType("name")
+[...]
+
 for l, _ := range locales {
 	// 
 	locSkill := skill.AddLocale(l.Name)
 	locSkill.Name = l.Name
 	locSkill.Description = l.Description
 	[...]
-	
+
 	// Skill only references Model (separte output JSON files)
 	intModel := locSkill.AddInteractionModel()
 	
 	// InteractionModel -> LanguageModel (with "invocation")
 	langModel := intModel.AddLanguageModel(l.Invocation)
 	
-	// LanguageModel -> []Intent
-	for i, _ := range l.Intents {
+	// LanguageModel -> []Intent : Intents are defined on the skill
+	for _, i := range skill.Intents {
 	    locInt := langModel.AddIntent(i.Name)
+	    resp := l.IntentResponses[i.Name]
 	    
-	    // Intent -> []Sample
-	    for s, _ := range i.Samples {
+	    // Intent -> []Sample : Samples are defined per locale
+	    for _, s := range resp.Samples {
 	    	locInt.AddSample(s)
 	    }
 	    
-	    // Intent -> []Slot -> []Sample
-	    for sl, _ := range i.Slots {
-	    	slot := locInt.AddSlot(sl)
+	    // Intent -> []Slot : Slots are defined on the skill
+	    for k, sl := range i.Slots {
+	    	slot := locInt.AddSlot(sl.Name, sl.Type)
 	    	
-	    	for s, _ = range sl.Samples {
+	    	// Slot -> []Sample : Slot samples are defined per locale
+	    	for _, s = range resp.Slots[k].Samples {
 	    		slot.AddSample(s)
 	    	}
 	    }
 	 }
 	
-	// Model -> []Type
-	for t, _ := range l.Types {
+	// Model -> []Type : Types are defined on the skill
+	for _, t := range skill.Types {
     	type := locSkill.AddType(t.Name)
+    	vals := l.Types[t.Name]
     	
-    	for v, _ := range t.Values {
-    		type.AddValue(v.Value)
+    	// Type -> []Value : Values are defined per locale
+    	for _, v := range vals {
+    		type.AddValue(v)
     	}
 	}
 	
@@ -172,4 +203,24 @@ func (a *Application) handleComplexIntent(l *Locale, s Slots, ...) (string, stri
 	// trigger reprompt if unclear, ...
 	return title, text, ssml // and more: Media (visual Alexa), Sounds, ...?
 }
+```
+
+
+## So, where does it go?
+```go
+// app.go
+func (a *Application) initialize() { // or in NewApplication
+	// define the skill
+	skill := alexa.NewSkill(Type)
+	// add general elements which are part of the skill
+	skill.AddIntents(...)
+	skill.AddSlots(...)
+	
+	// loop over locales and add them
+	for _, l := range locales {
+        skill.AddLocale(locale) // locale is part of alexa package
+        // AddLocale can loop over intents etc. and fetch locale for each element
+    }
+}
+[...]
 ```
