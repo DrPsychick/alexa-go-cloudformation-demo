@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/aws/aws-lambda-go/lambda"
-	lambda2 "github.com/drpsychick/alexa-go-cloudformation-demo/lambda"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/hamba/cmd"
 	"github.com/hamba/pkg/log"
 	"gopkg.in/urfave/cli.v1"
@@ -19,7 +19,10 @@ func runLambda(c *cli.Context) error {
 		log.Fatal(ctx, err.Error())
 	}
 
-	lambda.Start(lambda2.HandleRequest(app))
+	mux := lambda.NewMux(app)
+	if err := alexa.Serve(mux); err != nil {
+		log.Fatal(ctx, err)
+	}
 
 	return nil
 }

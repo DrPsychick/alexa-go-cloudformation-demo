@@ -26,6 +26,8 @@ type Response struct {
 	Version           string                 `json:"version"`
 	SessionAttributes map[string]interface{} `json:"sessionAttributes,omitempty"`
 	Body              ResponseBody           `json:"response"`
+
+	Error error `json:"-"`
 }
 
 // ResponseBody contains Speech Card etc.
@@ -37,19 +39,20 @@ type ResponseBody struct {
 	ShouldEndSession bool         `json:"shouldEndSession"`
 }
 
-// NewEmptyResponse builds an empty response
+// NewEmptyResponse builds an empty response.
 func NewEmptyResponse() Response {
 	return Response{Version: "1.0"}
 }
 
-// NewSimpleTerminateResponse builds an empty response
-func NewSimpleTerminateResponse() Response {
+// NewTerminateResponse builds an empty response that terminates the session.
+func NewTerminateResponse() Response {
 	r := NewEmptyResponse()
 	r.Body.ShouldEndSession = true
+
 	return r
 }
 
-// NewSpeechResponse builds a simple speech response
+// NewSpeechResponse builds a response with the given speech.
 func NewSpeechResponse(speech string) Response {
 	r := NewEmptyResponse()
 	r.Body.ShouldEndSession = true
@@ -61,7 +64,7 @@ func NewSpeechResponse(speech string) Response {
 	return r
 }
 
-// NewDialogDelegateResponse builds a simple response response to advance to the next step
+// NewDialogDelegateResponse builds a simple response to advance to the next step.
 func NewDialogDelegateResponse() Response {
 	r := NewEmptyResponse()
 	r.Body.ShouldEndSession = false
@@ -70,7 +73,7 @@ func NewDialogDelegateResponse() Response {
 	return r
 }
 
-// NewSimpleResponse builds a session response
+// NewSimpleResponse builds a response with the given title and text.
 func NewSimpleResponse(title string, text string) Response {
 	r := Response{
 		Version: "1.0",
@@ -89,4 +92,12 @@ func NewSimpleResponse(title string, text string) Response {
 	}
 
 	return r
+}
+
+// NewErrorResponse creates an error response with the given error.
+func NewErrorResponse(err error) Response {
+	return Response{
+		Version: "1.0",
+		Error:   err,
+	}
 }
