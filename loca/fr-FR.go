@@ -1,12 +1,12 @@
-package l10n
+package loca
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 )
 
 // just register the locale and fallback to enUS
-var frFR = l10n.Locale{
+var frFR = &l10n.Locale{
 	Name:         "fr-FR",
-	Fallback:     &enUS,
+	Fallback:     enUS,
 	TextSnippets: map[l10n.Key][]string{},
 }

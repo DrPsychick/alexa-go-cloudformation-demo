@@ -1,7 +1,7 @@
 package alfalfa
 
 import (
-	loca "github.com/drpsychick/alexa-go-cloudformation-demo/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
@@ -43,7 +43,6 @@ func (a *Application) SaySomething(l *l10n.Locale) (string, string, string) {
 // SSMLDemo is the intent to demonstrate SSML output with Alexa
 func (a *Application) SSMLDemo(l *l10n.Locale) (string, string, string) {
 	return l.GetSnippet(loca.GreetingTitle), l.GetSnippet(loca.Greeting), l.GetSnippet(loca.GreetingSSML)
-
 }
 
 // Logger returns the application logger

@@ -1,8 +1,10 @@
 package l10n_test
 
 import (
+	"bou.ke/monkey"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"github.com/stretchr/testify/assert"
+	"math/rand"
 	"testing"
 )
 
@@ -57,15 +59,15 @@ func TestRegisterLocale(t *testing.T) {
 	assert.NotEmpty(t, l.GetSnippet(Greeting))
 }
 
-//func TestLocaleGetSnippet(t *testing.T) {
-//	patch := monkey.Patch(rand.Intn, func(i int) int {
-//		return 1
-//	})
-//	defer patch.Unpatch()
-//
-//	l, _ := l10n.Resolve("de-DE")
-//	assert.Equal(t, "Hallo", l.GetSnippet(Greeting))
-//}
+func TestLocaleGetSnippet(t *testing.T) {
+	patch := monkey.Patch(rand.Intn, func(i int) int {
+		return 1
+	})
+	defer patch.Unpatch()
+
+	l, _ := l10n.Resolve("de-DE")
+	assert.Equal(t, "Hallo", l.GetSnippet(Greeting))
+}
 
 func TestRegisterFallback(t *testing.T) {
 	err := l10n.Register(enUS, l10n.AsFallbackFor("de-DE"))

@@ -1,12 +1,12 @@
-package l10n
+package loca
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 )
 
-var deDE = l10n.Locale{
+var deDE = &l10n.Locale{
 	Name:     "de-DE",
-	Fallback: &enUS,
+	Fallback: enUS,
 	TextSnippets: map[l10n.Key][]string{
 		GreetingTitle: []string{
 			"Begrüßung",
@@ -39,5 +39,5 @@ var deDE = l10n.Locale{
 				"</speak>",
 		},
 	},
-	// Utterances: map[l10n.Key][]string{ SaySomethingUtterances: []string{}, },
+	// Utterances: map[loca.Key][]string{ SaySomethingUtterances: []string{}, },
 }
