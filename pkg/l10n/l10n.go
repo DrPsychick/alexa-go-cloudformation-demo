@@ -2,8 +2,21 @@ package l10n
 
 import (
 	"fmt"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"math/rand"
 	"time"
+)
+
+// Default keys
+const (
+	KeySkillName                Key = "SKILL_Name"
+	KeySkillDescription         Key = "SKILL_Description"
+	KeySkillSummary             Key = "SKILL_Summary"
+	KeySkillExamplePhrases      Key = "SKILL_ExamplePhrases"
+	KeySkillKeywords            Key = "SKILL_Keywords"
+	KeySkillSmallIconURI        Key = "SKILL_SmallIconURI"
+	KeySkillLargeIconURI        Key = "SKILL_LargeIconURI"
+	KeySkillTestingInstructions Key = "SKILL_TestingInstructions"
 )
 
 func init() {
@@ -28,6 +41,7 @@ type Locale struct {
 	Fallback        *Locale // points to fallback (or nil)
 	TextSnippets    Snippets
 	IntentResponses IntentResponses
+	Countries       []alexa.Country
 	// Utterances
 }
 
@@ -119,6 +133,10 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 	return nil
 }
 
+func (r *Registry) GetLocales() map[string]*Locale {
+	return r.locales
+}
+
 // Resolve returns the Locale matching the given name or an error
 func (r Registry) Resolve(name string) (*Locale, error) {
 	l, ok := r.locales[name]
@@ -141,6 +159,10 @@ func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
 	return fmt.Sprintf(s[k][r], args...), nil
 }
 
+func (s Snippets) GetAll(k Key, args ...interface{}) ([]string, error) {
+	return s[k], nil
+}
+
 // GetSnippet returns the translation for the selected language (and follows fallback chain)
 func (l Locale) GetSnippet(k Key, args ...interface{}) string {
 	r, err := l.TextSnippets.Get(k, args...)
@@ -152,4 +174,12 @@ func (l Locale) GetSnippet(k Key, args ...interface{}) string {
 	}
 
 	return string(k)
+}
+
+func (l Locale) GetAllSnippets(k Key, args ...interface{}) []string {
+	r, err := l.TextSnippets.GetAll(k)
+	if err != nil {
+		return []string{string(k)}
+	}
+	return r
 }

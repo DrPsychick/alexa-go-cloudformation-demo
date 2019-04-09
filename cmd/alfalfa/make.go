@@ -147,18 +147,33 @@ func runMake(c *cli.Context) error {
 		}
 	}
 
+	createSkill(*l10n.DefaultRegistry)
 	return nil
 }
 
 // createSkill
-func createSkill(r l10n.Registry) (gen.Skill, error) {
+func createSkill(r l10n.Registry) (*gen.Skill, error) {
 	skill := gen.NewSkill()
 	skill.SetCategory(alexa.CategoryBusinessAndFinance)
 	skill.AddIntentString("DemoIntent")
 
-	//for _, l := range r.GetLocales() {
-	//	skill.AddModel(createModel(l))
-	//}
+	for n, l := range r.GetLocales() {
+		skill.AddLocale(n, l)
+		for _, c := range l.Countries {
+			skill.AddCountry(c)
+		}
+	}
+
+	// How to avoid this? Define a default (english) locale?
+	d, _ := r.Resolve("en-US")
+	skill.SetTestingInstructions(d.GetSnippet(l10n.KeySkillTestingInstructions))
+
+	s := skill.Build()
+	res, _ := json.Marshal(s)
+
+	// Print for demonstration
+	fmt.Printf("%s\n", string(res))
+	return skill, nil
 }
 
 //
