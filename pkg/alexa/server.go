@@ -30,13 +30,16 @@ type Server struct {
 
 // Invoke calls the handler, and serializes the response.
 func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
-	req := &Request{}
+	req := &RequestEnvelope{}
 	if err := jsoniter.Unmarshal(payload, req); err != nil {
 		return nil, err
 	}
 
+	req.Request.context = req.Context
+	req.Request.session = req.Session
+
 	builder := &ResponseBuilder{}
-	s.Handler.Serve(builder, req)
+	s.Handler.Serve(builder, req.Request)
 
 	return jsoniter.Marshal(builder.Build())
 
@@ -80,17 +83,17 @@ func (m *ServeMux) Handler(r *Request) (Handler, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	if h, ok := m.types[r.Body.Type]; ok {
+	if h, ok := m.types[r.Type]; ok {
 		return h, nil
 	}
 
-	if r.Body.Type != TypeIntentRequest {
-		return nil, fmt.Errorf("server: unknown intent type %s", r.Body.Type)
+	if r.Type != TypeIntentRequest {
+		return nil, fmt.Errorf("server: unknown intent type %s", r.Type)
 	}
 
-	h, ok := m.intents[r.Body.Intent.Name]
+	h, ok := m.intents[r.Intent.Name]
 	if !ok {
-		return nil, fmt.Errorf("server: unknown intent %s", r.Body.Intent.Name)
+		return nil, fmt.Errorf("server: unknown intent %s", r.Intent.Name)
 	}
 
 	return h, nil

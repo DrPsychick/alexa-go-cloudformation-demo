@@ -14,12 +14,12 @@ func NewServer(app Application) alexa.Handler {
 	return nil
 }
 
-type Handler func(alexa.Request) (alexa.ResponseEnvelope, error)
+type Handler func(alexa.RequestEnvelope) (alexa.ResponseEnvelope, error)
 
 // HandleRequest is the lambda hander
 //func HandleRequest(app Application) Handler {
-//	return func(r alexa.Request) (alexa.ResponseEnvelope, error) {
-//		name := r.Body.Intent.Name
+//	return func(r alexa.RequestEnvelope) (alexa.ResponseEnvelope, error) {
+//		name := r.Request.Intent.Name
 //
 //		switch name {
 //		case "hello":
@@ -34,10 +34,10 @@ type Handler func(alexa.Request) (alexa.ResponseEnvelope, error)
 //	}
 //}
 //
-//func handleHello(request alexa.Request) alexa.ResponseEnvelope {
+//func handleHello(request alexa.RequestEnvelope) alexa.ResponseEnvelope {
 //	title := "Saying Hello"
 //	var text string
-//	switch request.Body.Locale {
+//	switch request.Request.Locale {
 //	case alexa.LocaleAustralianEnglish:
 //		text = "G'day mate!"
 //	case alexa.LocaleGerman:
