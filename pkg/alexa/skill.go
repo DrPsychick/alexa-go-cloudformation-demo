@@ -16,7 +16,7 @@ type Manifest struct {
 
 // Publishing information
 type Publishing struct {
-	Locales             map[Locale]LocaleDef `json:"locales"`
+	Locales             map[string]LocaleDef `json:"locales"`
 	Worldwide           bool                 `json:"isAvailableWorldwide"`
 	Category            Category             `json:"category"`
 	Countries           []Country            `json:"distributionCountries"`
@@ -208,7 +208,7 @@ type Custom struct {
 
 // FlashBriefing API endpoint
 type FlashBriefing struct {
-	Locales map[Locale]FlashBriefingLocaleDef `json:"locales"`
+	Locales map[string]FlashBriefingLocaleDef `json:"locales"`
 }
 
 // FlashBriefingLocaleDef is locale definition for flashBriefing API
@@ -343,7 +343,7 @@ type Privacy struct {
 	AllowsPurchases   bool                         `json:"allowsPurchases"`
 	UsesPersonalInfo  bool                         `json:"usesPersonalInfo"`
 	IsChildDirected   bool                         `json:"isChildDirected"`
-	Locales           *map[Locale]PrivacyLocaleDef `json:"locales,omitempty"`
+	Locales           *map[string]PrivacyLocaleDef `json:"locales,omitempty"`
 }
 
 // PrivacyLocaleDef defines

@@ -10,7 +10,7 @@ var minimalSkillDef = Skill{
 	Manifest: Manifest{
 		Version: "1.0",
 		Publishing: Publishing{
-			Locales: map[Locale]LocaleDef{
+			Locales: map[string]LocaleDef{
 				"de-DE": {
 					Name:        "name",
 					Description: "description",

@@ -47,7 +47,7 @@ func handleLaunch(b *alexa.ResponseBuilder, r *alexa.Request) {
 }
 
 func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.Request) {
-	intent := r.Body.Intent.Name
+	intent := r.Intent.Name
 	if intent == SSMLDemoIntent || intent == SaySomethingIntent || intent == DemoIntent {
 		b.WithCanFulfillIntent(&alexa.CanFulfillIntent{
 			CanFulfill: "YES",
@@ -71,7 +71,7 @@ func handleHelp(app Application) alexa.Handler {
 
 func handleStop(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(string(r.Body.Locale))
+		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
 			// TODO: maybe say something here
 			return
@@ -86,7 +86,7 @@ func handleStop(app Application) alexa.Handler {
 
 func handleSSMLResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(string(r.Body.Locale))
+		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
 			// TODO: maybe say something here
 			return
@@ -101,7 +101,7 @@ func handleSSMLResponse(app Application) alexa.Handler {
 
 func handleSaySomethingResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(string(r.Body.Locale))
+		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
 			return
 		}
