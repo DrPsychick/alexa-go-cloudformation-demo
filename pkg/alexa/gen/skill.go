@@ -6,16 +6,17 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 )
 
-// SkillDefinition is a logical construct for the skill.
+// Skill is a logical construct for the skill.
 type Skill struct {
 	Category            alexa.Category
-	Locales             map[alexa.Locale]LocaleDef
+	DefaultLocale       string
+	Locales             map[string]LocaleDef
 	Intents             []Intent
-	Models              []Model
+	Models              map[string]Model
 	Types               []Type
 	Countries           []alexa.Country
 	TestingInstructions string
-	Privacy             []bool // TODO
+	Privacy             Privacy
 }
 
 // NewSkill returns a new basic skill
@@ -35,11 +36,19 @@ func (s *Skill) SetTestingInstructions(instructions string) {
 	s.TestingInstructions = instructions
 }
 
+func (s *Skill) SetDefaultLocale(locale string) {
+	s.DefaultLocale = locale
+}
+
 func (s *Skill) AddLocale(l string, trans *l10n.Locale) {
 	if nil == s.Locales {
-		s.Locales = make(map[alexa.Locale]LocaleDef)
+		s.Locales = make(map[string]LocaleDef)
+		// ensure that a default is set
+		if s.DefaultLocale == "" {
+			s.DefaultLocale = l
+		}
 	}
-	s.Locales[alexa.Locale(l)] = LocaleDef{Translations: trans}
+	s.Locales[l] = LocaleDef{Translations: trans}
 }
 
 func (s *Skill) AddIntent(intent Intent) {
@@ -48,10 +57,6 @@ func (s *Skill) AddIntent(intent Intent) {
 
 func (s *Skill) AddIntentString(intent string) {
 	s.Intents = append(s.Intents, NewIntent(intent))
-}
-
-func (s *Skill) AddModel(model Model) {
-	s.Models = append(s.Models, model)
 }
 
 func (s *Skill) AddType(t Type) {
@@ -67,26 +72,99 @@ func (s *Skill) AddCountry(c alexa.Country) {
 	s.Countries = append(s.Countries, c)
 }
 
-// Build renders the skill.json.
-func (s *Skill) Build() alexa.Skill {
+// Build builds an alexa.Skill object.
+func (s *Skill) Build() *alexa.Skill {
 	skill := &alexa.Skill{
 		Manifest: alexa.Manifest{
 			Version: "1.0",
 		},
 	}
+
+	// default is always set if at least one locale was defined.
+	dl, _ := s.Locales[s.DefaultLocale]
+
 	skill.Manifest.Publishing.Category = s.Category
-
-	for _, l := range s.Locales {
-		l.Build(skill)
-	}
-
 	// TODO: ensure unique occurance
 	skill.Manifest.Publishing.Countries = s.Countries
-	skill.Manifest.Publishing.TestingInstructions = s.TestingInstructions
 
-	return *skill
+	if s.TestingInstructions != "" {
+		skill.Manifest.Publishing.TestingInstructions = s.TestingInstructions
+	} else {
+		skill.Manifest.Publishing.TestingInstructions = dl.Translations.GetSnippet(l10n.KeySkillTestingInstructions)
+	}
+
+	// Permissions are required.
+	skill.Manifest.Permissions = &[]alexa.Permission{}
+
+	// TODO can we make this nicer?
+	// PrivacyAndCompliance is required.
+	skill.Manifest.Privacy = &alexa.Privacy{}
+	if s.Privacy.IsExportCompliant {
+		skill.Manifest.Privacy.IsExportCompliant = true
+	}
+	if s.Privacy.ContainsAds {
+		skill.Manifest.Privacy.ContainsAds = true
+	}
+
+	// Add elements for every locale.
+	for _, l := range s.Locales {
+		l.BuildLocale(skill)
+		l.BuildPrivacyLocale(skill)
+	}
+
+	return skill
 }
 
+// BuildModels builds an alexa.Model for each locale
+func (s *Skill) BuildModels() map[string]*alexa.Model {
+	models := make(map[string]*alexa.Model)
+	for _, l := range s.Locales {
+		models[l.Translations.Name] = s.BuildModel(&l)
+	}
+	return models
+}
+
+// BuildModel builds an alexa.Model for the given locale
+func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
+	model := &alexa.Model{
+		Model: alexa.InteractionModel{
+			Language: alexa.LanguageModel{
+				Invocation: locale.Translations.GetSnippet(l10n.KeySkillInvocation),
+			},
+		},
+	}
+
+	// add Intents
+	for _, i := range s.Intents {
+		mi := alexa.ModelIntent{
+			Name:    i.Name,
+			Samples: []string{},
+		}
+		if sam := locale.Translations.GetIntent(l10n.Key(i.Name)).Samples; len(sam) > 0 {
+			mi.Samples = sam
+		}
+		model.Model.Language.Intents = append(model.Model.Language.Intents, mi)
+	}
+
+	// add Types and Values
+	for _, t := range s.Types {
+		mt := alexa.ModelType{
+			Name: string(t),
+		}
+
+		for _, t := range locale.Translations.GetAllSnippets(l10n.Key(t + "Values")) {
+			mt.Values = append(mt.Values, alexa.TypeValue{
+				Name: alexa.NameValue{Value: t},
+			})
+		}
+		model.Model.Language.Types = append(model.Model.Language.Types, mt)
+	}
+
+	return model
+
+}
+
+// ValidateTypes ensures that Intents only use Types defined in the Skill
 func (s *Skill) ValidateTypes() error {
 	var tm = make(map[string]bool)
 	for _, t := range s.Types {
@@ -105,15 +183,18 @@ func (s *Skill) ValidateTypes() error {
 	return nil
 }
 
+// TODO: remove this indirection, use l10n.Locale directly
+// LocaleDef
 type LocaleDef struct {
 	Translations *l10n.Locale
 }
 
-func (l *LocaleDef) Build(s *alexa.Skill) {
-	if s.Manifest.Publishing.Locales == nil {
-		s.Manifest.Publishing.Locales = make(map[alexa.Locale]alexa.LocaleDef)
+// BuildLocale adds locale information to the alexa.Skill.
+func (l *LocaleDef) BuildLocale(skill *alexa.Skill) {
+	if skill.Manifest.Publishing.Locales == nil {
+		skill.Manifest.Publishing.Locales = make(map[string]alexa.LocaleDef)
 	}
-	s.Manifest.Publishing.Locales[alexa.Locale(l.Translations.Name)] = alexa.LocaleDef{
+	skill.Manifest.Publishing.Locales[l.Translations.Name] = alexa.LocaleDef{
 		Name:         l.Translations.GetSnippet(l10n.KeySkillName),
 		Description:  l.Translations.GetSnippet(l10n.KeySkillDescription),
 		Summary:      l.Translations.GetSnippet(l10n.KeySkillSummary),
@@ -124,11 +205,27 @@ func (l *LocaleDef) Build(s *alexa.Skill) {
 	}
 }
 
+// BuildPrivacyLocale adds PrivacyAndCompliance locale information to the alexa.Skill
+func (l *LocaleDef) BuildPrivacyLocale(skill *alexa.Skill) {
+	if skill.Manifest.Privacy == nil { // TODO not needed, can we rely on it? (see above)
+		skill.Manifest.Privacy = &alexa.Privacy{}
+	}
+	if skill.Manifest.Privacy.Locales == nil {
+		skill.Manifest.Privacy.Locales = make(map[string]alexa.PrivacyLocaleDef)
+	}
+	skill.Manifest.Privacy.Locales[l.Translations.Name] = alexa.PrivacyLocaleDef{
+		PrivacyPolicyURL: l.Translations.GetSnippet(l10n.KeySkillPrivacyPolicyURL),
+		TermsOfUse:       l.Translations.GetSnippet(l10n.KeySkillTermsOfUse),
+	}
+}
+
+// Intent
 type Intent struct {
 	Name  string
 	Slots []Slot
 }
 
+// NewIntent returns a new intent with the given name
 func NewIntent(name string) Intent {
 	return Intent{Name: name}
 }
@@ -137,6 +234,7 @@ func (i *Intent) AddSlot(slot Slot) {
 	i.Slots = append(i.Slots, slot)
 }
 
+// Slot
 type Slot struct {
 	Name string // specific to intent
 	Type Type   // global for skill
@@ -146,11 +244,33 @@ func NewSlot(name string, t Type) Slot {
 	return Slot{Name: name, Type: t}
 }
 
+// TODO: overkill? just use 'string'?
+// Type
 type Type string
 
 func NewType(t string) Type {
 	return Type(t)
 }
 
+// TODO: what for?
+// Model
 type Model struct {
 }
+
+// Privacy
+type Privacy struct {
+	IsExportCompliant bool
+	ContainsAds       bool
+	AllowsPurchases   bool
+	UsesPersonalInfo  bool
+	IsChildDirected   bool
+}
+
+func (p *Privacy) SetIsExportCompliant(b bool) {
+	p.IsExportCompliant = b
+}
+func (p *Privacy) SetContainsAds(b bool) {
+	p.ContainsAds = b
+}
+
+// TODO implement other functions

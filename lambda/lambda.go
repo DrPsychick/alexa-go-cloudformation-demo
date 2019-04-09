@@ -17,6 +17,7 @@ type Application interface {
 	Stop(l *l10n.Locale) (string, string, string)
 	SSMLDemo(l *l10n.Locale) (string, string, string)
 	SaySomething(l *l10n.Locale) (string, string, string)
+	Demo(l *l10n.Locale) (string, string, string)
 }
 
 func NewMux(app Application) alexa.Handler {
@@ -31,7 +32,7 @@ func NewMux(app Application) alexa.Handler {
 
 	mux.HandleIntent(SSMLDemoIntent, handleSSMLResponse(app))
 	mux.HandleIntent(SaySomethingIntent, handleSaySomethingResponse(app))
-	mux.HandleIntentFunc(DemoIntent, handleDemo)
+	mux.HandleIntent(DemoIntent, handleDemo(app))
 
 	return mux
 }
@@ -113,14 +114,16 @@ func handleSaySomethingResponse(app Application) alexa.Handler {
 	})
 }
 
-func handleDemo(b *alexa.ResponseBuilder, r *alexa.Request) {
-	title := "Test"
-	text := "Pace ist geil!"
-	ssml := `<speak>
-		<voice name="Kendra"><lang xml:lang="en-US"><emphasis level="strong">pace</emphasis></lang></voice>
-		<voice name="Marlene">iss <emphasis level="strong">geil!</emphasis></voice>
-	</speak>`
+func handleDemo(app Application) alexa.Handler {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		l, err := l10n.Resolve(r.Locale)
+		if err != nil {
+			return
+		}
 
-	b.WithSpeech(ssml).
-		WithSimpleCard(title, text)
+		title, text, ssmlText := app.Demo(l)
+
+		b.WithSpeech(ssmlText).
+			WithSimpleCard(title, text)
+	})
 }

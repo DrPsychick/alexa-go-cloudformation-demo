@@ -11,11 +11,12 @@ const (
 	ByeBye        l10n.Key = "byebye"
 	StopTitle     l10n.Key = "stop_title"
 	Stop          l10n.Key = "stop"
-	// SaySomething Intent
-	SaySomethingTitle  l10n.Key = "saysomething_title"
-	SaySomething       l10n.Key = "saysomething"
-	SaySomethingSSML   l10n.Key = "saysomething_ssml"
-	SaySomethingIntent l10n.Key = "SaySomethingIntent"
+	// Intents
+	SaySomething l10n.Key = "SaySomething"
+	DemoIntent   l10n.Key = "DemoIntent"
+	// Types
+	TypeBeerCountries       l10n.Key = "BEER_Countries"
+	TypeBeerCountriesValues l10n.Key = "BEER_CountriesValues"
 )
 
 func init() {

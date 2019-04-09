@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
@@ -42,7 +43,7 @@ var skill = alexa.Skill{
 		Permissions: &[]alexa.Permission{},
 		Privacy: &alexa.Privacy{
 			IsExportCompliant: true,
-			//Locales: &map[alexa.Locale]alexa.PrivacyLocaleDef{
+			//Locales: map[alexa.Locale]alexa.PrivacyLocaleDef{
 			//	"de-DE": {
 			//
 			//	},
@@ -134,7 +135,6 @@ func runMake(c *cli.Context) error {
 		if err := ioutil.WriteFile("./alexa/skill.json", res, 0644); err != nil {
 			log.Fatal(err)
 		}
-
 	}
 
 	if c.Bool("models") {
@@ -155,7 +155,9 @@ func runMake(c *cli.Context) error {
 func createSkill(r l10n.Registry) (*gen.Skill, error) {
 	skill := gen.NewSkill()
 	skill.SetCategory(alexa.CategoryBusinessAndFinance)
-	skill.AddIntentString("DemoIntent")
+	skill.SetDefaultLocale(r.GetDefaultLocale())
+	skill.AddIntentString(string(loca.DemoIntent))
+	skill.AddIntentString(string(loca.SaySomething))
 
 	for n, l := range r.GetLocales() {
 		skill.AddLocale(n, l)
@@ -164,20 +166,20 @@ func createSkill(r l10n.Registry) (*gen.Skill, error) {
 		}
 	}
 
-	// How to avoid this? Define a default (english) locale?
-	d, _ := r.Resolve("en-US")
-	skill.SetTestingInstructions(d.GetSnippet(l10n.KeySkillTestingInstructions))
+	skill.AddTypeString(string(loca.TypeBeerCountries))
+	skill.Privacy.SetIsExportCompliant(true)
+	//skill.Privacy.SetContainsAds(false)
 
+	// TODO move elsewhere
 	s := skill.Build()
 	res, _ := json.Marshal(s)
-
-	// Print for demonstration
 	fmt.Printf("%s\n", string(res))
+
+	ms := skill.BuildModels()
+	for _, m := range ms {
+		res, _ := json.Marshal(m)
+		fmt.Printf("%s\n", string(res))
+	}
+
 	return skill, nil
 }
-
-//
-//func createModel(l *l10n.Locale) (gen.Model, error) {
-//	// ...
-//	alexa.NewModelDefinition()
-//}

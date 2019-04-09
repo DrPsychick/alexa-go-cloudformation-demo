@@ -33,6 +33,7 @@ var minimalSkillDef = Skill{
 		Permissions: &[]Permission{},
 		Privacy: &Privacy{
 			IsExportCompliant: true,
+			Locales:           map[string]PrivacyLocaleDef{},
 		},
 	},
 }

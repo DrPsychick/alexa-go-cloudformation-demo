@@ -37,12 +37,17 @@ func (a *Application) Stop(l *l10n.Locale) (string, string, string) {
 
 // SimpleResponse handles simple title + text response
 func (a *Application) SaySomething(l *l10n.Locale) (string, string, string) {
-	return l.GetSnippet(loca.SaySomethingTitle), l.GetSnippet(loca.SaySomething), l.GetSnippet(loca.SaySomethingSSML)
+	return l.GetSingleIntentResponse(loca.SaySomething)
 }
 
 // SSMLDemo is the intent to demonstrate SSML output with Alexa
 func (a *Application) SSMLDemo(l *l10n.Locale) (string, string, string) {
 	return l.GetSnippet(loca.GreetingTitle), l.GetSnippet(loca.Greeting), l.GetSnippet(loca.GreetingSSML)
+}
+
+// Demo is a simple demo response.
+func (a *Application) Demo(l *l10n.Locale) (string, string, string) {
+	return l.GetSingleIntentResponse(loca.DemoIntent)
 }
 
 // Logger returns the application logger

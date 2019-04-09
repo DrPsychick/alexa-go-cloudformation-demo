@@ -17,6 +17,9 @@ const (
 	KeySkillSmallIconURI        Key = "SKILL_SmallIconURI"
 	KeySkillLargeIconURI        Key = "SKILL_LargeIconURI"
 	KeySkillTestingInstructions Key = "SKILL_TestingInstructions"
+	KeySkillInvocation          Key = "SKILL_Invocation"
+	KeySkillPrivacyPolicyURL    Key = "SKILL_PrivacyPolicyURL"
+	KeySkillTermsOfUse          Key = "SKILL_TermsOfUse"
 )
 
 func init() {
@@ -25,7 +28,7 @@ func init() {
 
 // Registry is the Locale registry
 type Registry struct {
-	DefaultLocale string
+	defaultLocale string
 	locales       map[string]*Locale
 }
 
@@ -37,11 +40,11 @@ var DefaultRegistry = &Registry{
 // Locale is a representation of Keys in a specific language (and can have a fallback Locale)
 type Locale struct {
 	Name            string  // de-DE, en-US, ...
-	Invocation      string  // "mein skill"
+	Invocation      string  // "my skill"
 	Fallback        *Locale // points to fallback (or nil)
 	TextSnippets    Snippets
 	IntentResponses IntentResponses
-	Countries       []alexa.Country
+	Countries       []alexa.Country // countries associated with this locale
 	// Utterances
 }
 
@@ -55,9 +58,10 @@ type Snippets map[Key][]string
 type IntentResponses map[Key]IntentResponse
 
 type IntentResponse struct {
-	Title []string
-	Text  []string
-	SSML  []string
+	Samples []string
+	Title   []string
+	Text    []string
+	SSML    []string
 }
 
 // RegisterFunc defines the functions to be passed to Register
@@ -69,13 +73,14 @@ type Config struct {
 	FallbackFor   string
 }
 
-//// AsDefault sets the given Locale the default
-//func AsDefault() RegisterFunc {
-//	return func(cfg *Config) {
-//		cfg.DefaultLocale = true
-//	}
-//}
+// AsDefault sets the given Locale the default
+func AsDefault() RegisterFunc {
+	return func(cfg *Config) {
+		cfg.DefaultLocale = true
+	}
+}
 
+// TODO Obsolete:
 // AsFallbackFor registers the locale as fallback Locale for the given Locale name
 func AsFallbackFor(name string) RegisterFunc {
 	return func(cfg *Config) {
@@ -123,16 +128,19 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 		r.locales[cfg.FallbackFor].Fallback = l
 	}
 
-	//// set locale as default
-	//if cfg.DefaultLocale {
-	//	r.DefaultLocale = l.Name
-	//}
+	// set locale as default
+	if cfg.DefaultLocale {
+		r.defaultLocale = l.Name
+	}
 
 	r.locales[l.Name] = l
 
 	return nil
 }
 
+func (r *Registry) GetDefaultLocale() string {
+	return r.defaultLocale
+}
 func (r *Registry) GetLocales() map[string]*Locale {
 	return r.locales
 }
@@ -160,13 +168,15 @@ func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
 }
 
 func (s Snippets) GetAll(k Key, args ...interface{}) ([]string, error) {
+	if len(s[k]) < 1 {
+		return []string{}, fmt.Errorf("key not defined %s", string(k))
+	}
 	return s[k], nil
 }
 
-// GetSnippet returns the translation for the selected language (and follows fallback chain)
+// GetSnippet returns the translation and follows fallback chain
 func (l Locale) GetSnippet(k Key, args ...interface{}) string {
-	r, err := l.TextSnippets.Get(k, args...)
-	if err == nil {
+	if r, err := l.TextSnippets.Get(k, args...); err == nil {
 		return r
 	}
 	if l.Fallback != nil {
@@ -176,10 +186,23 @@ func (l Locale) GetSnippet(k Key, args ...interface{}) string {
 	return string(k)
 }
 
+// GetAllSnippets returns all available translations and follows fallback chain
 func (l Locale) GetAllSnippets(k Key, args ...interface{}) []string {
-	r, err := l.TextSnippets.GetAll(k)
-	if err != nil {
-		return []string{string(k)}
+	if r, err := l.TextSnippets.GetAll(k); err == nil {
+		return r
 	}
-	return r
+	if l.Fallback != nil {
+		return l.Fallback.GetAllSnippets(k, args...)
+	}
+
+	return []string{string(k)}
+}
+
+func (l Locale) GetIntent(key Key) IntentResponse {
+	return l.IntentResponses[key]
+}
+
+func (l Locale) GetSingleIntentResponse(key Key) (string, string, string) {
+	r := rand.Intn(len(l.IntentResponses[key].Text))
+	return l.IntentResponses[key].Title[0], l.IntentResponses[key].Text[r], l.IntentResponses[key].SSML[r]
 }
