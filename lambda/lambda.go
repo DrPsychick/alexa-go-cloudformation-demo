@@ -29,9 +29,9 @@ func NewMux(app Application) alexa.Handler {
 	mux.HandleIntent(alexa.CancelIntent, handleStop(app))
 	mux.HandleIntent(alexa.StopIntent, handleStop(app))
 
-	mux.HandleIntent("SSMLDemoIntent", handleSSMLResponse(app))
-	mux.HandleIntent("SaySomething", handleSaySomethingResponse(app))
-	mux.HandleIntentFunc("DemoIntent", handleDemo)
+	mux.HandleIntent(SSMLDemoIntent, handleSSMLResponse(app))
+	mux.HandleIntent(SaySomethingIntent, handleSaySomethingResponse(app))
+	mux.HandleIntentFunc(DemoIntent, handleDemo)
 
 	return mux
 }
