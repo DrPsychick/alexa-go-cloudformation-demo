@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"log"
+
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"gopkg.in/urfave/cli.v1"
 )
 
 // Alexa skill definition (to generate skill.json)
@@ -14,7 +15,7 @@ var skill = alexa.Skill{
 	Manifest: alexa.Manifest{
 		Version: "1.0",
 		Publishing: alexa.Publishing{
-			Locales: map[alexa.Locale]alexa.LocaleDef{
+			Locales: map[string]alexa.LocaleDef{
 				"de-DE": {
 					Name:         "DemoSkill",
 					Description:  "Demo for the golang meetup",
@@ -49,7 +50,7 @@ var skill = alexa.Skill{
 	},
 }
 
-var models = map[alexa.Locale]alexa.Model{
+var models = map[string]alexa.Model{
 	"de-DE": modelGerman,
 }
 

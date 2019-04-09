@@ -113,18 +113,8 @@ type Request struct {
 	Reason      string      `json:"reason,omitempty"`
 	DialogState string      `json:"dialogState,omitempty"`
 
-	session *Session
-	context *Context
-}
-
-// Context returns the context for the request.
-func (r *Request) Context() *Context {
-	return r.context
-}
-
-// Context returns the session for the request.
-func (r *Request) Session() *Session {
-	return r.session
+	Context *Context `json:"-"`
+	Session *Session `json:"-"`
 }
 
 // Session represents the Alexa skill session
