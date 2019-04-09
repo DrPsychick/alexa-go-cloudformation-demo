@@ -2,29 +2,40 @@ package alexa
 
 // Locale constants.
 const (
-	// LocaleAmericanEnglish is the locale for American English
+	// LocaleAmericanEnglish is the locale for American English.
 	LocaleAmericanEnglish = "en-US"
-	// LocaleAustralianEnglish is the locale for Australian English
+
+	// LocaleAustralianEnglish is the locale for Australian English.
 	LocaleAustralianEnglish = "en-AU"
-	// LocaleBritishEnglish is the locale for UK English
+
+	// LocaleBritishEnglish is the locale for UK English.
 	LocaleBritishEnglish = "en-GB"
-	// LocaleCanadianEnglish is the locale for Canadian English
+
+	// LocaleCanadianEnglish is the locale for Canadian English.
 	LocaleCanadianEnglish = "en-CA"
-	// LocaleCanadianFrench is the locale for Canadian French
+
+	// LocaleCanadianFrench is the locale for Canadian French.
 	LocaleCanadianFrench = "fr-CA"
-	// LocaleFrenchFrench is the locale for French (France)
+
+	// LocaleFrenchFrench is the locale for French (France).
 	LocaleFrench = "fr-FR"
-	// LocaleGerman is the locale for standard dialect German (Germany)
+
+	// LocaleGerman is the locale for standard dialect German (Germany).
 	LocaleGerman = "de-DE"
-	//LocaleIndianEnglish is the locale for Indian English
+
+	//LocaleIndianEnglish is the locale for Indian English.
 	LocaleIndianEnglish = "en-IN"
-	// LocaleItalian is the locale for Italian (Italy)
+
+	// LocaleItalian is the locale for Italian (Italy).
 	LocaleItalian = "it-IT"
-	// LocaleJapanese is the locale for Japanese (Japan)
+
+	// LocaleJapanese is the locale for Japanese (Japan).
 	LocaleJapanese = "ja-JP"
-	// LocaleMexicanSpanish is the locale for Mexican Spanish
+
+	// LocaleMexicanSpanish is the locale for Mexican Spanish.
 	LocaleMexicanSpanish = "es-MX"
-	// LocaleSpanish is the  for Spanish (Spain)
+
+	// LocaleSpanish is the  for Spanish (Spain).
 	LocaleSpanish = "es-ES"
 )
 
@@ -32,23 +43,25 @@ const (
 type ConfirmationStatus string
 
 const (
-	// ConfirmationStatusNone is constant `NONE`
+	// ConfirmationStatusNone is constant `NONE`.
 	ConfirmationStatusNone = "NONE"
-	// ConfirmationStatusConfirmed is constant `CONFIRMED`
+
+	// ConfirmationStatusConfirmed is constant `CONFIRMED`.
 	ConfirmationStatusConfirmed = "CONFIRMED"
-	// ConfirmationStatusDenied is constant `DENIED`
+
+	// ConfirmationStatusDenied is constant `DENIED`.
 	ConfirmationStatusDenied = "DENIED"
 )
 
 // Built in intents.
 const (
-	//HelpIntent is the Alexa built-in Help Intent
+	//HelpIntent is the Alexa built-in Help Intent.
 	HelpIntent = "AMAZON.HelpIntent"
 
-	//CancelIntent is the Alexa built-in Cancel Intent
+	//CancelIntent is the Alexa built-in Cancel Intent.
 	CancelIntent = "AMAZON.CancelIntent"
 
-	//StopIntent is the Alexa built-in Stop Intent
+	//StopIntent is the Alexa built-in Stop Intent.
 	StopIntent = "AMAZON.StopIntent"
 )
 
@@ -59,7 +72,7 @@ type Intent struct {
 	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
 }
 
-// Slot is an Alexa skill slot
+// Slot is an Alexa skill slot.
 type Slot struct {
 	Name        string       `json:"name"`
 	Value       string       `json:"value"`
@@ -82,7 +95,7 @@ type Resolutions struct {
 	} `json:"resolutionsPerAuthority"`
 }
 
-// UpdatedIntent is to update the Intent
+// UpdatedIntent is to update the Intent.
 type UpdatedIntent struct {
 	Name               string                 `json:"name,omitempty"`
 	ConfirmationStatus ConfirmationStatus     `json:"confirmationStatus,omitempty"`
@@ -92,6 +105,7 @@ type UpdatedIntent struct {
 // RequestType represents JSON request `request.type`, see https://developer.amazon.com/docs/custom-skills/request-types-reference.html
 type RequestType string
 
+// Request type constants.
 const (
 	// TypeLaunchRequest
 	TypeLaunchRequest RequestType = "LaunchRequest"
@@ -117,7 +131,7 @@ type Request struct {
 	Session *Session `json:"-"`
 }
 
-// Session represents the Alexa skill session
+// Session represents the Alexa skill session.
 type Session struct {
 	New         bool   `json:"new"`
 	SessionID   string `json:"sessionId"`
@@ -131,7 +145,7 @@ type Session struct {
 	} `json:"user"`
 }
 
-// Context represents the Alexa skill request context
+// Context represents the Alexa skill request context.
 type Context struct {
 	System struct {
 		APIAccessToken string `json:"apiAccessToken"`
