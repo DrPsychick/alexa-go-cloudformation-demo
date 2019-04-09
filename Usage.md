@@ -24,7 +24,16 @@ type Locale = struct{
 	Name: string,
 	Invocation: string,
 	Description: string,
+	IntentResponses: []IntentResponse,
+	Prompts: map[Id]Prompt,
 	[...]
+}
+
+var skill = &Skill{
+	Intents: []Intent, // may reference slots
+	Types: []Type, // slot types
+	Dialog: Dialog, // tied with slot intent prompts
+	Prompts: []Prompt, // only list of Ids
 }
 
 var enUS = &Locale{
@@ -93,10 +102,15 @@ for l, _ := range locales {
 	}
 	
 	// InteractionModel -> Dialog (with "delegationStrategy")
-	dia := intModel.AddDialog(l.DelegationStrategy)
+	dia := intModel.AddDialog(skill.Dialog.DelegationStrategy)
 	
-	// Dialog -> []Intent
-	for i, _ = range l.Intents {
+	// Dialog -> []Intent : Intents are defined on the skill
+	// TODO: Dialog has no locale specific information?
+	for _, i = range l.Intents {
+		// only intents with slots
+		if len(i.Slots) == 0 {
+			continue
+		}
 		int := dia.AddIntent(i.Name, i.ConfirmationRequired)
 		
 		// Intent -> []Prompt
@@ -110,12 +124,12 @@ for l, _ := range locales {
         }
 	}
 	
-	// InteractionModel -> []Prompt
-	for p, _ = range l.Prompts {
+	// InteractionModel -> []Prompt : Prompts are defined on the skill
+	for _, p = range skill.Prompts {
 	    prompt := intModel.AddPrompt(p.Id)
 	    
-	    // Prompt -> []Variation
-	    for v, _ := range p.Variations {
+	    // Prompt -> []Variation : Variations are defined per locale
+	    for _, v := range l.Prompts[p.Id] {
 	    	prompt.AddVariation(v.Type, v.Value)
 	    }
 	}

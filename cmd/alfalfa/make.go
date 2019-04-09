@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
 	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"log"
@@ -147,3 +149,20 @@ func runMake(c *cli.Context) error {
 
 	return nil
 }
+
+// createSkill
+func createSkill(r l10n.Registry) (gen.Skill, error) {
+	skill := gen.NewSkill()
+	skill.SetCategory(alexa.CategoryBusinessAndFinance)
+	skill.AddIntentString("DemoIntent")
+
+	//for _, l := range r.GetLocales() {
+	//	skill.AddModel(createModel(l))
+	//}
+}
+
+//
+//func createModel(l *l10n.Locale) (gen.Model, error) {
+//	// ...
+//	alexa.NewModelDefinition()
+//}
