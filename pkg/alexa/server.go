@@ -35,8 +35,8 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	req.Request.context = req.Context
-	req.Request.session = req.Session
+	req.Request.Context = req.Context
+	req.Request.Session = req.Session
 
 	builder := &ResponseBuilder{}
 	s.Handler.Serve(builder, req.Request)
