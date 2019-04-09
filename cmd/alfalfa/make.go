@@ -16,7 +16,7 @@ var skill = alexa.Skill{
 	Manifest: alexa.Manifest{
 		Version: "1.0",
 		Publishing: alexa.Publishing{
-			Locales: map[alexa.Locale]alexa.LocaleDef{
+			Locales: map[string]alexa.LocaleDef{
 				"de-DE": {
 					Name:         "DemoSkill",
 					Description:  "Demo for the golang meetup",
@@ -51,7 +51,7 @@ var skill = alexa.Skill{
 	},
 }
 
-var models = map[alexa.Locale]alexa.Model{
+var models = map[string]alexa.Model{
 	"de-DE": modelGerman,
 }
 

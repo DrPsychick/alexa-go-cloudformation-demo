@@ -12,15 +12,15 @@ import (
 
 // Handler represents an alexa request handler.
 type Handler interface {
-	Serve(*Request) Response
+	Serve(*ResponseBuilder, *Request)
 }
 
 // HandlerFunc is an adapter allowing a function to be used as a handler.
-type HandlerFunc func(*Request) Response
+type HandlerFunc func(*ResponseBuilder, *Request)
 
 // Serve serves the request.
-func (fn HandlerFunc) Serve(r *Request) Response {
-	return fn(r)
+func (fn HandlerFunc) Serve(b *ResponseBuilder, r *Request) {
+	fn(b, r)
 }
 
 // A Server defines parameters for running an Alexa server.
@@ -30,17 +30,18 @@ type Server struct {
 
 // Invoke calls the handler, and serializes the response.
 func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
-	req := &Request{}
+	req := &RequestEnvelope{}
 	if err := jsoniter.Unmarshal(payload, req); err != nil {
 		return nil, err
 	}
 
-	resp := s.Handler.Serve(req)
-	if resp.Error != nil {
-		return nil, resp.Error
-	}
+	req.Request.Context = req.Context
+	req.Request.Session = req.Session
 
-	return jsoniter.Marshal(resp)
+	builder := &ResponseBuilder{}
+	s.Handler.Serve(builder, req.Request)
+
+	return jsoniter.Marshal(builder.Build())
 
 }
 
@@ -82,17 +83,17 @@ func (m *ServeMux) Handler(r *Request) (Handler, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	if h, ok := m.types[r.Body.Type]; ok {
+	if h, ok := m.types[r.Type]; ok {
 		return h, nil
 	}
 
-	if r.Body.Type != TypeIntentRequest {
-		return nil, fmt.Errorf("server: unknown intent type %s", r.Body.Type)
+	if r.Type != TypeIntentRequest {
+		return nil, fmt.Errorf("server: unknown intent type %s", r.Type)
 	}
 
-	h, ok := m.intents[r.Body.Intent.Name]
+	h, ok := m.intents[r.Intent.Name]
 	if !ok {
-		return nil, fmt.Errorf("server: unknown intent %s", r.Body.Intent.Name)
+		return nil, fmt.Errorf("server: unknown intent %s", r.Intent.Name)
 	}
 
 	return h, nil
@@ -142,13 +143,14 @@ func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 }
 
 // Serve serves the matched handler.
-func (m *ServeMux) Serve(r *Request) Response {
+func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
 	h, err := m.Handler(r)
 	if err != nil {
-		return NewErrorResponse(err)
+		// TODO: Fallback handler
+		return
 	}
 
-	return h.Serve(r)
+	h.Serve(b, r)
 }
 
 var DefaultServeMux = NewServerMux()
