@@ -12,15 +12,15 @@ import (
 
 // Handler represents an alexa request handler.
 type Handler interface {
-	Serve(*Request) Response
+	Serve(*ResponseBuilder, *Request)
 }
 
 // HandlerFunc is an adapter allowing a function to be used as a handler.
-type HandlerFunc func(*Request) Response
+type HandlerFunc func(*ResponseBuilder, *Request)
 
 // Serve serves the request.
-func (fn HandlerFunc) Serve(r *Request) Response {
-	return fn(r)
+func (fn HandlerFunc) Serve(b *ResponseBuilder, r *Request) {
+	fn(b, r)
 }
 
 // A Server defines parameters for running an Alexa server.
@@ -35,12 +35,10 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	resp := s.Handler.Serve(req)
-	if resp.Error != nil {
-		return nil, resp.Error
-	}
+	builder := &ResponseBuilder{}
+	s.Handler.Serve(builder, req)
 
-	return jsoniter.Marshal(resp)
+	return jsoniter.Marshal(builder.Build())
 
 }
 
@@ -142,13 +140,14 @@ func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 }
 
 // Serve serves the matched handler.
-func (m *ServeMux) Serve(r *Request) Response {
+func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
 	h, err := m.Handler(r)
 	if err != nil {
-		return NewErrorResponse(err)
+		// TODO: Fallback handler
+		return
 	}
 
-	return h.Serve(r)
+	h.Serve(b, r)
 }
 
 var DefaultServeMux = NewServerMux()

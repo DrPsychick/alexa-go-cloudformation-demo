@@ -16,11 +16,11 @@ func NewServer(app Application) alexa.Handler {
 	return nil
 }
 
-type Handler func(alexa.Request) (alexa.Response, error)
+type Handler func(alexa.Request) (alexa.ResponseEnvelope, error)
 
 // HandleRequest is the lambda hander
 func HandleRequest(app Application) Handler {
-	return func(r alexa.Request) (alexa.Response, error) {
+	return func(r alexa.Request) (alexa.ResponseEnvelope, error) {
 		name := r.Body.Intent.Name
 
 		switch name {
@@ -32,11 +32,11 @@ func HandleRequest(app Application) Handler {
 			return alexa.NewSimpleResponse(title, text), nil
 		}
 
-		return alexa.Response{}, fmt.Errorf("server: unknown intent %s", name)
+		return alexa.ResponseEnvelope{}, fmt.Errorf("server: unknown intent %s", name)
 	}
 }
 
-func handleHello(request alexa.Request) alexa.Response {
+func handleHello(request alexa.Request) alexa.ResponseEnvelope {
 	title := "Saying Hello"
 	var text string
 	switch request.Body.Locale {

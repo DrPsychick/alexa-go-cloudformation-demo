@@ -1,103 +1,191 @@
 package alexa
 
-// Payload of response
-type Payload struct {
-	Type    string `json:"type,omitempty"`
-	Title   string `json:"title,omitempty"`
-	Text    string `json:"text,omitempty"`
-	SSML    string `json:"ssml,omitempty"`
-	Content string `json:"content,omitempty"`
-	Image   Image  `json:"image,omitempty"`
+import "strings"
+
+// Stream represents a response directive audio item stream.
+type Stream struct {
+	Token                string `json:"token,omitempty"`
+	URL                  string `json:"url,omitempty"`
+	OffsetInMilliseconds int    `json:"offsetInMilliseconds,omitempty"`
 }
 
-// Image definition
+// AudioItem represents a response directive audio item.
+type AudioItem struct {
+	Stream Stream `json:"stream,omitempty"`
+}
+
+// DirectiveType represents various Directive Types
+type DirectiveType string
+
+// Directive types.
+const (
+	DirectiveTypeDialogDelegate      DirectiveType = "Dialog.Delegate"
+	DirectiveTypeDialogElicitSlot    DirectiveType = "Dialog.ElicitSlot"
+	DirectiveTypeDialogConfirmSlot   DirectiveType = "Dialog.ConfirmSlot"
+	DirectiveTypeDialogConfirmIntent DirectiveType = "Dialog.ConfirmIntent"
+)
+
+// Directive represents a response directive.
+type Directive struct {
+	Type          DirectiveType  `json:"type,omitempty"`
+	SlotToElicit  string         `json:"slotToElicit,omitempty"`
+	UpdatedIntent *UpdatedIntent `json:"UpdatedIntent,omitempty"`
+	PlayBehavior  string         `json:"playBehavior,omitempty"`
+	AudioItem     AudioItem      `json:"audioItem,omitempty"`
+}
+
+// OutputSpeech represents a speech response.
+type OutputSpeech struct {
+	Type         string `json:"type"`
+	Text         string `json:"text,omitempty"`
+	SSML         string `json:"ssml,omitempty"`
+	PlayBehavior string `json:"playBehavior,omitempty"`
+}
+
+// Card presents a card response.
+type Card struct {
+	Type    string `json:"type"`
+	Title   string `json:"title,omitempty"`
+	Text    string `json:"text,omitempty"`
+	Content string `json:"content,omitempty"`
+	Image   *Image `json:"image,omitempty"`
+}
+
+// Image represents a card image.
 type Image struct {
 	SmallImageURL string `json:"smallImageUrl,omitempty"`
 	LargeImageURL string `json:"largeImageUrl,omitempty"`
 }
 
-// Reprompt
+// Reprompt represents a reprompt response.
 type Reprompt struct {
-	OutputSpeech Payload `json:"outputSpeech,omitempty"`
+	OutputSpeech *OutputSpeech `json:"outputSpeech,omitempty"`
 }
 
-// Response is the response back to the response speech service
-type Response struct {
+// CanFulfillSlot represents a slots fulfillment.
+type CanFulfillSlot struct {
+	CanUnderstand string `json:"canUnderstand"`
+	CanFulfill    string `json:"canFulfill"`
+}
+
+// CanFulfillIntent represents a response indicating if an intent
+// can be fulfilled.
+type CanFulfillIntent struct {
+	CanFulfill string                    `json:"canFulfill"`
+	Slots      map[string]CanFulfillSlot `json:"slots"`
+}
+
+// ResponseEnvelope represents the wrapper for a response.
+type ResponseEnvelope struct {
 	Version           string                 `json:"version"`
 	SessionAttributes map[string]interface{} `json:"sessionAttributes,omitempty"`
-	Body              ResponseBody           `json:"response"`
-
-	Error error `json:"-"`
+	Response          Response               `json:"response"`
 }
 
-// ResponseBody contains Speech Card etc.
-type ResponseBody struct {
-	OutputSpeech     *Payload     `json:"outputSpeech,omitempty"`
-	Card             *Payload     `json:"card,omitempty"`
-	Reprompt         *Reprompt    `json:"reprompt,omitempty"`
-	Directives       []Directives `json:"directives,omitempty"`
-	ShouldEndSession bool         `json:"shouldEndSession"`
+// Response represents the response.
+type Response struct {
+	OutputSpeech     *OutputSpeech     `json:"outputSpeech,omitempty"`
+	Card             *Card             `json:"card,omitempty"`
+	Reprompt         *Reprompt         `json:"reprompt,omitempty"`
+	Directives       []*Directive      `json:"directives,omitempty"`
+	ShouldEndSession bool              `json:"shouldEndSession"`
+	CanFulfillIntent *CanFulfillIntent `json:"canFulfillIntent"`
 }
 
-// NewEmptyResponse builds an empty response.
-func NewEmptyResponse() Response {
-	return Response{Version: "1.0"}
+// ResponseBuilder builds a response.
+type ResponseBuilder struct {
+	speech           *OutputSpeech
+	card             *Card
+	reprompt         *OutputSpeech
+	directives       []*Directive
+	shouldEndSession bool
+	sessionAttr      map[string]interface{}
+	canFulfillIntent *CanFulfillIntent
 }
 
-// NewTerminateResponse builds an empty response that terminates the session.
-func NewTerminateResponse() Response {
-	r := NewEmptyResponse()
-	r.Body.ShouldEndSession = true
+// WithSpeech sets the output speech on the response.
+//
+// If the text contains SSML speak tags, it will be set as SSML speech,
+// otherwise it will be set as plain text speech.
+func (b *ResponseBuilder) WithSpeech(text string) *ResponseBuilder {
+	if strings.HasPrefix(text, "<speak>") && strings.HasSuffix(text, "</speak>") {
+		b.speech = &OutputSpeech{
+			Type: "SSML",
+			SSML: text,
+		}
+		return b
+	}
 
-	return r
-}
-
-// NewSpeechResponse builds a response with the given speech.
-func NewSpeechResponse(speech string) Response {
-	r := NewEmptyResponse()
-	r.Body.ShouldEndSession = true
-	r.Body.OutputSpeech = &Payload{
+	b.speech = &OutputSpeech{
 		Type: "PlainText",
-		Text: speech,
+		Text: text,
+	}
+	return b
+}
+
+// WithSimpleCard sets a simple card on the response.
+func (b *ResponseBuilder) WithSimpleCard(title, text string) *ResponseBuilder {
+	b.card = &Card{
+		Type:    "Simple",
+		Title:   title,
+		Content: text,
 	}
 
-	return r
+	return b
 }
 
-// NewDialogDelegateResponse builds a simple response to advance to the next step.
-func NewDialogDelegateResponse() Response {
-	r := NewEmptyResponse()
-	r.Body.ShouldEndSession = false
-	r.Body.Directives = append(r.Body.Directives, Directives{Type: DirectiveTypeDialogDelegate})
+// WithStandardCard sets a standard card on the response.
+func (b *ResponseBuilder) WithStandardCard(title, text string, image *Image) *ResponseBuilder {
+	b.card = &Card{
+		Type:  "Standard",
+		Title: title,
+		Text:  text,
+		Image: image,
+	}
 
-	return r
+	return b
 }
 
-// NewSimpleResponse builds a response with the given title and text.
-func NewSimpleResponse(title string, text string) Response {
-	r := Response{
-		Version: "1.0",
-		Body: ResponseBody{
-			OutputSpeech: &Payload{
-				Type: "PlainText",
-				Text: text,
+// WithShouldEndSession determines if the session should end after the current response.
+func (b *ResponseBuilder) WithShouldEndSession(end bool) *ResponseBuilder {
+	b.shouldEndSession = end
+	return b
+}
+
+// WithSessionAttributes sets the session attributes on the response.
+func (b *ResponseBuilder) WithSessionAttributes(attr map[string]interface{}) *ResponseBuilder {
+	b.sessionAttr = attr
+
+	return b
+}
+
+// WithCanFulfillIntent sets the can fulfill intent response on the response.
+func (b *ResponseBuilder) WithCanFulfillIntent(response *CanFulfillIntent) *ResponseBuilder {
+	b.canFulfillIntent = response
+
+	return b
+}
+
+// AddDirective adds a directive tp the response.
+func (b *ResponseBuilder) AddDirective(directive *Directive) *ResponseBuilder {
+	b.directives = append(b.directives, directive)
+
+	return b
+}
+
+// Build builds the response from the given information.
+func (b *ResponseBuilder) Build() *ResponseEnvelope {
+	return &ResponseEnvelope{
+		Version:           "1.0",
+		SessionAttributes: b.sessionAttr,
+		Response: Response{
+			OutputSpeech: b.speech,
+			Card:         b.card,
+			Reprompt: &Reprompt{
+				OutputSpeech: b.reprompt,
 			},
-			Card: &Payload{
-				Type:    "Simple",
-				Title:   title,
-				Content: text,
-			},
-			ShouldEndSession: true,
+			Directives:       b.directives,
+			ShouldEndSession: b.shouldEndSession,
 		},
-	}
-
-	return r
-}
-
-// NewErrorResponse creates an error response with the given error.
-func NewErrorResponse(err error) Response {
-	return Response{
-		Version: "1.0",
-		Error:   err,
 	}
 }
