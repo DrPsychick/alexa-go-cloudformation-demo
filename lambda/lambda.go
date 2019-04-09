@@ -2,6 +2,8 @@ package lambda
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/hamba/pkg/log"
+	"github.com/hamba/pkg/stats"
 
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 )
@@ -13,6 +15,9 @@ const (
 )
 
 type Application interface {
+	log.Loggable
+	stats.Statable
+
 	Help() (string, string)
 	Stop(l *l10n.Locale) (string, string, string)
 	SSMLDemo(l *l10n.Locale) (string, string, string)

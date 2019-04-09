@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/drpsychick/alexa-go-cloudformation-demo"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda/middleware"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/hamba/cmd"
 	"github.com/hamba/pkg/log"
@@ -19,10 +21,17 @@ func runLambda(c *cli.Context) error {
 		log.Fatal(ctx, err.Error())
 	}
 
-	mux := lambda.NewMux(app)
-	if err := alexa.Serve(mux); err != nil {
+	l := newLambda(app)
+	if err := alexa.Serve(l); err != nil {
 		log.Fatal(ctx, err)
 	}
 
 	return nil
+}
+
+func newLambda(app *alfalfa.Application) alexa.Handler {
+	h := lambda.NewMux(app)
+
+	h = middleware.WithRequestStats(h, app)
+	return middleware.WithRecovery(h, app)
 }
