@@ -24,7 +24,7 @@ func TestResponseBuilder_WithSpeechSSML(t *testing.T) {
 	b := bdr.WithSpeech("<speak>test</speak>")
 
 	resp := bdr.Build()
-	want := &alexa.OutputSpeech{Type: "SSML", Text: "<speak>test</speak>"}
+	want := &alexa.OutputSpeech{Type: "SSML", SSML: "<speak>test</speak>"}
 	assert.Exactly(t, bdr, b)
 	assert.Equal(t, want, resp.Response.OutputSpeech)
 }
