@@ -191,6 +191,7 @@ func (b *ResponseBuilder) Build() *ResponseEnvelope {
 			},
 			Directives:       b.directives,
 			ShouldEndSession: b.shouldEndSession,
+			CanFulfillIntent: b.canFulfillIntent,
 		},
 	}
 }
