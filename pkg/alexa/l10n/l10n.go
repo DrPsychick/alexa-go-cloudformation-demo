@@ -39,13 +39,12 @@ var DefaultRegistry = &Registry{
 
 // Locale is a representation of Keys in a specific language (and can have a fallback Locale)
 type Locale struct {
-	Name            string  // de-DE, en-US, ...
-	Invocation      string  // "my skill"
-	Fallback        *Locale // points to fallback (or nil)
+	Name            string          // de-DE, en-US, ...
+	Countries       []alexa.Country // countries associated with this locale
+	Invocation      string          // "my skill"
+	Fallback        *Locale         // points to fallback (or nil)
 	TextSnippets    Snippets
 	IntentResponses IntentResponses
-	Countries       []alexa.Country // countries associated with this locale
-	// Utterances
 }
 
 // Key defines the type of a text key

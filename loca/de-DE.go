@@ -2,18 +2,18 @@ package loca
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
 var deDE = &l10n.Locale{
 	Name:     "de-DE",
 	Fallback: enUS,
 	Countries: []alexa.Country{
-		"DE", "AT",
+		"DE",
 	},
 	TextSnippets: map[l10n.Key][]string{
-		l10n.KeySkillName:         []string{"Mein Skill"},
-		l10n.KeySkillDescription:  []string{"Demonstrationsskill"},
+		l10n.KeySkillName:         []string{"DemoSkill"},
+		l10n.KeySkillDescription:  []string{"Demonstrationsskill für das Meetup"},
 		l10n.KeySkillSummary:      []string{"Dieser Skill demonstriert was man mit dem DrPsychick/alexa package machen kann"},
 		l10n.KeySkillSmallIconURI: []string{"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_small.png"},
 		l10n.KeySkillLargeIconURI: []string{"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/development/alexa/assets/images/de-DE_large.png"},

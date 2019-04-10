@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

@@ -3,7 +3,7 @@ package gen
 import (
 	"fmt"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
 // Skill is a logical construct for the skill.
@@ -11,10 +11,10 @@ type Skill struct {
 	Category            alexa.Category
 	DefaultLocale       string
 	Locales             map[string]LocaleDef
+	Countries           []alexa.Country
 	Intents             []Intent
 	Models              map[string]Model
 	Types               []Type
-	Countries           []alexa.Country
 	TestingInstructions string
 	Privacy             Privacy
 }
@@ -22,6 +22,14 @@ type Skill struct {
 // NewSkill returns a new basic skill
 func NewSkill() *Skill {
 	s := &Skill{}
+	// set sane defaults/allocate space
+	s.Locales = make(map[string]LocaleDef)
+	s.Countries = []alexa.Country{}
+	s.Intents = []Intent{}
+	s.Models = make(map[string]Model)
+	s.Types = []Type{}
+
+	// add default intents
 	s.AddIntentString(alexa.HelpIntent)
 	s.AddIntentString(alexa.CancelIntent)
 	s.AddIntentString(alexa.StopIntent)
@@ -41,8 +49,7 @@ func (s *Skill) SetDefaultLocale(locale string) {
 }
 
 func (s *Skill) AddLocale(l string, trans *l10n.Locale) {
-	if nil == s.Locales {
-		s.Locales = make(map[string]LocaleDef)
+	if len(s.Locales) == 0 {
 		// ensure that a default is set
 		if s.DefaultLocale == "" {
 			s.DefaultLocale = l
@@ -147,6 +154,7 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 	}
 
 	// add Types and Values
+	model.Model.Language.Types = []alexa.ModelType{}
 	for _, t := range s.Types {
 		mt := alexa.ModelType{
 			Name: string(t),
@@ -160,6 +168,9 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 		model.Model.Language.Types = append(model.Model.Language.Types, mt)
 	}
 
+	s.Models[locale.Translations.Name] = Model{
+		Model: model,
+	}
 	return model
 
 }
@@ -183,8 +194,8 @@ func (s *Skill) ValidateTypes() error {
 	return nil
 }
 
-// TODO: remove this indirection, use l10n.Locale directly
-// LocaleDef
+// TODO: remove this indirection, use l10n.Locale directly?
+// LocaleDef links skill locale with l10n.Locale to fetch translations.
 type LocaleDef struct {
 	Translations *l10n.Locale
 }
@@ -255,6 +266,7 @@ func NewType(t string) Type {
 // TODO: what for?
 // Model
 type Model struct {
+	Model *alexa.Model
 }
 
 // Privacy
