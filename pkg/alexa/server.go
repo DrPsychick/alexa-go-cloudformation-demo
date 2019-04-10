@@ -2,7 +2,6 @@ package alexa
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
 
@@ -23,7 +22,7 @@ func (fn HandlerFunc) Serve(b *ResponseBuilder, r *Request) {
 	fn(b, r)
 }
 
-// A Server defines parameters for running an Alexa server.
+// A Server defines parameters for running an Alexa lambda server.
 type Server struct {
 	Handler Handler
 }
@@ -47,9 +46,9 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 
 // Serve serves the handler.
 func (s *Server) Serve() error {
-	// TODO: decide if we want a DefaultServeMux
-	if s.Handler == nil {
-		return errors.New("alexa: cannot serve empty handler")
+	handler := s.Handler
+	if handler == nil {
+		handler = DefaultServeMux
 	}
 
 	lambda.StartHandler(s)

@@ -146,6 +146,11 @@ func (b *ResponseBuilder) WithStandardCard(title, text string, image *Image) *Re
 	return b
 }
 
+func (b *ResponseBuilder) WithCard(card *Card) *ResponseBuilder {
+	b.card = card
+	return b
+}
+
 // WithShouldEndSession determines if the session should end after the current response.
 func (b *ResponseBuilder) WithShouldEndSession(end bool) *ResponseBuilder {
 	b.shouldEndSession = end
