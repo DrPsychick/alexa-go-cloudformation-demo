@@ -145,7 +145,6 @@ func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
 	h, err := m.Handler(r)
 	if err != nil {
-		// TODO: Fallback handler
 		return
 	}
 

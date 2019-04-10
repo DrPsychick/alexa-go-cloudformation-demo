@@ -23,3 +23,10 @@ func TestHandlerFunc_Serve(t *testing.T) {
 
 	assert.True(t, called)
 }
+
+func TestNewServerMux(t *testing.T) {
+	mux := alexa.NewServerMux()
+
+	assert.Implements(t, (*alexa.Handler)(nil), mux)
+	assert.IsType(t, &alexa.ServeMux{}, mux)
+}
