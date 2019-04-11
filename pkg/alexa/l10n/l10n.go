@@ -37,11 +37,11 @@ func Speak(text string) string {
 	return "<speak>" + text + "</speak>"
 }
 func UseVoice(voice string, text string) string {
-	return "<voice name=\"" + voice + "\">" + text + "</voice>"
+	return `<voice name="` + voice + `">` + text + `</voice>`
 }
 
 func UseVoiceLang(voice string, language string, text string) string {
-	return "<voice name=\"" + voice + "\"><lang xml:lang=\"" + language + "\">" + text + "</lang></voice>"
+	return `<voice name="` + voice + `"><lang xml:lang="` + language + `">` + text + `</lang></voice>`
 }
 
 // Registry is the Locale registry
