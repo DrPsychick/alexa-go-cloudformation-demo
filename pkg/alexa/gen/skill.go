@@ -6,90 +6,98 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
-// Skill is a logical construct for the skill.
-type Skill struct {
-	Category            alexa.Category
-	DefaultLocale       string
-	Locales             map[string]LocaleDef
-	Countries           []alexa.Country
-	Intents             []Intent
-	Models              map[string]Model
-	Types               []Type
-	TestingInstructions string
-	Privacy             Privacy
-	ModelDelegation     alexa.DialogDelegation
+// SkillBuilder is a logical construct for the skill.
+type SkillBuilder struct {
+	category            alexa.Category
+	defaultLocale       string
+	locales             map[string]LocaleDef
+	countries           []alexa.Country
+	intents             []Intent
+	models              map[string]Model
+	types               []Type
+	testingInstructions string
+	privacy             privacy
+	modelDelegation     alexa.DialogDelegation
 }
 
-// NewSkill returns a new basic skill
-func NewSkill() *Skill {
-	s := &Skill{}
+// NewSkillBuilder returns a new basic SkillBuilder
+func NewSkillBuilder() *SkillBuilder {
+	s := &SkillBuilder{}
 	// set sane defaults/allocate space
-	s.Locales = make(map[string]LocaleDef)
-	s.Countries = []alexa.Country{}
-	s.Intents = []Intent{}
-	s.Models = make(map[string]Model)
-	s.Types = []Type{}
+	s.locales = make(map[string]LocaleDef)
+	s.models = make(map[string]Model)
 
 	// add default intents
-	s.AddIntentString(alexa.HelpIntent)
-	s.AddIntentString(alexa.CancelIntent)
-	s.AddIntentString(alexa.StopIntent)
+	//s.AddIntentString(alexa.HelpIntent)
+	//s.AddIntentString(alexa.CancelIntent)
+	//s.AddIntentString(alexa.StopIntent)
 	return s
 }
 
-func (s *Skill) SetCategory(category alexa.Category) {
-	s.Category = category
+func (s *SkillBuilder) WithCategory(category alexa.Category) *SkillBuilder {
+	s.category = category
+	return s
 }
 
-func (s *Skill) SetTestingInstructions(instructions string) {
-	s.TestingInstructions = instructions
+func (s *SkillBuilder) SetCategory(category alexa.Category) {
+	s.category = category
 }
 
-func (s *Skill) SetDefaultLocale(locale string) {
-	s.DefaultLocale = locale
+func (s *SkillBuilder) SetTestingInstructions(instructions string) {
+	s.testingInstructions = instructions
 }
 
-func (s *Skill) SetModelDelegation(delegation alexa.DialogDelegation) {
-	s.ModelDelegation = delegation
+func (s *SkillBuilder) SetDefaultLocale(locale string) {
+	s.defaultLocale = locale
 }
 
-func (s *Skill) AddLocale(l string, trans *l10n.Locale) {
-	if len(s.Locales) == 0 {
+func (s *SkillBuilder) SetModelDelegation(delegation alexa.DialogDelegation) {
+	s.modelDelegation = delegation
+}
+
+func (s *SkillBuilder) AddLocale(l string, trans *l10n.Locale) {
+	if len(s.locales) == 0 {
 		// ensure that a default is set
-		if s.DefaultLocale == "" {
-			s.DefaultLocale = l
+		if s.defaultLocale == "" {
+			s.defaultLocale = l
 		}
 	}
-	s.Locales[l] = LocaleDef{Translations: trans}
+	s.locales[l] = LocaleDef{Translations: trans}
 }
 
-func (s *Skill) AddIntent(intent Intent) {
-	s.Intents = append(s.Intents, intent)
+func (s *SkillBuilder) AddIntent(intent Intent) {
+	s.intents = append(s.intents, intent)
 }
 
 // AddIntentString creates an Intent from the string, adds it and returns a reference.
-func (s *Skill) AddIntentString(intent string) *Intent {
+func (s *SkillBuilder) AddIntentString(intent string) *Intent {
 	i := NewIntent(intent)
-	s.Intents = append(s.Intents, i)
+	s.intents = append(s.intents, i)
 	return &i
 }
 
-func (s *Skill) AddType(t Type) {
+func (s *SkillBuilder) AddType(t Type) {
 	// TODO: validate rules!
-	s.Types = append(s.Types, t)
+	s.types = append(s.types, t)
 }
 
-func (s *Skill) AddTypeString(t string) {
-	s.Types = append(s.Types, Type(t))
+func (s *SkillBuilder) AddTypeString(t string) {
+	s.types = append(s.types, Type(t))
 }
 
-func (s *Skill) AddCountry(c alexa.Country) {
-	s.Countries = append(s.Countries, c)
+func (s *SkillBuilder) AddCountry(c alexa.Country) {
+	s.countries = append(s.countries, c)
+}
+
+func (s *SkillBuilder) AddCountries(cs []alexa.Country) {
+	for _, c := range cs {
+		s.countries = append(s.countries, c)
+	}
 }
 
 // Build builds an alexa.Skill object.
 // TODO: return errors!
-func (s *Skill) Build() *alexa.Skill {
+func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 	skill := &alexa.Skill{
 		Manifest: alexa.Manifest{
 			Version: "1.0",
@@ -97,14 +105,14 @@ func (s *Skill) Build() *alexa.Skill {
 	}
 
 	// default is always set if at least one locale was defined.
-	dl, _ := s.Locales[s.DefaultLocale]
+	dl, _ := s.locales[s.defaultLocale]
 
-	skill.Manifest.Publishing.Category = s.Category
+	skill.Manifest.Publishing.Category = s.category
 	// TODO: ensure unique occurance
-	skill.Manifest.Publishing.Countries = s.Countries
+	skill.Manifest.Publishing.Countries = s.countries
 
-	if s.TestingInstructions != "" {
-		skill.Manifest.Publishing.TestingInstructions = s.TestingInstructions
+	if s.testingInstructions != "" {
+		skill.Manifest.Publishing.TestingInstructions = s.testingInstructions
 	} else {
 		skill.Manifest.Publishing.TestingInstructions = dl.Translations.GetSnippet(l10n.KeySkillTestingInstructions)
 	}
@@ -112,36 +120,48 @@ func (s *Skill) Build() *alexa.Skill {
 	// Permissions are required.
 	skill.Manifest.Permissions = &[]alexa.Permission{}
 
-	// TODO can we make this nicer?
 	// PrivacyAndCompliance is required.
 	skill.Manifest.Privacy = &alexa.Privacy{}
-	if s.Privacy.IsExportCompliant {
+	if s.privacy.flags[FlagIsExportCompliant] {
 		skill.Manifest.Privacy.IsExportCompliant = true
 	}
-	if s.Privacy.ContainsAds {
+	if s.privacy.flags[FlagContainsAds] {
 		skill.Manifest.Privacy.ContainsAds = true
+	}
+	if s.privacy.flags[FlagAllowsPurchases] {
+		skill.Manifest.Privacy.AllowsPurchases = true
+	}
+	if s.privacy.flags[FlagUsesPersonalInfo] {
+		skill.Manifest.Privacy.UsesPersonalInfo = true
+	}
+	if s.privacy.flags[FlagIsChildDirectred] {
+		skill.Manifest.Privacy.IsChildDirected = true
 	}
 
 	// Add elements for every locale.
-	for _, l := range s.Locales {
+	for _, l := range s.locales {
 		l.BuildLocale(skill)
 		l.BuildPrivacyLocale(skill)
 	}
 
-	return skill
+	return skill, nil
 }
 
 // BuildModels builds an alexa.Model for each locale
-func (s *Skill) BuildModels() map[string]*alexa.Model {
+func (s *SkillBuilder) BuildModels() (map[string]*alexa.Model, error) {
+	var err error
 	models := make(map[string]*alexa.Model)
-	for _, l := range s.Locales {
-		models[l.Translations.Name] = s.BuildModel(&l)
+	for _, l := range s.locales {
+		models[l.Translations.Name], err = s.BuildModel(&l)
+		if err != nil {
+			return nil, fmt.Errorf("Could not build model for locale %s: %s", l.Translations.Name, err)
+		}
 	}
-	return models
+	return models, nil
 }
 
 // BuildModel builds an alexa.Model for the given locale
-func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
+func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 	model := &alexa.Model{
 		Model: alexa.InteractionModel{
 			Language: alexa.LanguageModel{
@@ -153,8 +173,11 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 	var prompts = []prompt{}
 
 	// add Intents
-	for _, i := range s.Intents {
-		li := locale.Translations.GetIntent(l10n.Key(i.Name))
+	for _, i := range s.intents {
+		li, err := locale.Translations.GetIntent(l10n.Key(i.Name))
+		if err != nil {
+			return nil, fmt.Errorf("Intent %s is not translated into %s", i.Name, locale.Translations.Name)
+		}
 
 		// create LanguageModel.Intent
 		mi := alexa.ModelIntent{
@@ -228,7 +251,7 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 			// add Dialog
 			if model.Model.Dialog == nil {
 				model.Model.Dialog = &alexa.Dialog{
-					Delegation: alexa.DialogDelegation(s.ModelDelegation),
+					Delegation: alexa.DialogDelegation(s.modelDelegation),
 				}
 			}
 
@@ -243,7 +266,7 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 
 	// add Types and Values
 	model.Model.Language.Types = []alexa.ModelType{}
-	for _, t := range s.Types {
+	for _, t := range s.types {
 		mt := alexa.ModelType{
 			Name: string(t),
 		}
@@ -269,22 +292,22 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 	}
 
 	// store reference to the model
-	s.Models[locale.Translations.Name] = Model{
+	s.models[locale.Translations.Name] = Model{
 		Model: model,
 	}
-	return model
+	return model, nil
 
 }
 
 // ValidateTypes ensures that Intents only use Types defined in the Skill
-func (s *Skill) ValidateTypes() error {
+func (s *SkillBuilder) ValidateTypes() error {
 	var tm = make(map[string]bool)
-	for _, t := range s.Types {
+	for _, t := range s.types {
 		tm[string(t)] = true
 	}
-	for _, i := range s.Intents {
+	for _, i := range s.intents {
 		for _, sl := range i.Slots {
-			if len(s.Types) == 0 {
+			if len(s.types) == 0 {
 				return fmt.Errorf("No types defined in the skill!")
 			}
 			if _, ok := tm[string(sl.Type)]; !ok {
@@ -372,20 +395,22 @@ type Model struct {
 	Model *alexa.Model
 }
 
-// Privacy
-type Privacy struct {
-	IsExportCompliant bool
-	ContainsAds       bool
-	AllowsPurchases   bool
-	UsesPersonalInfo  bool
-	IsChildDirected   bool
+// Flags for alexa.Privacy
+const (
+	FlagIsExportCompliant string = "IsExportCompliant"
+	FlagContainsAds       string = "ContainsAds"
+	FlagAllowsPurchases   string = "AllowsPurchases"
+	FlagUsesPersonalInfo  string = "UsesPersonalInfo"
+	FlagIsChildDirectred  string = "IsChildDirected"
+)
+
+// privacy
+type privacy struct {
+	flags map[string]bool
 }
 
-func (p *Privacy) SetIsExportCompliant(b bool) {
-	p.IsExportCompliant = b
-}
-func (p *Privacy) SetContainsAds(b bool) {
-	p.ContainsAds = b
+func (s *SkillBuilder) SetPrivacyFlag(name string, b bool) {
+	s.privacy.flags[name] = b
 }
 
 // TODO implement other functions

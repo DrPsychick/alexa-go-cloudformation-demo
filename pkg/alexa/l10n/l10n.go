@@ -26,6 +26,13 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
+// Config contains the options for Locale registration
+type Config struct {
+	DefaultLocale bool
+	FallbackFor   string
+}
+
+// TODO: move to `ssml` package
 func Speak(text string) string {
 	return "<speak>" + text + "</speak>"
 }
@@ -48,53 +55,8 @@ var DefaultRegistry = &Registry{
 	locales: map[string]*Locale{},
 }
 
-// Locale is a representation of Keys in a specific language (and can have a fallback Locale)
-type Locale struct {
-	Name            string          // de-DE, en-US, ...
-	Countries       []alexa.Country // countries associated with this locale
-	Invocation      string          // "my skill"
-	Fallback        *Locale         // points to fallback (or nil)
-	TextSnippets    Snippets
-	IntentResponses IntentResponses
-}
-
-// Key defines the type of a text key
-type Key string
-
-func (k Key) String() string {
-	return string(k)
-}
-
-// Snippets is the actual representation of key -> array of texts in locale
-type Snippets map[Key][]string
-
-// Responses is the representation of a list of IntentResponses
-type IntentResponses map[Key]IntentResponse
-
-type IntentResponse struct {
-	Samples []string
-	Title   []string
-	Text    []string
-	SSML    []string
-	Slots   map[Key]Slot
-}
-
-type Slot struct {
-	Samples             []string
-	PromptElicitations  []alexa.PromptVariations
-	PromptConfirmations []alexa.PromptVariations // TODO: is this correct?
-}
-
-type Prompts map[Key][]alexa.PromptVariations
-
 // RegisterFunc defines the functions to be passed to Register
 type RegisterFunc func(cfg *Config)
-
-// Config contains the options for Locale registration
-type Config struct {
-	DefaultLocale bool
-	FallbackFor   string
-}
 
 // AsDefault sets the given Locale the default
 func AsDefault() RegisterFunc {
@@ -169,13 +131,16 @@ func (r *Registry) GetLocales() map[string]*Locale {
 }
 
 // Resolve returns the Locale matching the given name or an error
-func (r Registry) Resolve(name string) (*Locale, error) {
+func (r *Registry) Resolve(name string) (*Locale, error) {
 	l, ok := r.locales[name]
 	if !ok {
 		return nil, fmt.Errorf("locale %s not found", name)
 	}
 	return l, nil
 }
+
+// Snippets is the actual representation of key -> array of texts in locale
+type Snippets map[Key][]string
 
 // Get returns the translation for the snippet
 func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
@@ -195,6 +160,16 @@ func (s Snippets) GetAll(k Key, args ...interface{}) ([]string, error) {
 		return []string{}, fmt.Errorf("key not defined %s", string(k))
 	}
 	return s[k], nil
+}
+
+// Locale is a representation of Keys in a specific language (and can have a fallback Locale)
+type Locale struct {
+	Name            string          // de-DE, en-US, ...
+	Countries       []alexa.Country // countries associated with this locale
+	Invocation      string          // "my skill"
+	Fallback        *Locale         // points to fallback (or nil)
+	TextSnippets    Snippets
+	IntentResponses IntentResponses
 }
 
 // GetSnippet returns the translation and follows fallback chain
@@ -221,20 +196,17 @@ func (l Locale) GetAllSnippets(k Key, args ...interface{}) []string {
 	return []string{string(k)}
 }
 
-func (l Locale) GetIntent(key Key) IntentResponse {
+// GetIntent returns complete localized intent
+func (l Locale) GetIntent(key Key) (IntentResponse, error) {
 	if r, ok := l.IntentResponses[key]; ok {
-		return r
+		return r, nil
 	}
-
-	if l.Fallback != nil {
-		return l.Fallback.GetIntent(key)
-	}
-
-	return IntentResponse{}
+	return IntentResponse{}, fmt.Errorf("No %s translations for intent %s", l.Name, key)
 }
 
+// TODO: refactor to return a response object usable by ResponseBuilder?
 func (l Locale) GetSingleIntentResponse(key Key) (string, string, string) {
-	ir := l.GetIntent(key)
+	ir, _ := l.GetIntent(key)
 
 	if len(ir.Text) > 0 {
 		r := rand.Intn(len(ir.Text))
@@ -244,3 +216,30 @@ func (l Locale) GetSingleIntentResponse(key Key) (string, string, string) {
 	return string(key + ".Title"), string(key + ".Text"), string(key + ".SSML")
 
 }
+
+// Key defines the type of a text key
+// TODO: refactor and just use string!
+type Key string
+
+func (k Key) String() string {
+	return string(k)
+}
+
+// Responses is the representation of a list of IntentResponses
+type IntentResponses map[Key]IntentResponse
+
+type IntentResponse struct {
+	Samples []string
+	Title   []string
+	Text    []string
+	SSML    []string
+	Slots   map[Key]Slot
+}
+
+type Slot struct {
+	Samples             []string
+	PromptElicitations  []alexa.PromptVariations
+	PromptConfirmations []alexa.PromptVariations // TODO: is this correct?
+}
+
+type Prompts map[Key][]alexa.PromptVariations

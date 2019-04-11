@@ -41,6 +41,7 @@ var enUS = &l10n.Locale{
 		// Type values
 		TypeAreaValues:   []string{"Europe", "North America", "Asia Pacific", "South America"},
 		TypeRegionValues: []string{"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
+
 		GreetingTitle: []string{
 			"Greeting",
 		},

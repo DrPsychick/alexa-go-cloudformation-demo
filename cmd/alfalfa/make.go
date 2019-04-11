@@ -139,7 +139,11 @@ func runMake(c *cli.Context) error {
 	ms, _ := createModels(sk)
 
 	if c.Bool("skill") {
-		res, _ := json.MarshalIndent(sk.Build(), "", "  ")
+		s, err := sk.Build()
+		if err != nil {
+			log.Fatal(err)
+		}
+		res, _ := json.MarshalIndent(s, "", "  ")
 		if err := ioutil.WriteFile("./alexa/skill.json", res, 0644); err != nil {
 			log.Fatal(err)
 		}
@@ -159,13 +163,13 @@ func runMake(c *cli.Context) error {
 	return nil
 }
 
-// createSkill generates and returns a Skill.
-func createSkill(r l10n.Registry) (*gen.Skill, error) {
-	skill := gen.NewSkill()
+// createSkill generates and returns a SkillBuilder.
+func createSkill(r l10n.Registry) (*gen.SkillBuilder, error) {
+	skill := gen.NewSkillBuilder()
 	skill.SetCategory(alexa.CategoryOrganizersAndAssistants)
 	skill.SetModelDelegation(alexa.DelegationSkillResponse)
 	skill.SetDefaultLocale(r.GetDefaultLocale())
-	skill.Privacy.SetIsExportCompliant(true)
+	skill.SetPrivacyFlag(gen.FlagIsExportCompliant, true)
 
 	// Types will automatically add the values from l10n.Key
 	ta := gen.NewType(string(loca.TypeArea))
@@ -195,6 +199,6 @@ func createSkill(r l10n.Registry) (*gen.Skill, error) {
 }
 
 // createModels generates and returns a list of Models.
-func createModels(s *gen.Skill) (map[string]*alexa.Model, error) {
-	return s.BuildModels(), nil
+func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
+	return s.BuildModels()
 }

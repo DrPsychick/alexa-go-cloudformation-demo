@@ -25,7 +25,8 @@ r := NewRegistry().
 // generate new SkillBuilder
 skill := gen.NewSkillBuilder().
 	WithCategory(alexa.CategoryShopping).
-	WithModelDelegation(alexa.DelegationSkillResponse)
+	WithModelDelegation(alexa.DelegationSkillResponse).
+	WithPrivacyFlag(gen.FlagIsExportCompliant)
 [...]
 // add locales
 for n, l := range r.GetLocales() {
@@ -46,9 +47,19 @@ skill = skill.WithIntent(gen.NewIntentBuilder(loca.DemoIntent).
 		loca.DemoIntentSlotOne, loca.SlotOneType
     ).WithSlotSamples(local.DemoIntentSlotOneSamples)
 ))
+// OR: WithIntent returns an Intent...
+skill = skill.WithIntent(loca.DemoIntent).
+	WithSamples(...).WithSlot(...)
 
 s, _ := skill.Build()
 res, _ := json.Marshal(s)
+[...]
+
+model, _ := skill.BuildModels()
+for l, m := range skill.BuildModels() {
+	res, _ := json.Marshal(m)
+	[...]
+}
 ```
 
 In a loop over locales
