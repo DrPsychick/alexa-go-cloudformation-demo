@@ -2,20 +2,53 @@
 
 ## defining the skill
 ```go
-skill := NewSkill(alexa.SkillType)
-skill.AddCategory(alexa.CategoryShopping)
+const (
+	TypeSlotOne string = "SLOT_one"
+	DemoIntent string = "DemoIntent"
+	DemoIntentSlotOne string = "DemoIntent_Slot_One"
+	DemoIntentSlotOneSamples string = "DemoIntent_Slot_One_Samples"
+	MyIntent string = "MyIntent"
+)
+var deDE = &l10n.Locale{
+	Name: "de-DE",
+	Countries: []alexa.Country{alexa.CountryGerman},
+	TextSnippets: map[string][]string{
+		"MyKey": []string{"My Value 1", "My Value 2"},
+		DemoIntentTitle: []string{"Demo"},
+		DemoIntentSamples: []string{"starte demo"},
+		DemoIntentSlotOneSamples: []string{"of {Area}", "in {Area}"},
+	},
+}
+r := NewRegistry().
+	WithLocale(deDE)
 [...]
-deSkill := skill.AddLocale("de-DE")
-deSkill.Name = "Foo"
-deSkill.Description = "Bar"
+// generate new SkillBuilder
+skill := gen.NewSkillBuilder().
+	WithCategory(alexa.CategoryShopping).
+	WithModelDelegation(alexa.DelegationSkillResponse)
 [...]
-
-deModel := deSkill.AddLanguageModel("my skill") // invocation name needed only once per locale
-
-int := deModel.AddIntent("DemoIntent")
-int.AddSample("Erzähl mir was")
+// add locales
+for n, l := range r.GetLocales() {
+    skill = skill.WithLocale(gen.NewLocaleBuilder().WithLocale(n, l).
+    	WithCountries(l.Countries)
+}
 [...]
+// add types
+skill = skill.WithType(loca.SlotOneType)
 
+// add simple intent
+skill = skill.WithIntent(gen.NewIntentBuilder(loca.MyIntent))
+
+// add intent with samples and slot
+skill = skill.WithIntent(gen.NewIntentBuilder(loca.DemoIntent).
+	WithSamples(loca.DemoIntentSamples). // reference key specifically
+	WithSlot(gen.NewIntentSlot(
+		loca.DemoIntentSlotOne, loca.SlotOneType
+    ).WithSlotSamples(local.DemoIntentSlotOneSamples)
+))
+
+s, _ := skill.Build()
+res, _ := json.Marshal(s)
 ```
 
 In a loop over locales
