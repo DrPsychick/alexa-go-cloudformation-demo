@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
@@ -69,95 +68,91 @@ var modelGerman = alexa.Model{
 					"Auf geht's",
 					"Hop hop",
 				}},
-				{Name: "SSMLDemoIntent", Samples: []string{
-					"Zeig' was du kannst",
-					"Immer her damit",
-					"Was kann SSML",
-				}},
+				//{Name: "SSMLDemoIntent", Samples: []string{
+				//	"Zeig' was du kannst",
+				//	"Immer her damit",
+				//	"Was kann SSML",
+				//}},
 				{Name: "SaySomething", Samples: []string{
 					"Erzähl' mir was",
 					"Sag was",
 				}},
 				{
-					Name: "BeerStatsIntent",
+					Name: "AWSStatus",
 					Samples: []string{
-						"wieviel Bier trinkt man in {Country}",
-						"wieviel trinkt {Country}",
-						"wieviel Bier trinken {PeopleCategory} in {Country}",
+						"A.W.S. status of {Area}",
+						"status of {Area}",
+						"give me the status of {Region}",
+						"status of {Region}",
+						"{Region} status",
 					},
 					Slots: &[]alexa.ModelSlot{
-						{Name: "Country", Type: "BEER_Countries", Samples: []string{"{Country}"}},
-						{Name: "PeopleCategory", Type: "BEER_PeopleCategory", Samples: []string{"{PeopleCategory}", "von {PeopleCategory}"}},
+						{Name: "Area", Type: "AWS_Area", Samples: []string{"of {Area}"}},
+						{Name: "Region", Type: "AWS_Region", Samples: []string{"of {Region}", "in {Region}"}},
 					},
 				},
 			},
 			Types: []alexa.ModelType{
-				{Name: "BEER_Countries", Values: []alexa.TypeValue{
-					{Name: alexa.NameValue{Value: "Deutschland"}},
-					{Name: alexa.NameValue{Value: "Frankreich"}},
+				{Name: "AWS_Area", Values: []alexa.TypeValue{
+					{Name: alexa.NameValue{Value: "Europe"}},
+					{Name: alexa.NameValue{Value: "North America"}},
+					{Name: alexa.NameValue{Value: "South America"}},
+					{Name: alexa.NameValue{Value: "Asia Pacific"}},
 				}},
-				{Name: "BEER_PeopleCategory", Values: []alexa.TypeValue{
-					{Name: alexa.NameValue{Value: "Alle"}},
-					{Name: alexa.NameValue{Value: "Frauen"}},
-					{Name: alexa.NameValue{Value: "Männern"}},
-					{Name: alexa.NameValue{Value: "Teenagern"}},
-					{Name: alexa.NameValue{Value: "Intellektuellen"}},
+				{Name: "AWS_Region", Values: []alexa.TypeValue{
+					{Name: alexa.NameValue{Value: "Frankfurt"}},
+					{Name: alexa.NameValue{Value: "Ireland"}},
+					{Name: alexa.NameValue{Value: "London"}},
+					{Name: alexa.NameValue{Value: "Paris"}},
+					{Name: alexa.NameValue{Value: "Stockholm"}},
+					{Name: alexa.NameValue{Value: "North Virginia"}},
 				}},
 			},
 		},
 		Dialog: &alexa.Dialog{
-			Delegation: alexa.SkillResponse,
-			Intents: &[]alexa.DialogIntent{
-				{Name: "BeerStatsIntent", Confirmation: false, Slots: []alexa.DialogIntentSlot{
-					{Name: "Country", Type: "BEER_Countries", Prompts: alexa.SlotPrompts{
-						Elicitation: "Elicit.Intent-BeerStatsIntent.IntentSlot-Country",
+			Delegation: alexa.DelegationSkillResponse,
+			Intents: []alexa.DialogIntent{
+				{Name: "AWSStatus", Confirmation: false, Slots: []alexa.DialogIntentSlot{
+					{Name: "Area", Type: "AWS_Area", Prompts: alexa.SlotPrompts{
+						Elicitation: "Elicit.Intent-AWSStatus.IntentSlot-Area",
 					}},
-					{Name: "PeopleCategory", Type: "BEER_PeopleCategory", Prompts: alexa.SlotPrompts{
-						Elicitation: "Elicit.Intent-BeerStatsIntent.IntentSlot-PeopleCategory",
+					{Name: "Region", Type: "AWS_Region", Prompts: alexa.SlotPrompts{
+						Elicitation: "Elicit.Intent-AWSStatus.IntentSlot-Region",
 					}},
 				}},
 			},
 		},
 		Prompts: &[]alexa.ModelPrompt{
-			{Id: "Elicit.Intent-BeerStatsIntent.IntentSlot-Country", Variations: []alexa.PromptVariations{
-				{Type: "PlainText", Value: "Für welches Land möchtest du Bier Statistiken?"},
+			{Id: "Elicit.Intent-AWSStatus.IntentSlot-Area", Variations: []alexa.PromptVariations{
+				{Type: "PlainText", Value: "From what area do you seek status?"},
 			}},
-			{Id: "Elicit.Intent-BeerStatsIntent.IntentSlot-PeopleCategory", Variations: []alexa.PromptVariations{
-				{Type: "PlainText", Value: "Für welche Personengruppe möchtest du Bier Statistiken?"},
+			{Id: "Elicit.Intent-AWSStatus.IntentSlot-Region", Variations: []alexa.PromptVariations{
+				{Type: "PlainText", Value: "From what region do you want to know the status?"},
 			}},
 		},
 	},
 }
 
 func runMake(c *cli.Context) error {
+	// build skill and models
 	sk, _ := createSkill(*l10n.DefaultRegistry)
 	ms, _ := createModels(sk)
 
 	if c.Bool("skill") {
-		res, _ := json.MarshalIndent(skill, "", "  ")
-		//fmt.Println(string(res))
+		res, _ := json.MarshalIndent(sk.Build(), "", "  ")
 		if err := ioutil.WriteFile("./alexa/skill.json", res, 0644); err != nil {
 			log.Fatal(err)
 		}
-		res, _ = json.MarshalIndent(sk.Build(), "", "  ")
-		//fmt.Printf(string(res))
-		ioutil.WriteFile(("./newskill.json"), res, 0644)
-		fmt.Printf("vimdiff ./newskill.json ./alexa/skill.json\n")
 	}
 
 	if c.Bool("models") {
-		for l, m := range models {
+		for l, m := range ms {
+			var filename = "./alexa/interactionModels/custom/" + string(l) + ".json"
+
 			res, _ := json.MarshalIndent(m, "", "  ")
-			//fmt.Println(string(res))
-			if err := ioutil.WriteFile("./alexa/interactionModels/custom/"+string(l)+".json", res, 0644); err != nil {
+			if err := ioutil.WriteFile(filename, res, 0644); err != nil {
 				log.Fatal(err)
 			}
-		}
-		for l, m := range ms {
-			res, _ := json.MarshalIndent(m, "", "  ")
-			//fmt.Printf(string(res))
-			ioutil.WriteFile("./new"+string(l)+".json", res, 0644)
-			fmt.Printf("vimdiff ./new" + string(l) + ".json ./alexa/interactionModels/custom/" + string(l) + ".json\n")
 		}
 	}
 
@@ -168,23 +163,33 @@ func runMake(c *cli.Context) error {
 func createSkill(r l10n.Registry) (*gen.Skill, error) {
 	skill := gen.NewSkill()
 	skill.SetCategory(alexa.CategoryOrganizersAndAssistants)
+	skill.SetModelDelegation(alexa.DelegationSkillResponse)
 	skill.SetDefaultLocale(r.GetDefaultLocale())
+	skill.Privacy.SetIsExportCompliant(true)
+
+	// Types will automatically add the values from l10n.Key
+	ta := gen.NewType(string(loca.TypeArea))
+	skill.AddType(ta)
+	tr := gen.NewType(string(loca.TypeRegion))
+	skill.AddType(tr)
+
+	// Intents
 	skill.AddIntentString(string(loca.DemoIntent))
 	skill.AddIntentString(string(loca.SaySomething))
 
+	// Intent with Slots (will automatically generate Prompts)
+	i := gen.NewIntent(string(loca.AWSStatusIntent))
+	i.AddSlot(gen.NewSlot(string(loca.TypeAreaName), ta))
+	i.AddSlot(gen.NewSlot(string(loca.TypeRegionName), tr))
+	skill.AddIntent(i)
+
+	// Add locales and countries
 	for n, l := range r.GetLocales() {
 		skill.AddLocale(n, l)
 		for _, c := range l.Countries {
 			skill.AddCountry(c)
 		}
 	}
-
-	// Types will automatically add the values from l10n.Key
-	skill.AddTypeString(string(loca.TypeBeerCountries))
-	skill.AddTypeString(string(loca.TypePeopleCategory))
-
-	skill.Privacy.SetIsExportCompliant(true)
-	//skill.Privacy.SetContainsAds(false)
 
 	return skill, nil
 }

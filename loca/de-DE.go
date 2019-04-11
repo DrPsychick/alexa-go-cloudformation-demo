@@ -9,7 +9,7 @@ var deDE = &l10n.Locale{
 	Name:     "de-DE",
 	Fallback: enUS,
 	Countries: []alexa.Country{
-		"DE",
+		alexa.CountryGermany,
 	},
 	TextSnippets: map[l10n.Key][]string{
 		l10n.KeySkillName:         []string{"DemoSkill"},
@@ -23,7 +23,6 @@ var deDE = &l10n.Locale{
 			"schiess los",
 			"sag' was",
 		},
-		TypeBeerCountriesValues: []string{"Deutschland", "Frankreich"},
 		GreetingTitle: []string{
 			"Begrüßung",
 		},
@@ -46,13 +45,12 @@ var deDE = &l10n.Locale{
 				"Jawoll",
 			},
 			SSML: []string{
-				"<speak>" +
-					"<voice name=\"Kendra\"><lang xml:lang=\"en-US\"><emphasis level=\"strong\">pace</emphasis></lang></voice>" +
-					"<voice name=\"Marlene\">iss <emphasis level=\"strong\">geil!</emphasis></voice>" +
-					"</speak>",
-				"<speak><voice name=\"Kendra\">" +
-					"<lang xml:lang=\"en-US\"><emphasis level=\"strong\">geil</emphasis></lang>" +
-					"</voice></speak>"},
+				l10n.Speak(
+					l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
+						l10n.UseVoice("Marlene", "iss <emphasis level=\"strong\">geil!</emphasis>"),
+				),
+				l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
+			},
 		},
 		SaySomething: l10n.IntentResponse{
 			Samples: []string{"sag' etwas", "erzähl' mir was"},

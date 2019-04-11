@@ -83,6 +83,12 @@ export ASKVendorId=<VendorId>
 
 ```bash ./cloudformation/deploy.sh```
 
+### Validate the Skill witk `ask`
+```
+ask validate -s amzn1.ask.skill.xxx -l en-US > result_en-US.json
+# output is long, search for "FAIL"
+```
+
 
 # TODOs
 Before first "release"

@@ -17,6 +17,7 @@ type Skill struct {
 	Types               []Type
 	TestingInstructions string
 	Privacy             Privacy
+	ModelDelegation     alexa.DialogDelegation
 }
 
 // NewSkill returns a new basic skill
@@ -48,6 +49,10 @@ func (s *Skill) SetDefaultLocale(locale string) {
 	s.DefaultLocale = locale
 }
 
+func (s *Skill) SetModelDelegation(delegation alexa.DialogDelegation) {
+	s.ModelDelegation = delegation
+}
+
 func (s *Skill) AddLocale(l string, trans *l10n.Locale) {
 	if len(s.Locales) == 0 {
 		// ensure that a default is set
@@ -62,8 +67,11 @@ func (s *Skill) AddIntent(intent Intent) {
 	s.Intents = append(s.Intents, intent)
 }
 
-func (s *Skill) AddIntentString(intent string) {
-	s.Intents = append(s.Intents, NewIntent(intent))
+// AddIntentString creates an Intent from the string, adds it and returns a reference.
+func (s *Skill) AddIntentString(intent string) *Intent {
+	i := NewIntent(intent)
+	s.Intents = append(s.Intents, i)
+	return &i
 }
 
 func (s *Skill) AddType(t Type) {
@@ -80,6 +88,7 @@ func (s *Skill) AddCountry(c alexa.Country) {
 }
 
 // Build builds an alexa.Skill object.
+// TODO: return errors!
 func (s *Skill) Build() *alexa.Skill {
 	skill := &alexa.Skill{
 		Manifest: alexa.Manifest{
@@ -141,16 +150,95 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 		},
 	}
 
+	var prompts = []prompt{}
+
 	// add Intents
 	for _, i := range s.Intents {
+		li := locale.Translations.GetIntent(l10n.Key(i.Name))
+
+		// create LanguageModel.Intent
 		mi := alexa.ModelIntent{
 			Name:    i.Name,
 			Samples: []string{},
 		}
-		if sam := locale.Translations.GetIntent(l10n.Key(i.Name)).Samples; len(sam) > 0 {
+		if sam := li.Samples; len(sam) > 0 {
 			mi.Samples = sam
 		}
+
+		// loop over slots
+		var di_slots = []alexa.DialogIntentSlot{}
+		for _, sl := range i.Slots {
+			ls := li.Slots[l10n.Key(sl.Name)]
+
+			if mi.Slots == nil {
+				mi.Slots = &[]alexa.ModelSlot{}
+			}
+
+			// create ModelSlot
+			slot := alexa.ModelSlot{
+				Name:    sl.Name,
+				Type:    string(sl.Type),
+				Samples: []string{},
+			}
+			if len(ls.Samples) > 0 {
+				slot.Samples = ls.Samples
+			}
+			// add slot to ModelIntent
+			*mi.Slots = append(*mi.Slots, slot)
+
+			// add slot DialogIntent - Elicitations
+			pe := ls.PromptElicitations
+			if len(pe) > 0 {
+				p := prompt{Id: "Elicit.Intent-" + i.Name + ".IntentSlot-" + sl.Name}
+				dis := alexa.DialogIntentSlot{
+					Name: sl.Name,
+					Type: string(sl.Type),
+				}
+				dis.Elicitation = true
+				dis.Prompts = alexa.SlotPrompts{
+					Elicitation: p.Id,
+				}
+				p.Variations = pe
+				prompts = append(prompts, p)
+				di_slots = append(di_slots, dis)
+			}
+
+			// add slot DialogIntent - Confirmations
+			pc := ls.PromptConfirmations
+			if len(pc) > 0 {
+				p := prompt{Id: "Confirm.Intent-" + i.Name + ".IntentSlot-" + sl.Name}
+				dis := alexa.DialogIntentSlot{
+					Name: sl.Name,
+					Type: string(sl.Type),
+				}
+				dis.Confirmation = true
+				dis.Prompts = alexa.SlotPrompts{
+					Confirmation: p.Id,
+				}
+				p.Confirmations = pc
+				prompts = append(prompts, p)
+				di_slots = append(di_slots, dis)
+			}
+		}
+		// add LanguageModel.Intents
 		model.Model.Language.Intents = append(model.Model.Language.Intents, mi)
+
+		// add Dialog.Intents
+		if len(di_slots) > 0 {
+			// add Dialog
+			if model.Model.Dialog == nil {
+				model.Model.Dialog = &alexa.Dialog{
+					Delegation: alexa.DialogDelegation(s.ModelDelegation),
+				}
+			}
+
+			// create Dialog.Intent
+			di := alexa.DialogIntent{
+				Name:  i.Name,
+				Slots: di_slots,
+			}
+			model.Model.Dialog.Intents = append(model.Model.Dialog.Intents, di)
+		}
 	}
 
 	// add Types and Values
@@ -168,6 +256,19 @@ func (s *Skill) BuildModel(locale *LocaleDef) *alexa.Model {
 		model.Model.Language.Types = append(model.Model.Language.Types, mt)
 	}
 
+	// add Prompts
+	if len(prompts) > 0 {
+		model.Model.Prompts = &[]alexa.ModelPrompt{}
+	}
+	for _, p := range prompts {
+		mp := alexa.ModelPrompt{
+			Id:         p.Id,
+			Variations: p.Variations,
+		}
+		*model.Model.Prompts = append(*model.Model.Prompts, mp)
+	}
+
+	// store reference to the model
 	s.Models[locale.Translations.Name] = Model{
 		Model: model,
 	}
@@ -247,12 +348,14 @@ func (i *Intent) AddSlot(slot Slot) {
 
 // Slot
 type Slot struct {
-	Name string // specific to intent
-	Type Type   // global for skill
+	Name         string // specific to intent
+	Type         Type   // global for skill
+	Confirmation bool
+	Elicitation  bool
 }
 
 func NewSlot(name string, t Type) Slot {
-	return Slot{Name: name, Type: t}
+	return Slot{Name: name, Type: t, Confirmation: false, Elicitation: false}
 }
 
 // TODO: overkill? just use 'string'?
@@ -286,3 +389,10 @@ func (p *Privacy) SetContainsAds(b bool) {
 }
 
 // TODO implement other functions
+
+// prompt is used internally to build the models
+type prompt struct {
+	Id            string
+	Variations    []alexa.PromptVariations
+	Confirmations []alexa.PromptVariations
+}

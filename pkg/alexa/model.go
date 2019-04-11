@@ -8,8 +8,8 @@ type Model struct {
 // InteractionModel defines the base model structure
 type InteractionModel struct {
 	Language LanguageModel  `json:"languageModel"`
-	Dialog   *Dialog        `json:"dialog"`
-	Prompts  *[]ModelPrompt `json:"prompts"`
+	Dialog   *Dialog        `json:"dialog,omitempty"`
+	Prompts  *[]ModelPrompt `json:"prompts,omitempty"`
 }
 
 // LanguageModel
@@ -48,18 +48,20 @@ type NameValue struct {
 
 type Dialog struct {
 	Delegation DialogDelegation `json:"delegationStrategy"`
-	Intents    *[]DialogIntent  `json:"intents"`
+	Intents    []DialogIntent   `json:"intents"`
 }
 
 type DialogDelegation string
 
 const (
-	SkillResponse DialogDelegation = "SKILL_RESPONSE"
+	DelegationSkillResponse DialogDelegation = "SKILL_RESPONSE"
+	DelegationAlways        DialogDelegation = "ALWAYS"
 )
 
 type DialogIntent struct {
 	Name         string             `json:"name"`
 	Confirmation bool               `json:"confirmationRequired"`
+	Delegation   DialogDelegation   `json:"delegationStrategy,omitempty"`
 	Prompts      struct{}           `json:"prompts"`
 	Slots        []DialogIntentSlot `json:"slots"`
 }
@@ -70,10 +72,12 @@ type DialogIntentSlot struct {
 	Confirmation bool        `json:"confirmationRequired"`
 	Elicitation  bool        `json:"elicitationRequired"`
 	Prompts      SlotPrompts `json:"prompts,omitempty"`
+	// TODO: Validations SlotValidations...
 }
 
 type SlotPrompts struct {
-	Elicitation string `json:"elicitation"`
+	Elicitation  string `json:"elicitation,omitempty"`
+	Confirmation string `json:"confirmation,omitempty"`
 }
 
 type ModelPrompt struct {

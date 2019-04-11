@@ -26,6 +26,17 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
+func Speak(text string) string {
+	return "<speak>" + text + "</speak>"
+}
+func UseVoice(voice string, text string) string {
+	return "<voice name=\"" + voice + "\">" + text + "</voice>"
+}
+
+func UseVoiceLang(voice string, language string, text string) string {
+	return "<voice name=\"" + voice + "\"><lang xml:lang=\"" + language + "\">" + text + "</lang></voice>"
+}
+
 // Registry is the Locale registry
 type Registry struct {
 	defaultLocale string
@@ -50,6 +61,10 @@ type Locale struct {
 // Key defines the type of a text key
 type Key string
 
+func (k Key) String() string {
+	return string(k)
+}
+
 // Snippets is the actual representation of key -> array of texts in locale
 type Snippets map[Key][]string
 
@@ -61,7 +76,16 @@ type IntentResponse struct {
 	Title   []string
 	Text    []string
 	SSML    []string
+	Slots   map[Key]Slot
 }
+
+type Slot struct {
+	Samples             []string
+	PromptElicitations  []alexa.PromptVariations
+	PromptConfirmations []alexa.PromptVariations // TODO: is this correct?
+}
+
+type Prompts map[Key][]alexa.PromptVariations
 
 // RegisterFunc defines the functions to be passed to Register
 type RegisterFunc func(cfg *Config)
@@ -198,10 +222,25 @@ func (l Locale) GetAllSnippets(k Key, args ...interface{}) []string {
 }
 
 func (l Locale) GetIntent(key Key) IntentResponse {
-	return l.IntentResponses[key]
+	if r, ok := l.IntentResponses[key]; ok {
+		return r
+	}
+
+	if l.Fallback != nil {
+		return l.Fallback.GetIntent(key)
+	}
+
+	return IntentResponse{}
 }
 
 func (l Locale) GetSingleIntentResponse(key Key) (string, string, string) {
-	r := rand.Intn(len(l.IntentResponses[key].Text))
-	return l.IntentResponses[key].Title[0], l.IntentResponses[key].Text[r], l.IntentResponses[key].SSML[r]
+	ir := l.GetIntent(key)
+
+	if len(ir.Text) > 0 {
+		r := rand.Intn(len(ir.Text))
+		return ir.Title[0], ir.Text[r], ir.SSML[r]
+	}
+
+	return string(key + ".Title"), string(key + ".Text"), string(key + ".SSML")
+
 }

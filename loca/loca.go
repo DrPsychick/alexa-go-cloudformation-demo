@@ -14,14 +14,18 @@ const (
 	Stop          l10n.Key = "stop"
 
 	// Intents
-	SaySomething l10n.Key = "SaySomething"
-	DemoIntent   l10n.Key = "DemoIntent"
+	SaySomething    l10n.Key = "SaySomething"
+	DemoIntent      l10n.Key = "DemoIntent"
+	AWSStatusIntent l10n.Key = "AWSStatus"
 
 	// Types
-	TypeBeerCountries        l10n.Key = "BEER_Countries"
-	TypeBeerCountriesValues  l10n.Key = "BEER_CountriesValues"
-	TypePeopleCategory       l10n.Key = "BEER_PeopleCategory"
-	TypePeopleCategoryValues l10n.Key = "BEER_PeopleCatgoryValues"
+	TypeArea       l10n.Key = "AWS_Area"
+	TypeAreaName   l10n.Key = "Area"
+	TypeAreaValues l10n.Key = "AWS_AreaValues"
+
+	TypeRegion       l10n.Key = "AWS_Region"
+	TypeRegionName   l10n.Key = "Region"
+	TypeRegionValues l10n.Key = "AWS_RegionValues"
 )
 
 func init() {
