@@ -3,7 +3,8 @@
 ## defining the skill
 ```go
 const (
-	TypeSlotOne string = "SLOT_one"
+	TypeSlotOne string = "SLOT_One"
+    TypeSlotTwo string = "SLOT_Two"
 	DemoIntent string = "DemoIntent"
 	DemoIntentSlotOne string = "DemoIntent_Slot_One"
 	DemoIntentSlotOneSamples string = "DemoIntent_Slot_One_Samples"
@@ -12,11 +13,14 @@ const (
 var deDE = &l10n.Locale{
 	Name: "de-DE",
 	Countries: []alexa.Country{alexa.CountryGerman},
+	l10n.KeySkillInvocation: "demo skill",
 	TextSnippets: map[string][]string{
 		"MyKey": []string{"My Value 1", "My Value 2"},
 		DemoIntentTitle: []string{"Demo"},
 		DemoIntentSamples: []string{"starte demo"},
 		DemoIntentSlotOneSamples: []string{"of {Area}", "in {Area}"},
+		SlotOneValues: []string{"Value 1", "Value 2"},
+		SlotTwoValues: []string{"Value A", "Value B"},
 	},
 }
 r := NewRegistry().
@@ -26,7 +30,8 @@ r := NewRegistry().
 skill := gen.NewSkillBuilder().
 	WithCategory(alexa.CategoryShopping).
 	WithModelDelegation(alexa.DelegationSkillResponse).
-	WithPrivacyFlag(gen.FlagIsExportCompliant)
+	WithPrivacyFlag(gen.FlagIsExportCompliant).
+	WithL10NRegistry(r)
 [...]
 // add locales
 for n, l := range r.GetLocales() {
@@ -34,29 +39,35 @@ for n, l := range r.GetLocales() {
     	WithCountries(l.Countries)
 }
 [...]
+
+// new ModelBuilder
+modelBuilder := gen.NewModelBuilder().
+	WithL10NRegistry(r)
 // add types
-skill = skill.WithType(loca.SlotOneType)
+typeBuilder = modelBuilder.
+	WithType(loca.TypeSlotOne).WithValuesName(loca.SlotOneValues)
+typeBuilder = modelBuilder.
+	WithType(local.TypeSlotTwo).WithValuesName(loca.SlotTwoValues)
 
 // add simple intent
-skill = skill.WithIntent(gen.NewIntentBuilder(loca.MyIntent))
+intentBuilder = modelBuilder.WithIntent(gen.NewIntentBuilder(loca.MyIntent))
 
 // add intent with samples and slot
-skill = skill.WithIntent(gen.NewIntentBuilder(loca.DemoIntent).
+intentBuilder = modelBuilder.WithIntent(gen.NewIntentBuilder(loca.DemoIntent).
 	WithSamples(loca.DemoIntentSamples). // reference key specifically
 	WithSlot(gen.NewIntentSlot(
 		loca.DemoIntentSlotOne, loca.SlotOneType
     ).WithSlotSamples(local.DemoIntentSlotOneSamples)
 ))
 // OR: WithIntent returns an Intent...
-skill = skill.WithIntent(loca.DemoIntent).
+intentBuilder = modelBuilder.WithIntent(loca.DemoIntent).
 	WithSamples(...).WithSlot(...)
 
 s, _ := skill.Build()
 res, _ := json.Marshal(s)
 [...]
 
-model, _ := skill.BuildModels()
-for l, m := range skill.BuildModels() {
+for l, m := range modelBuilder.BuildModels() {
 	res, _ := json.Marshal(m)
 	[...]
 }

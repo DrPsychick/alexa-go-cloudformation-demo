@@ -44,15 +44,19 @@ func UseVoiceLang(voice string, language string, text string) string {
 	return `<voice name="` + voice + `"><lang xml:lang="` + language + `">` + text + `</lang></voice>`
 }
 
+// DefaultRegistry is the standard registry used
+var DefaultRegistry = &Registry{
+	locales: map[string]*Locale{},
+}
+
 // Registry is the Locale registry
 type Registry struct {
 	defaultLocale string
 	locales       map[string]*Locale
 }
 
-// DefaultRegistry is the standard registry used
-var DefaultRegistry = &Registry{
-	locales: map[string]*Locale{},
+func NewRegistry() *Registry {
+	return &Registry{locales: map[string]*Locale{}}
 }
 
 // RegisterFunc defines the functions to be passed to Register
