@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-const Greeting l10n.Key = "greeting"
-const FuckYou l10n.Key = "fuckyou"
-const ByeBye l10n.Key = "byebye"
-const FallbackTest l10n.Key = "fallback_test"
+const Greeting string = "greeting"
+const FuckYou string = "fuckyou"
+const ByeBye string = "byebye"
+const FallbackTest string = "fallback_test"
 
 var deDE = &l10n.Locale{
 	Name: "de-DE",
@@ -82,11 +82,11 @@ func TestRegisterFallback(t *testing.T) {
 
 	l, _ := l10n.Resolve("de-DE")
 	assert.NotNil(t, l.Fallback)                                 // fallback Locale is set
-	assert.NotEmpty(t, l.GetSnippet(ByeBye))                     // fallback Key is used
+	assert.NotEmpty(t, l.GetSnippet(ByeBye))                     // fallback key is used
 	assert.Equal(t, "Fallback text", l.GetSnippet(FallbackTest)) // fallback content is returned
 }
 
 func TestFallbackToKey(t *testing.T) {
 	l, _ := l10n.Resolve("en-US")
-	assert.Equal(t, "not_found", l.GetSnippet(l10n.Key("not_found"))) // no fallback: return key name
+	assert.Equal(t, "not_found", l.GetSnippet("not_found")) // no fallback: return key name
 }

@@ -20,15 +20,15 @@ type LanguageModel struct {
 }
 
 type ModelIntent struct {
-	Name    string       `json:"name"`
-	Samples []string     `json:"samples"`
-	Slots   *[]ModelSlot `json:"slots,omitempty"`
+	Name    string      `json:"name"`
+	Samples []string    `json:"samples,omitempty"`
+	Slots   []ModelSlot `json:"slots,omitempty"`
 }
 
 type ModelSlot struct {
 	Name    string   `json:"name"`
 	Type    string   `json:"type"`
-	Samples []string `json:"samples"`
+	Samples []string `json:"samples,omitempty"`
 }
 
 type ModelType struct {

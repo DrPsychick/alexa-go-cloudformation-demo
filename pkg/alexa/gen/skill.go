@@ -174,7 +174,7 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 
 	// add Intents
 	for _, i := range s.intents {
-		li, err := locale.Translations.GetIntent(l10n.Key(i.Name))
+		li, err := locale.Translations.GetIntent(i.Name)
 		if err != nil {
 			return nil, fmt.Errorf("Intent %s is not translated into %s", i.Name, locale.Translations.Name)
 		}
@@ -191,10 +191,10 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 		// loop over slots
 		var di_slots = []alexa.DialogIntentSlot{}
 		for _, sl := range i.Slots {
-			ls := li.Slots[l10n.Key(sl.Name)]
+			ls := li.Slots[sl.Name]
 
 			if mi.Slots == nil {
-				mi.Slots = &[]alexa.ModelSlot{}
+				mi.Slots = []alexa.ModelSlot{}
 			}
 
 			// create ModelSlot
@@ -207,7 +207,7 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 				slot.Samples = ls.Samples
 			}
 			// add slot to ModelIntent
-			*mi.Slots = append(*mi.Slots, slot)
+			mi.Slots = append(mi.Slots, slot)
 
 			// add slot DialogIntent - Elicitations
 			pe := ls.PromptElicitations
@@ -271,7 +271,7 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 			Name: string(t),
 		}
 
-		for _, t := range locale.Translations.GetAllSnippets(l10n.Key(t + "Values")) {
+		for _, t := range locale.Translations.GetAllSnippets(string(t + "Values")) {
 			mt.Values = append(mt.Values, alexa.TypeValue{
 				Name: alexa.NameValue{Value: t},
 			})

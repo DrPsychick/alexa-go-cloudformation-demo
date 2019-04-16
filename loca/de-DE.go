@@ -11,7 +11,7 @@ var deDE = &l10n.Locale{
 	Countries: []alexa.Country{
 		alexa.CountryGermany,
 	},
-	TextSnippets: map[l10n.Key][]string{
+	TextSnippets: map[string][]string{
 		l10n.KeySkillName:         []string{"DemoSkill"},
 		l10n.KeySkillDescription:  []string{"Demonstrationsskill für das Meetup"},
 		l10n.KeySkillSummary:      []string{"Dieser Skill demonstriert was man mit dem DrPsychick/alexa package machen kann"},

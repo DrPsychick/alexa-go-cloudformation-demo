@@ -8,5 +8,5 @@ import (
 var frFR = &l10n.Locale{
 	Name:         "fr-FR",
 	Fallback:     enUS,
-	TextSnippets: map[l10n.Key][]string{},
+	TextSnippets: map[string][]string{},
 }

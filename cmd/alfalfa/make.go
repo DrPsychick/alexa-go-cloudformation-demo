@@ -86,7 +86,7 @@ var modelGerman = alexa.Model{
 						"status of {Region}",
 						"{Region} status",
 					},
-					Slots: &[]alexa.ModelSlot{
+					Slots: []alexa.ModelSlot{
 						{Name: "Area", Type: "AWS_Area", Samples: []string{"of {Area}"}},
 						{Name: "Region", Type: "AWS_Region", Samples: []string{"of {Region}", "in {Region}"}},
 					},
@@ -168,10 +168,10 @@ func createSkill(r l10n.Registry) (*gen.SkillBuilder, error) {
 	skill := gen.NewSkillBuilder()
 	skill.SetCategory(alexa.CategoryOrganizersAndAssistants)
 	skill.SetModelDelegation(alexa.DelegationSkillResponse)
-	skill.SetDefaultLocale(r.GetDefaultLocale())
+	skill.SetDefaultLocale(r.GetDefault().Name)
 	skill.SetPrivacyFlag(gen.FlagIsExportCompliant, true)
 
-	// Types will automatically add the values from l10n.Key
+	// Types will automatically add the values from l10n key
 	ta := gen.NewType(string(loca.TypeArea))
 	skill.AddType(ta)
 	tr := gen.NewType(string(loca.TypeRegion))

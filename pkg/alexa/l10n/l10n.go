@@ -9,17 +9,17 @@ import (
 
 // Default keys
 const (
-	KeySkillName                Key = "SKILL_Name"
-	KeySkillDescription         Key = "SKILL_Description"
-	KeySkillSummary             Key = "SKILL_Summary"
-	KeySkillExamplePhrases      Key = "SKILL_ExamplePhrases"
-	KeySkillKeywords            Key = "SKILL_Keywords"
-	KeySkillSmallIconURI        Key = "SKILL_SmallIconURI"
-	KeySkillLargeIconURI        Key = "SKILL_LargeIconURI"
-	KeySkillTestingInstructions Key = "SKILL_TestingInstructions"
-	KeySkillInvocation          Key = "SKILL_Invocation"
-	KeySkillPrivacyPolicyURL    Key = "SKILL_PrivacyPolicyURL"
-	KeySkillTermsOfUse          Key = "SKILL_TermsOfUse"
+	KeySkillName                string = "SKILL_Name"
+	KeySkillDescription         string = "SKILL_Description"
+	KeySkillSummary             string = "SKILL_Summary"
+	KeySkillExamplePhrases      string = "SKILL_ExamplePhrases"
+	KeySkillKeywords            string = "SKILL_Keywords"
+	KeySkillSmallIconURI        string = "SKILL_SmallIconURI"
+	KeySkillLargeIconURI        string = "SKILL_LargeIconURI"
+	KeySkillTestingInstructions string = "SKILL_TestingInstructions"
+	KeySkillInvocation          string = "SKILL_Invocation"
+	KeySkillPrivacyPolicyURL    string = "SKILL_PrivacyPolicyURL"
+	KeySkillTermsOfUse          string = "SKILL_TermsOfUse"
 )
 
 func init() {
@@ -114,7 +114,8 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 		}
 
 		// set the fallback
-		r.locales[cfg.FallbackFor].Fallback = l
+		fb := r.locales[cfg.FallbackFor]
+		fb.Fallback = l
 	}
 
 	// set locale as default
@@ -127,27 +128,31 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 	return nil
 }
 
-func (r *Registry) GetDefaultLocale() string {
-	return r.defaultLocale
+func (r *Registry) GetDefault() *Locale {
+	return r.locales[r.defaultLocale]
 }
 func (r *Registry) GetLocales() map[string]*Locale {
 	return r.locales
 }
 
 // Resolve returns the Locale matching the given name or an error
-func (r *Registry) Resolve(name string) (*Locale, error) {
-	l, ok := r.locales[name]
+func (r *Registry) Resolve(locale string) (*Locale, error) {
+	l, ok := r.locales[locale]
 	if !ok {
-		return nil, fmt.Errorf("locale %s not found", name)
+		return nil, fmt.Errorf("locale %s not found", locale)
 	}
 	return l, nil
 }
 
 // Snippets is the actual representation of key -> array of texts in locale
-type Snippets map[Key][]string
+type Snippets map[string][]string
+
+func (s Snippets) GetFirst(key string) string {
+	return s[key][0]
+}
 
 // Get returns the translation for the snippet
-func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
+func (s Snippets) Get(k string, args ...interface{}) (string, error) {
 	if len(s[k]) < 1 {
 		return "", fmt.Errorf("key not defined %s", string(k))
 	}
@@ -159,14 +164,14 @@ func (s Snippets) Get(k Key, args ...interface{}) (string, error) {
 	return fmt.Sprintf(s[k][r], args...), nil
 }
 
-func (s Snippets) GetAll(k Key, args ...interface{}) ([]string, error) {
+func (s Snippets) GetAll(k string, args ...interface{}) ([]string, error) {
 	if len(s[k]) < 1 {
 		return []string{}, fmt.Errorf("key not defined %s", string(k))
 	}
 	return s[k], nil
 }
 
-// Locale is a representation of Keys in a specific language (and can have a fallback Locale)
+// Locale is a representation of keys in a specific language (and can have a fallback Locale)
 type Locale struct {
 	Name            string          // de-DE, en-US, ...
 	Countries       []alexa.Country // countries associated with this locale
@@ -176,8 +181,26 @@ type Locale struct {
 	IntentResponses IntentResponses
 }
 
+func (l Locale) GetName() string {
+	return l.Name
+}
+
+func (l Locale) Get(key string) string {
+	return l.TextSnippets.GetFirst(key)
+}
+
+func (l Locale) GetAny(key string) string {
+	t, _ := l.TextSnippets.Get(key)
+	return t
+}
+
+func (l Locale) GetAll(key string) []string {
+	t, _ := l.TextSnippets.GetAll(key)
+	return t
+}
+
 // GetSnippet returns the translation and follows fallback chain
-func (l Locale) GetSnippet(k Key, args ...interface{}) string {
+func (l Locale) GetSnippet(k string, args ...interface{}) string {
 	if r, err := l.TextSnippets.Get(k, args...); err == nil {
 		return r
 	}
@@ -189,7 +212,7 @@ func (l Locale) GetSnippet(k Key, args ...interface{}) string {
 }
 
 // GetAllSnippets returns all available translations and follows fallback chain
-func (l Locale) GetAllSnippets(k Key, args ...interface{}) []string {
+func (l Locale) GetAllSnippets(k string, args ...interface{}) []string {
 	if r, err := l.TextSnippets.GetAll(k); err == nil {
 		return r
 	}
@@ -201,7 +224,7 @@ func (l Locale) GetAllSnippets(k Key, args ...interface{}) []string {
 }
 
 // GetIntent returns complete localized intent
-func (l Locale) GetIntent(key Key) (IntentResponse, error) {
+func (l Locale) GetIntent(key string) (IntentResponse, error) {
 	if r, ok := l.IntentResponses[key]; ok {
 		return r, nil
 	}
@@ -209,7 +232,7 @@ func (l Locale) GetIntent(key Key) (IntentResponse, error) {
 }
 
 // TODO: refactor to return a response object usable by ResponseBuilder?
-func (l Locale) GetSingleIntentResponse(key Key) (string, string, string) {
+func (l Locale) GetSingleIntentResponse(key string) (string, string, string) {
 	ir, _ := l.GetIntent(key)
 
 	if len(ir.Text) > 0 {
@@ -221,23 +244,15 @@ func (l Locale) GetSingleIntentResponse(key Key) (string, string, string) {
 
 }
 
-// Key defines the type of a text key
-// TODO: refactor and just use string!
-type Key string
-
-func (k Key) String() string {
-	return string(k)
-}
-
 // Responses is the representation of a list of IntentResponses
-type IntentResponses map[Key]IntentResponse
+type IntentResponses map[string]IntentResponse
 
 type IntentResponse struct {
 	Samples []string
 	Title   []string
 	Text    []string
 	SSML    []string
-	Slots   map[Key]Slot
+	Slots   map[string]Slot
 }
 
 type Slot struct {
@@ -246,4 +261,4 @@ type Slot struct {
 	PromptConfirmations []alexa.PromptVariations // TODO: is this correct?
 }
 
-type Prompts map[Key][]alexa.PromptVariations
+type Prompts map[string][]alexa.PromptVariations

@@ -23,10 +23,10 @@ func TestLocales(t *testing.T) {
 	var deDE = &l10n.Locale{
 		Name:      "de-DE",
 		Countries: []alexa.Country{"US", "CA", "DE"},
-		TextSnippets: map[l10n.Key][]string{
+		TextSnippets: map[string][]string{
 			l10n.KeySkillName: []string{"My skill name"},
 		},
-		IntentResponses: map[l10n.Key]l10n.IntentResponse{
+		IntentResponses: map[string]l10n.IntentResponse{
 			"WithSlots": l10n.IntentResponse{},
 		},
 	}

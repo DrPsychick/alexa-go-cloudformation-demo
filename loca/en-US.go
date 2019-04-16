@@ -12,7 +12,7 @@ var enUS = &l10n.Locale{
 		alexa.CountryUnitedStates,
 	},
 	// TODO: move simple text (no list) to separate key?
-	TextSnippets: map[l10n.Key][]string{
+	TextSnippets: map[string][]string{
 		l10n.KeySkillName:        []string{"Demo Skill"},
 		l10n.KeySkillDescription: []string{"Demo for the golang meetup"},
 		l10n.KeySkillSummary: []string{
@@ -102,7 +102,7 @@ var enUS = &l10n.Locale{
 				"{Region} status",
 			},
 			Text: []string{},
-			Slots: map[l10n.Key]l10n.Slot{
+			Slots: map[string]l10n.Slot{
 				TypeAreaName: {
 					Samples: []string{"of {Area}", "in {Area}"},
 					PromptElicitations: []alexa.PromptVariations{

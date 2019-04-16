@@ -4,28 +4,28 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
-// l10n.Keys of the project
+// keys of the project
 const (
-	GreetingTitle l10n.Key = "greeting_title"
-	Greeting      l10n.Key = "greeting"
-	GreetingSSML  l10n.Key = "greeting_ssml"
-	ByeBye        l10n.Key = "byebye"
-	StopTitle     l10n.Key = "stop_title"
-	Stop          l10n.Key = "stop"
+	GreetingTitle string = "greeting_title"
+	Greeting      string = "greeting"
+	GreetingSSML  string = "greeting_ssml"
+	ByeBye        string = "byebye"
+	StopTitle     string = "stop_title"
+	Stop          string = "stop"
 
 	// Intents
-	SaySomething    l10n.Key = "SaySomething"
-	DemoIntent      l10n.Key = "DemoIntent"
-	AWSStatusIntent l10n.Key = "AWSStatus"
+	SaySomething    string = "SaySomething"
+	DemoIntent      string = "DemoIntent"
+	AWSStatusIntent string = "AWSStatus"
 
 	// Types
-	TypeArea       l10n.Key = "AWS_Area"
-	TypeAreaName   l10n.Key = "Area"
-	TypeAreaValues l10n.Key = "AWS_AreaValues"
+	TypeArea       string = "AWS_Area"
+	TypeAreaName   string = "Area"
+	TypeAreaValues string = "AWS_AreaValues"
 
-	TypeRegion       l10n.Key = "AWS_Region"
-	TypeRegionName   l10n.Key = "Region"
-	TypeRegionValues l10n.Key = "AWS_RegionValues"
+	TypeRegion       string = "AWS_Region"
+	TypeRegionName   string = "Region"
+	TypeRegionValues string = "AWS_RegionValues"
 )
 
 func init() {
