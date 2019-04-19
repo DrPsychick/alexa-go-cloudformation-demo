@@ -1,6 +1,8 @@
 package gen_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
@@ -8,77 +10,171 @@ import (
 	"testing"
 )
 
-var s = gen.NewSkillBuilder()
+var registry = l10n.NewRegistry()
 
-func TestSkill(t *testing.T) {
-	s.SetCategory(alexa.CategoryCommunication)
-	s.SetTestingInstructions("My instructions")
-	skill, _ := s.Build()
-
-	assert.Equal(t, alexa.CategoryCommunication, skill.Manifest.Publishing.Category)
-	assert.Equal(t, "My instructions", skill.Manifest.Publishing.TestingInstructions)
+var enUS = &l10n.Locale{
+	Name: "en-US",
+	TextSnippets: map[string][]string{
+		"MyIntent_Samples":            []string{"say one", "say two"},
+		"MY_type_values":              []string{"Value 1", "Value 2"},
+		"Skill_Instructions":          []string{"My instructions"},
+		l10n.KeySkillName:             []string{"SkillName"},
+		l10n.KeySkillDescription:      []string{"SkillDescription"},
+		l10n.KeySkillSummary:          []string{"SkillSummary"},
+		l10n.KeySkillKeywords:         []string{"Keyword1", "Keyword2"},
+		l10n.KeySkillExamplePhrases:   []string{"start me", "boot me up"},
+		l10n.KeySkillSmallIconURI:     []string{"https://small"},
+		l10n.KeySkillLargeIconURI:     []string{"https://large"},
+		l10n.KeySkillPrivacyPolicyURL: []string{"https://policy"},
+		l10n.KeySkillTermsOfUse:       []string{"https://toc"},
+		"Name":                        []string{"name"},
+		"Description":                 []string{"description"},
+		"Summary":                     []string{"summary"},
+		"Keywords":                    []string{"key", "words"},
+		"Examples":                    []string{"say", "something"},
+		"SmallIcon":                   []string{"https://small.icon"},
+		"LargeIcon":                   []string{"https://large.icon"},
+		"Privacy":                     []string{"https://privacy.url"},
+		"Terms":                       []string{"https://terms.url"},
+		l10n.KeySkillInvocation:       []string{"call me"},
+	},
 }
 
-func TestLocales(t *testing.T) {
-	var deDE = &l10n.Locale{
-		Name:      "de-DE",
-		Countries: []alexa.Country{"US", "CA", "DE"},
-		TextSnippets: map[string][]string{
-			l10n.KeySkillName: []string{"My skill name"},
-		},
-		//IntentResponses: map[string]l10n.IntentResponse{
-		//	"WithSlots": l10n.IntentResponse{},
-		//},
-	}
-	err := l10n.Register(deDE)
-	assert.NoError(t, err)
-
-	s.AddLocale("de-DE", deDE)
-	skill, _ := s.Build()
-
-	for l, _ := range skill.Manifest.Publishing.Locales {
-		loc, err := l10n.Resolve(l)
-		assert.NoError(t, err)
-		assert.Equal(t, "My skill name", loc.Get(l10n.KeySkillName))
-		assert.Empty(t, loc.Get("Test"))
-		//_, err = loc.GetIntent("DoesNotExist")
-		//assert.Error(t, err)
-	}
-
-	s.AddCountry(alexa.CountryCanada)
-	s.AddCountry(alexa.CountryGermany)
-
-	skill, _ = s.Build()
-	assert.Contains(t, skill.Manifest.Publishing.Countries, alexa.CountryCanada)
-	assert.Contains(t, skill.Manifest.Publishing.Countries, alexa.CountryGermany)
+func init() {
+	registry.Register(enUS, l10n.AsDefault())
 }
 
-func TestIntentWithSlots(t *testing.T) {
-	ty := gen.NewType("MY_Type")
-	i := gen.NewIntent("WithSlots")
-	i.AddSlot(gen.NewSlot("MySlot-1", ty))
-	s.AddIntent(i)
-
-	_, err := s.Build()
-	assert.NoError(t, err)
-	_, err = s.BuildModels()
-	assert.NoError(t, err)
-
-	// 3 basic + 2 added in this test case:
-	// TODO: fix this if _, ok := models["de-DE"]; ok {
-	//	assert.Equal(t, 5, len(models["de-DE"].Model.Language.Intents))
-	//}
+func TestSetup(t *testing.T) {
+	assert.NotEmpty(t, registry.GetLocales())
+	assert.NotEmpty(t, registry.GetDefault())
+	assert.Equal(t, enUS, registry.GetDefault())
 }
 
-func TestValidateTypes(t *testing.T) {
-	assert.Error(t, s.ValidateTypes())
-	s.AddTypeString("MY_Type")
-	assert.NoError(t, s.ValidateTypes())
-	s.AddType(gen.NewType("MY_Type2"))
-	assert.NoError(t, s.ValidateTypes())
+func TestSkillBuilder_Build(t *testing.T) {
+	sb := gen.NewSkillBuilder().
+		WithLocaleRegistry(registry)
+	assert.IsType(t, &gen.SkillBuilder{}, sb)
+
+	sk, err := sb.Build()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, sk)
+
+	res, err := json.MarshalIndent(sk, "", "  ")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, string(res))
+	assert.NotContains(t, string(res), "null")
+	fmt.Printf("Skill: %s\n", string(res))
+}
+
+func TestSkillBuilder_WithLocaleTestingInstructionsOverwrite(t *testing.T) {
+	sb := gen.NewSkillBuilder().
+		WithLocaleRegistry(registry).
+		WithTestingInstructions("Skill_Instructions")
+	sk, err := sb.Build()
+	assert.NoError(t, err)
+	assert.Equal(t, "My instructions", sk.Manifest.Publishing.TestingInstructions)
+
+	sb.WithLocaleTestingInstructions("en-US", "New instructions")
+	sk, err = sb.Build()
+	assert.NoError(t, err)
+	assert.Equal(t, "New instructions", sk.Manifest.Publishing.TestingInstructions)
+
+	res, err := json.MarshalIndent(sk, "", "  ")
+	assert.NoError(t, err)
+
+	fmt.Printf("Skill: %s\n", string(res))
+}
+
+func TestSkillBuilder_Build_Full(t *testing.T) {
+	sb := gen.NewSkillBuilder().
+		WithLocaleRegistry(registry).
+		WithCategory(alexa.CategoryAstrology).
+		WithPrivacyFlag(gen.FlagIsExportCompliant, true).
+		WithPrivacyFlag(gen.FlagUsesPersonalInfo, true).
+		WithPrivacyFlag(gen.FlagAllowsPurchases, true).
+		WithPrivacyFlag(gen.FlagContainsAds, true).
+		WithPrivacyFlag(gen.FlagIsChildDirected, true).
+		AddCountry(alexa.CountryFrance).
+		WithCountries([]string{alexa.CountryGermany}).
+		AddCountries([]string{alexa.CountryCanada, alexa.CountryAustralia})
+	assert.NotEmpty(t, registry.GetLocales())
+
+	sk, err := sb.Build()
+	assert.NoError(t, err)
+	res, err := json.MarshalIndent(sk, "", "  ")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, string(res))
+
+	assert.Contains(t, string(res), alexa.CategoryAstrology)
+	assert.NotContains(t, string(res), "FR")
+	assert.Contains(t, string(res), "DE")
+	assert.Contains(t, string(res), "CA")
+	assert.Contains(t, string(res), "AU")
+
+	fmt.Printf("Full Skill: %s\n", string(res))
+
+	_, err = sb.BuildModels()
+	assert.Error(t, err)
+}
+
+func TestSkillBuilder_Build_Locale(t *testing.T) {
+	sb := gen.NewSkillBuilder()
+	sb.AddLocale("en-US").
+		WithLocaleName("my name")
+	sb.AddLocale("de-DE").
+		WithLocaleName("mein name")
+	sk, err := sb.Build()
+	assert.NoError(t, err)
+	assert.Equal(t, "my name", sk.Manifest.Publishing.Locales["en-US"].Name)
+
+	res, err := json.MarshalIndent(sk, "", "  ")
+	assert.NoError(t, err)
+	assert.Contains(t, string(res), "my name")
+
+	fmt.Printf("%s\n", string(res))
+}
+
+func TestSkillLocaleBuilder_With(t *testing.T) {
+	lb := gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(registry).
+		WithName("Name").
+		WithDescription("Description").
+		WithSummary("Summary").
+		WithKeywords("Keywords").
+		WithExamples("Examples").
+		WithSmallIcon("SmallIcon").
+		WithLargeIcon("LargeIcon").
+		WithPrivacyURL("Privacy").
+		WithTermsURL("Terms")
+
+	l, err := lb.BuildPublishingLocale()
+	assert.NoError(t, err)
+
+	res, err := json.MarshalIndent(l, "", "  ")
+	assert.NoError(t, err)
+	assert.Contains(t, string(res), ": \"name\"")
+	assert.Contains(t, string(res), ": \"description\"")
+	assert.Contains(t, string(res), ": \"summary\"")
+	assert.Contains(t, string(res), "\"say\",")
+	assert.Contains(t, string(res), "\"key\",")
+	assert.Contains(t, string(res), "small.icon")
+	assert.Contains(t, string(res), "large.icon")
+
+	fmt.Printf("%s\n", string(res))
+
+	pl, err := lb.BuildPrivacyLocale()
+	assert.NoError(t, err)
+
+	res, err = json.MarshalIndent(pl, "", "  ")
+	assert.NoError(t, err)
+	assert.Contains(t, string(res), "privacy.url")
+	assert.Contains(t, string(res), "terms.url")
+
+	fmt.Printf("%s\n", string(res))
 }
 
 func TestBuildImmutability(t *testing.T) {
+	s := gen.NewSkillBuilder()
 	s1, _ := s.Build()
 	s2, _ := s.Build()
 

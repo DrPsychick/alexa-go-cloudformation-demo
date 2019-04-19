@@ -45,26 +45,27 @@ func (m *ModelBuilder) AddType(name string) *ModelTypeBuilder {
 	return t
 }
 
-func (m *ModelBuilder) Build() map[string]alexa.Model {
-	ams := make(map[string]alexa.Model)
+func (m *ModelBuilder) Build() (map[string]*alexa.Model, error) {
+	ams := make(map[string]*alexa.Model)
 
-	if m.registry != nil {
-		// build model for each locale registered
-		for _, l := range m.registry.GetLocales() {
-			ams[l.GetName()] = m.BuildLocale(l.GetName())
-		}
-	} else {
-		for l, _ := range m.registry.GetLocales() {
-			ams[l] = m.BuildLocale(l)
+	// build model for each locale registered
+	for _, l := range m.registry.GetLocales() {
+		if m, err := m.BuildLocale(l.GetName()); err != nil {
+			return nil, err
+		} else {
+			ams[l.GetName()] = m
 		}
 	}
-	return ams
+	return ams, nil
 }
 
-func (m *ModelBuilder) BuildLocale(locale string) alexa.Model {
-	loc, _ := m.registry.Resolve(locale)
+func (m *ModelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
+	loc, err := m.registry.Resolve(locale)
+	if err != nil {
+		return &alexa.Model{}, err
+	}
 	// create basic model
-	am := alexa.Model{
+	am := &alexa.Model{
 		Model: alexa.InteractionModel{
 			Language: alexa.LanguageModel{
 				Invocation: loc.Get(l10n.KeySkillInvocation),
@@ -74,7 +75,11 @@ func (m *ModelBuilder) BuildLocale(locale string) alexa.Model {
 
 	mts := []alexa.ModelType{}
 	for _, t := range m.types {
-		mts = append(mts, t.Build(locale))
+		if mt, err := t.Build(locale); err != nil {
+			return &alexa.Model{}, err
+		} else {
+			mts = append(mts, mt)
+		}
 	}
 	am.Model.Language.Types = mts
 
@@ -82,20 +87,20 @@ func (m *ModelBuilder) BuildLocale(locale string) alexa.Model {
 
 	// add intents
 	for _, i := range m.intents {
-		am.Model.Language.Intents = append(
-			am.Model.Language.Intents, i.BuildLanguageIntent(locale),
-		)
+		if i, err := i.BuildLanguageIntent(locale); err != nil {
+			return &alexa.Model{}, err
+		} else {
+			am.Model.Language.Intents = append(am.Model.Language.Intents, i)
+		}
 
 		//am.Model.Dialog.Intents = append(
 		//	am.Model.Dialog.Intents, i.BuildDialogIntent(locale),
 		//)
 	}
-	return am
+	return am, nil
 }
 
-func (m *ModelBuilder) GetLocales() map[string]l10n.LocaleInstance {
-	return m.registry.GetLocales()
-}
+///////////////////////////////////////////////////////
 
 // ModelIntentBuilder
 type ModelIntentBuilder struct {
@@ -120,7 +125,10 @@ func (i *ModelIntentBuilder) WithSamples(samplesName string) *ModelIntentBuilder
 }
 
 func (i *ModelIntentBuilder) WithLocaleSamples(locale string, samples []string) *ModelIntentBuilder {
-	loc, _ := i.registry.Resolve(locale)
+	loc, err := i.registry.Resolve(locale)
+	if err != nil {
+		return i
+	}
 	if i.samplesName == "" {
 		i.samplesName = i.name + l10n.KeyPostfixSamples
 	}
@@ -135,22 +143,28 @@ func (i *ModelIntentBuilder) AddSlot(name string) *ModelSlotBuilder {
 	return sb
 }
 
-func (i *ModelIntentBuilder) BuildLanguageIntent(locale string) alexa.ModelIntent {
-	loc, _ := i.registry.Resolve(locale)
-
-	mi := alexa.ModelIntent{
-		Name: i.name,
+func (i *ModelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelIntent, error) {
+	loc, err := i.registry.Resolve(locale)
+	if err != nil {
+		return alexa.ModelIntent{}, err
 	}
 
-	mi.Samples = loc.GetAll(i.samplesName)
+	mi := alexa.ModelIntent{
+		Name:    i.name,
+		Samples: loc.GetAll(i.samplesName),
+	}
 
 	mss := []alexa.ModelSlot{}
 	for _, s := range i.slots {
-		mss = append(mss, s.BuildIntentSlot(locale))
+		if s, err := s.BuildIntentSlot(locale); err != nil {
+			return alexa.ModelIntent{}, err
+		} else {
+			mss = append(mss, s)
+		}
 	}
 	mi.Slots = mss
 
-	return mi
+	return mi, nil
 }
 
 func (i *ModelIntentBuilder) BuildDialogIntent(locale string) alexa.DialogIntent {
@@ -201,8 +215,11 @@ func (s *ModelSlotBuilder) WithElicitationPrompt() *ModelSlotBuilder {
 	return s
 }
 
-func (s *ModelSlotBuilder) BuildIntentSlot(locale string) alexa.ModelSlot {
-	l, _ := s.registry.Resolve(locale)
+func (s *ModelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, error) {
+	l, err := s.registry.Resolve(locale)
+	if err != nil {
+		return alexa.ModelSlot{}, err
+	}
 	ms := alexa.ModelSlot{
 		Name: s.name,
 		Type: s.typeName,
@@ -210,7 +227,7 @@ func (s *ModelSlotBuilder) BuildIntentSlot(locale string) alexa.ModelSlot {
 	if s.samplesName != "" {
 		ms.Samples = l.GetAll(s.samplesName)
 	}
-	return ms
+	return ms, nil
 }
 
 func (s *ModelSlotBuilder) BuildDialogSlot(locale string) alexa.DialogIntentSlot {
@@ -247,7 +264,10 @@ func (t *ModelTypeBuilder) WithValuesName(valuesName string) *ModelTypeBuilder {
 }
 
 func (t *ModelTypeBuilder) WithLocaleValues(locale string, values []string) *ModelTypeBuilder {
-	loc, _ := t.registry.Resolve(locale)
+	loc, err := t.registry.Resolve(locale)
+	if err != nil {
+		return t
+	}
 	if t.valuesName == "" {
 		t.valuesName = t.name + l10n.KeyPostfixValues
 	}
@@ -255,12 +275,15 @@ func (t *ModelTypeBuilder) WithLocaleValues(locale string, values []string) *Mod
 	return t
 }
 
-func (t *ModelTypeBuilder) Build(locale string) alexa.ModelType {
-	loc, _ := t.registry.Resolve(locale)
+func (t *ModelTypeBuilder) Build(locale string) (alexa.ModelType, error) {
+	loc, err := t.registry.Resolve(locale)
+	if err != nil {
+		return alexa.ModelType{}, err
+	}
 	var tv = []alexa.TypeValue{}
 	for _, v := range loc.GetAll(t.valuesName) {
 		tv = append(tv, alexa.TypeValue{Name: alexa.NameValue{Value: v}})
 	}
-	return alexa.ModelType{Name: t.name, Values: tv}
+	return alexa.ModelType{Name: t.name, Values: tv}, nil
 
 }

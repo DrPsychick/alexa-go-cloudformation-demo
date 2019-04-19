@@ -1,15 +1,11 @@
 package loca
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
 var enUS = &l10n.Locale{
 	Name: "en-US",
-	Countries: []alexa.Country{
-		alexa.CountryUnitedStates,
-	},
 	// TODO: move simple text (no list) to separate key?
 	TextSnippets: map[string][]string{
 		l10n.KeySkillName:        []string{"Demo Skill"},

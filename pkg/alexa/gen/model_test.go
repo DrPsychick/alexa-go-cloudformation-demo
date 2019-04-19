@@ -5,30 +5,9 @@ import (
 	"fmt"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
-
-var registry = l10n.NewRegistry()
-
-var enUS = &l10n.Locale{
-	Name: "en-US",
-	TextSnippets: map[string][]string{
-		"MyIntent_Samples": []string{"say one", "say two"},
-		"MY_type_values":   []string{"Value 1", "Value 2"},
-	},
-}
-
-func init() {
-	registry.Register(enUS, l10n.AsDefault())
-}
-
-func TestSetup(t *testing.T) {
-	assert.NotEmpty(t, registry.GetLocales())
-	assert.NotEmpty(t, registry.GetDefault())
-	assert.Equal(t, enUS, registry.GetDefault())
-}
 
 func TestIntentBuilder(t *testing.T) {
 	loc := registry.GetDefault()
@@ -42,7 +21,8 @@ func TestIntentBuilder(t *testing.T) {
 		WithSamples("SlotOneSamples")
 
 	// validate alexa.ModelIntent
-	li := ib.BuildLanguageIntent(loc.GetName())
+	li, err := ib.BuildLanguageIntent(loc.GetName())
+	assert.NoError(t, err)
 	assert.IsType(t, alexa.ModelIntent{}, li)
 	assert.Equal(t, "MyIntent", li.Name)
 	assert.Equal(t, loc.GetAll("MyIntent_Samples"), li.Samples)
@@ -71,15 +51,27 @@ func TestTypeBuilder(t *testing.T) {
 	tb := gen.NewModelTypeBuilder("MY_type").
 		WithLocaleRegistry(registry).
 		WithValuesName("MY_type_values")
-	mt := tb.Build(registry.GetDefault().GetName())
+	mt, err := tb.Build(registry.GetDefault().GetName())
+	assert.NoError(t, err)
 	assert.IsType(t, alexa.ModelType{}, mt)
 	assert.Equal(t, "MY_type", mt.Name)
 
-	res, _ := json.MarshalIndent(mt, "", "  ")
+	res, err := json.MarshalIndent(mt, "", "  ")
+	assert.NoError(t, err)
 	assert.NotEmpty(t, string(res))
 	fmt.Printf("MY_type = %s\n", string(res))
 }
 
+func TestModelBuilder_AddIntent(t *testing.T) {
+	mb := gen.NewModelBuilder().
+		WithLocaleRegistry(registry)
+
+	mb.AddIntent("MyIntent").
+		WithSamples("MyIntent_Samples")
+
+}
+
+// Use ModelBuilder by manually passing locale strings
 func TestLocaleModelBuilder(t *testing.T) {
 	loc, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
@@ -98,7 +90,8 @@ func TestLocaleModelBuilder(t *testing.T) {
 		AddSlot("SlotName").
 		WithType("TypeSlotOne")
 
-	m := mb.BuildLocale(loc.GetName())
+	m, err := mb.BuildLocale(loc.GetName())
+	assert.NoError(t, err)
 	res, err := json.MarshalIndent(m, "", "  ")
 	assert.NoError(t, err)
 	assert.Equal(t, "TypeSlotOne", m.Model.Language.Types[0].Name)
@@ -106,31 +99,25 @@ func TestLocaleModelBuilder(t *testing.T) {
 	assert.NotContains(t, "null", string(res))
 	fmt.Printf("%s = %s\n", loc.GetName(), string(res))
 
-	//assert.Empty(t, string(res), "locale: %s", loc.Name)
-
-	m = mb.BuildLocale("de-DE")
+	m, err = mb.BuildLocale("de-DE")
+	assert.NoError(t, err)
 	res, err = json.MarshalIndent(m, "", "  ")
 	assert.NoError(t, err)
+	assert.Equal(t, "sample eins", m.Model.Language.Intents[0].Samples[0])
 	fmt.Printf("%s = %s\n", "de-DE", string(res))
-
-	fmt.Printf("locales = %s\n", mb.GetLocales())
 }
 
-//func TestModelBuilderLocale(t *testing.T) {
-//	mb := gen.NewModelBuilder()
-//	mb.AddLocaleIntent("en-US", "MyIntent").
-//		WithLocaleSamples([]string{"serve my intent", "do what i mean"})
-//
-//	for l, m := range mb.Build() {
-//		res, err := json.MarshalIndent(m, "", "  ")
-//		assert.NoError(t, err)
-//		assert.Empty(t, string(res), "locale %s", l)
-//	}
-//}
-
-func TestRegistryModelBuilder(t *testing.T) {
+func TestModelBuilder_Build(t *testing.T) {
 	mb := gen.NewModelBuilder().
 		WithLocaleRegistry(registry)
+	mb.AddIntent("MyIntent")
 
-	assert.NotEmpty(t, mb.GetLocales())
+	ms, err := mb.Build()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(ms))
+
+	res, err := json.MarshalIndent(ms["en-US"], "", "  ")
+	assert.NoError(t, err)
+
+	fmt.Printf("en-US: %s\n", string(res))
 }

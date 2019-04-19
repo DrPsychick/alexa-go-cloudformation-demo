@@ -19,7 +19,7 @@ type Publishing struct {
 	Locales             map[string]LocaleDef `json:"locales"`
 	Worldwide           bool                 `json:"isAvailableWorldwide"`
 	Category            Category             `json:"category"`
-	Countries           []Country            `json:"distributionCountries"`
+	Countries           []string             `json:"distributionCountries,omitempty"`
 	TestingInstructions string               `json:"testingInstructions"`
 }
 
@@ -34,26 +34,25 @@ type LocaleDef struct {
 	LargeIconURI string   `json:"largeIconUri"`
 }
 
-// Country constants
-type Country string
-
 const (
 	// CountryAustralia is AU
-	CountryAustralia Country = "AU"
+	CountryAustralia string = "AU"
 	// CountryCanada is CA
-	CountryCanada Country = "CA"
+	CountryCanada string = "CA"
 	// CountryGermany is DE
-	CountryGermany Country = "DE"
+	CountryGermany string = "DE"
+	// CountryFrance is FR
+	CountryFrance string = "FR"
 	// CountryGreatBritain is GB
-	CountryGreatBritain Country = "GB"
+	CountryGreatBritain string = "GB"
 	// CountryIndia is IN
-	CountryIndia Country = "IN"
+	CountryIndia string = "IN"
 	// CountryItaly is IT
-	CountryItaly Country = "IT"
+	CountryItaly string = "IT"
 	// CountryJapan is JP
-	CountryJapan Country = "JP"
+	CountryJapan string = "JP"
 	// CountryUnitedStates is US
-	CountryUnitedStates Country = "US"
+	CountryUnitedStates string = "US"
 )
 
 // Category of the Skill that is used for filtering in the Alexa App https://developer.amazon.com/de/docs/smapi/skill-manifest.html#category-enum

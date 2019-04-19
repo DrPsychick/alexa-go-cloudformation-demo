@@ -1,15 +1,11 @@
 package loca
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
 var deDE = &l10n.Locale{
 	Name: "de-DE",
-	Countries: []alexa.Country{
-		alexa.CountryGermany,
-	},
 	TextSnippets: map[string][]string{
 		l10n.KeySkillName:         []string{"DemoSkill"},
 		l10n.KeySkillDescription:  []string{"Demonstrationsskill für das Meetup"},

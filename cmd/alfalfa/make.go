@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
@@ -28,7 +27,7 @@ var skill = alexa.Skill{
 				},
 			},
 			Category:            alexa.CategoryOrganizersAndAssistants,
-			Countries:           []alexa.Country{"DE"},
+			Countries:           []string{"DE"},
 			TestingInstructions: "Alexa, open demo skill. Yes? Say something.",
 		},
 		//Apis: alexa.Apis{
@@ -135,7 +134,7 @@ var modelGerman = alexa.Model{
 
 func runMake(c *cli.Context) error {
 	// build skill and models
-	sk, _ := createSkill(*l10n.DefaultRegistry)
+	sk, _ := createSkill(l10n.DefaultRegistry)
 	ms, _ := createModels(sk)
 
 	if c.Bool("skill") {
@@ -164,36 +163,31 @@ func runMake(c *cli.Context) error {
 }
 
 // createSkill generates and returns a SkillBuilder.
-func createSkill(r l10n.Registry) (*gen.SkillBuilder, error) {
-	skill := gen.NewSkillBuilder()
-	skill.SetCategory(alexa.CategoryOrganizersAndAssistants)
-	skill.SetModelDelegation(alexa.DelegationSkillResponse)
-	skill.SetDefaultLocale(r.GetDefault().GetName())
-	skill.SetPrivacyFlag(gen.FlagIsExportCompliant, true)
+func createSkill(r *l10n.Registry) (*gen.SkillBuilder, error) {
+	skill := gen.NewSkillBuilder().
+		WithLocaleRegistry(r).
+		WithCategory(alexa.CategoryOrganizersAndAssistants).
+		WithPrivacyFlag(gen.FlagIsExportCompliant, true)
 
-	// Types will automatically add the values from l10n key
-	ta := gen.NewType(string(loca.TypeArea))
-	skill.AddType(ta)
-	tr := gen.NewType(string(loca.TypeRegion))
-	skill.AddType(tr)
+		//WithName(l10n.KeySkillName). // default anyway
+		//WithSummary(l10n.KeySkillSummary). // default
+		//WithDescription(l10n.KeySkillDescription)
 
-	// Intents
-	skill.AddIntentString(string(loca.DemoIntent))
-	skill.AddIntentString(string(loca.SaySomething))
+	//// Types will automatically add the values from l10n key
+	//ta := gen.NewType(string(loca.TypeArea))
+	//skill.AddType(ta)
+	//tr := gen.NewType(string(loca.TypeRegion))
+	//skill.AddType(tr)
+
+	//// Intents
+	//skill.AddIntentString(string(loca.DemoIntent))
+	//skill.AddIntentString(string(loca.SaySomething))
 
 	// Intent with Slots (will automatically generate Prompts)
-	i := gen.NewIntent(string(loca.AWSStatusIntent))
-	i.AddSlot(gen.NewSlot(string(loca.TypeAreaName), ta))
-	i.AddSlot(gen.NewSlot(string(loca.TypeRegionName), tr))
-	skill.AddIntent(i)
-
-	// Add locales and countries
-	for n, l := range r.GetLocales() {
-		skill.AddLocale(n, l)
-		for _, c := range l.GetCountries() {
-			skill.AddCountry(c)
-		}
-	}
+	//i := gen.NewIntent(string(loca.AWSStatusIntent))
+	//i.AddSlot(gen.NewSlot(string(loca.TypeAreaName), ta))
+	//i.AddSlot(gen.NewSlot(string(loca.TypeRegionName), tr))
+	//skill.AddIntent(i)
 
 	return skill, nil
 }

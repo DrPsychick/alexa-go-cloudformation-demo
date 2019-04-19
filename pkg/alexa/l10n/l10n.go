@@ -2,7 +2,6 @@ package l10n
 
 import (
 	"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"math/rand"
 	"time"
 )
@@ -39,7 +38,6 @@ type LocaleRegistry interface {
 // LocaleInstance is the interface for a specific locale.
 type LocaleInstance interface {
 	GetName() string
-	GetCountries() []alexa.Country
 	Set(key string, values []string)
 	Get(key string, args ...interface{}) string
 	GetAny(key string, args ...interface{}) string
@@ -113,7 +111,7 @@ func (r *Registry) Register(l LocaleInstance, opts ...RegisterFunc) error {
 	}
 
 	// set locale as default
-	if cfg.DefaultLocale {
+	if cfg.DefaultLocale || r.defaultLocale == "" {
 		r.defaultLocale = l.GetName()
 	}
 
@@ -142,9 +140,9 @@ func (r *Registry) Resolve(locale string) (LocaleInstance, error) {
 
 // Locale is a representation of keys in a specific language (and can have a fallback Locale)
 type Locale struct {
-	Name         string          // de-DE, en-US, ...
-	Countries    []alexa.Country // countries associated with this locale
+	Name         string // de-DE, en-US, ...
 	TextSnippets Snippets
+	foo          Snippets
 }
 
 func NewLocale(locale string) *Locale {
@@ -156,12 +154,6 @@ func NewLocale(locale string) *Locale {
 
 func (l *Locale) GetName() string {
 	return l.Name
-}
-func (l *Locale) AddCountry(country string) {
-	l.Countries = append(l.Countries, alexa.Country(country))
-}
-func (l *Locale) GetCountries() []alexa.Country {
-	return l.Countries
 }
 
 func (l *Locale) Set(key string, values []string) {

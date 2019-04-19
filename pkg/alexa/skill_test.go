@@ -20,7 +20,7 @@ var minimalSkillDef = Skill{
 				},
 			},
 			Category:  "mycategory",
-			Countries: []Country{"DE"},
+			Countries: []string{"DE"},
 		},
 		Apis: &Apis{
 			Custom: &Custom{
