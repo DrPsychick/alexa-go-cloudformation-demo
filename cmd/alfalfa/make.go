@@ -168,7 +168,7 @@ func createSkill(r l10n.Registry) (*gen.SkillBuilder, error) {
 	skill := gen.NewSkillBuilder()
 	skill.SetCategory(alexa.CategoryOrganizersAndAssistants)
 	skill.SetModelDelegation(alexa.DelegationSkillResponse)
-	skill.SetDefaultLocale(r.GetDefault().Name)
+	skill.SetDefaultLocale(r.GetDefault().GetName())
 	skill.SetPrivacyFlag(gen.FlagIsExportCompliant, true)
 
 	// Types will automatically add the values from l10n key
@@ -190,7 +190,7 @@ func createSkill(r l10n.Registry) (*gen.SkillBuilder, error) {
 	// Add locales and countries
 	for n, l := range r.GetLocales() {
 		skill.AddLocale(n, l)
-		for _, c := range l.Countries {
+		for _, c := range l.GetCountries() {
 			skill.AddCountry(c)
 		}
 	}

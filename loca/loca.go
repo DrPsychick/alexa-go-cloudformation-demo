@@ -12,10 +12,18 @@ const (
 	ByeBye        string = "byebye"
 	StopTitle     string = "stop_title"
 	Stop          string = "stop"
+	GenericTitle  string = "Alexa"
 
 	// Intents
-	SaySomething    string = "SaySomething"
-	DemoIntent      string = "DemoIntent"
+	SaySomething        string = "SaySomething"
+	SaySomethingSamples string = "SaySomething_Samples"
+	SaySomethingTitle   string = "SaySomething_Title"
+	SaySomethingText    string = "SaySomething_Text"
+	SaySomethingSSML    string = "SaySomething_SSML"
+	DemoIntent          string = "DemoIntent"
+	DemoIntentText      string = "DemoIntentText"
+	DemoIntentSSML      string = "DemoIntentSSML"
+
 	AWSStatusIntent string = "AWSStatus"
 
 	// Types

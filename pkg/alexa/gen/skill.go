@@ -55,7 +55,7 @@ func (s *SkillBuilder) SetModelDelegation(delegation alexa.DialogDelegation) {
 	s.modelDelegation = delegation
 }
 
-func (s *SkillBuilder) AddLocale(l string, trans *l10n.Locale) {
+func (s *SkillBuilder) AddLocale(l string, trans l10n.LocaleInstance) {
 	if len(s.locales) == 0 {
 		// ensure that a default is set
 		if s.defaultLocale == "" {
@@ -114,7 +114,7 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 	if s.testingInstructions != "" {
 		skill.Manifest.Publishing.TestingInstructions = s.testingInstructions
 	} else {
-		skill.Manifest.Publishing.TestingInstructions = dl.Translations.GetSnippet(l10n.KeySkillTestingInstructions)
+		skill.Manifest.Publishing.TestingInstructions = dl.Translations.Get(l10n.KeySkillTestingInstructions)
 	}
 
 	// Permissions are required.
@@ -152,9 +152,9 @@ func (s *SkillBuilder) BuildModels() (map[string]*alexa.Model, error) {
 	var err error
 	models := make(map[string]*alexa.Model)
 	for _, l := range s.locales {
-		models[l.Translations.Name], err = s.BuildModel(&l)
+		models[l.Translations.GetName()], err = s.BuildModel(&l)
 		if err != nil {
-			return nil, fmt.Errorf("Could not build model for locale %s: %s", l.Translations.Name, err)
+			return nil, fmt.Errorf("Could not build model for locale %s: %s", l.Translations.GetName(), err)
 		}
 	}
 	return models, nil
@@ -165,7 +165,7 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 	model := &alexa.Model{
 		Model: alexa.InteractionModel{
 			Language: alexa.LanguageModel{
-				Invocation: locale.Translations.GetSnippet(l10n.KeySkillInvocation),
+				Invocation: locale.Translations.Get(l10n.KeySkillInvocation),
 			},
 		},
 	}
@@ -174,94 +174,91 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 
 	// add Intents
 	for _, i := range s.intents {
-		li, err := locale.Translations.GetIntent(i.Name)
-		if err != nil {
-			return nil, fmt.Errorf("Intent %s is not translated into %s", i.Name, locale.Translations.Name)
-		}
+		samples := locale.Translations.GetAll(i.Name + l10n.KeyPostfixSamples)
 
 		// create LanguageModel.Intent
 		mi := alexa.ModelIntent{
 			Name:    i.Name,
 			Samples: []string{},
 		}
-		if sam := li.Samples; len(sam) > 0 {
-			mi.Samples = sam
+		if len(samples) > 0 {
+			mi.Samples = samples
 		}
 
-		// loop over slots
-		var di_slots = []alexa.DialogIntentSlot{}
-		for _, sl := range i.Slots {
-			ls := li.Slots[sl.Name]
-
-			if mi.Slots == nil {
-				mi.Slots = []alexa.ModelSlot{}
-			}
-
-			// create ModelSlot
-			slot := alexa.ModelSlot{
-				Name:    sl.Name,
-				Type:    string(sl.Type),
-				Samples: []string{},
-			}
-			if len(ls.Samples) > 0 {
-				slot.Samples = ls.Samples
-			}
-			// add slot to ModelIntent
-			mi.Slots = append(mi.Slots, slot)
-
-			// add slot DialogIntent - Elicitations
-			pe := ls.PromptElicitations
-			if len(pe) > 0 {
-				p := prompt{Id: "Elicit.Intent-" + i.Name + ".IntentSlot-" + sl.Name}
-				dis := alexa.DialogIntentSlot{
-					Name: sl.Name,
-					Type: string(sl.Type),
-				}
-				dis.Elicitation = true
-				dis.Prompts = alexa.SlotPrompts{
-					Elicitation: p.Id,
-				}
-				p.Variations = pe
-				prompts = append(prompts, p)
-				di_slots = append(di_slots, dis)
-			}
-
-			// add slot DialogIntent - Confirmations
-			pc := ls.PromptConfirmations
-			if len(pc) > 0 {
-				p := prompt{Id: "Confirm.Intent-" + i.Name + ".IntentSlot-" + sl.Name}
-				dis := alexa.DialogIntentSlot{
-					Name: sl.Name,
-					Type: string(sl.Type),
-				}
-				dis.Confirmation = true
-				dis.Prompts = alexa.SlotPrompts{
-					Confirmation: p.Id,
-				}
-				p.Confirmations = pc
-				prompts = append(prompts, p)
-				di_slots = append(di_slots, dis)
-			}
-		}
+		//// loop over slots
+		//var di_slots = []alexa.DialogIntentSlot{}
+		//for _, sl := range i.Slots {
+		//	ls := li.Slots[sl.Name]
+		//
+		//	if mi.Slots == nil {
+		//		mi.Slots = []alexa.ModelSlot{}
+		//	}
+		//
+		//	// create ModelSlot
+		//	slot := alexa.ModelSlot{
+		//		Name:    sl.Name,
+		//		Type:    string(sl.Type),
+		//		Samples: []string{},
+		//	}
+		//	if len(ls.Samples) > 0 {
+		//		slot.Samples = ls.Samples
+		//	}
+		//	// add slot to ModelIntent
+		//	mi.Slots = append(mi.Slots, slot)
+		//
+		//	// add slot DialogIntent - Elicitations
+		//	pe := ls.PromptElicitations
+		//	if len(pe) > 0 {
+		//		p := prompt{Id: "Elicit.Intent-" + i.Name + ".IntentSlot-" + sl.Name}
+		//		dis := alexa.DialogIntentSlot{
+		//			Name: sl.Name,
+		//			Type: string(sl.Type),
+		//		}
+		//		dis.Elicitation = true
+		//		dis.Prompts = alexa.SlotPrompts{
+		//			Elicitation: p.Id,
+		//		}
+		//		p.Variations = pe
+		//		prompts = append(prompts, p)
+		//		di_slots = append(di_slots, dis)
+		//	}
+		//
+		//	// add slot DialogIntent - Confirmations
+		//	pc := ls.PromptConfirmations
+		//	if len(pc) > 0 {
+		//		p := prompt{Id: "Confirm.Intent-" + i.Name + ".IntentSlot-" + sl.Name}
+		//		dis := alexa.DialogIntentSlot{
+		//			Name: sl.Name,
+		//			Type: string(sl.Type),
+		//		}
+		//		dis.Confirmation = true
+		//		dis.Prompts = alexa.SlotPrompts{
+		//			Confirmation: p.Id,
+		//		}
+		//		p.Confirmations = pc
+		//		prompts = append(prompts, p)
+		//		di_slots = append(di_slots, dis)
+		//	}
+		//}
 		// add LanguageModel.Intents
 		model.Model.Language.Intents = append(model.Model.Language.Intents, mi)
 
-		// add Dialog.Intents
-		if len(di_slots) > 0 {
-			// add Dialog
-			if model.Model.Dialog == nil {
-				model.Model.Dialog = &alexa.Dialog{
-					Delegation: alexa.DialogDelegation(s.modelDelegation),
-				}
-			}
-
-			// create Dialog.Intent
-			di := alexa.DialogIntent{
-				Name:  i.Name,
-				Slots: di_slots,
-			}
-			model.Model.Dialog.Intents = append(model.Model.Dialog.Intents, di)
-		}
+		//// add Dialog.Intents
+		//if len(di_slots) > 0 {
+		//	// add Dialog
+		//	if model.Model.Dialog == nil {
+		//		model.Model.Dialog = &alexa.Dialog{
+		//			Delegation: alexa.DialogDelegation(s.modelDelegation),
+		//		}
+		//	}
+		//
+		//	// create Dialog.Intent
+		//	di := alexa.DialogIntent{
+		//		Name:  i.Name,
+		//		Slots: di_slots,
+		//	}
+		//	model.Model.Dialog.Intents = append(model.Model.Dialog.Intents, di)
+		//}
 	}
 
 	// add Types and Values
@@ -271,7 +268,7 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 			Name: string(t),
 		}
 
-		for _, t := range locale.Translations.GetAllSnippets(string(t + "Values")) {
+		for _, t := range locale.Translations.GetAll(string(t + "Values")) {
 			mt.Values = append(mt.Values, alexa.TypeValue{
 				Name: alexa.NameValue{Value: t},
 			})
@@ -292,7 +289,7 @@ func (s *SkillBuilder) BuildModel(locale *LocaleDef) (*alexa.Model, error) {
 	}
 
 	// store reference to the model
-	s.models[locale.Translations.Name] = Model{
+	s.models[locale.Translations.GetName()] = Model{
 		Model: model,
 	}
 	return model, nil
@@ -321,7 +318,7 @@ func (s *SkillBuilder) ValidateTypes() error {
 // TODO: remove this indirection, use l10n.Locale directly?
 // LocaleDef links skill locale with l10n.Locale to fetch translations.
 type LocaleDef struct {
-	Translations *l10n.Locale
+	Translations l10n.LocaleInstance
 }
 
 // BuildLocale adds locale information to the alexa.Skill.
@@ -329,14 +326,14 @@ func (l *LocaleDef) BuildLocale(skill *alexa.Skill) {
 	if skill.Manifest.Publishing.Locales == nil {
 		skill.Manifest.Publishing.Locales = make(map[string]alexa.LocaleDef)
 	}
-	skill.Manifest.Publishing.Locales[l.Translations.Name] = alexa.LocaleDef{
-		Name:         l.Translations.GetSnippet(l10n.KeySkillName),
-		Description:  l.Translations.GetSnippet(l10n.KeySkillDescription),
-		Summary:      l.Translations.GetSnippet(l10n.KeySkillSummary),
-		Examples:     l.Translations.GetAllSnippets(l10n.KeySkillExamplePhrases),
-		Keywords:     l.Translations.GetAllSnippets(l10n.KeySkillKeywords),
-		SmallIconURI: l.Translations.GetSnippet(l10n.KeySkillSmallIconURI),
-		LargeIconURI: l.Translations.GetSnippet(l10n.KeySkillLargeIconURI),
+	skill.Manifest.Publishing.Locales[l.Translations.GetName()] = alexa.LocaleDef{
+		Name:         l.Translations.Get(l10n.KeySkillName),
+		Description:  l.Translations.Get(l10n.KeySkillDescription),
+		Summary:      l.Translations.Get(l10n.KeySkillSummary),
+		Examples:     l.Translations.GetAll(l10n.KeySkillExamplePhrases),
+		Keywords:     l.Translations.GetAll(l10n.KeySkillKeywords),
+		SmallIconURI: l.Translations.Get(l10n.KeySkillSmallIconURI),
+		LargeIconURI: l.Translations.Get(l10n.KeySkillLargeIconURI),
 	}
 }
 
@@ -348,9 +345,9 @@ func (l *LocaleDef) BuildPrivacyLocale(skill *alexa.Skill) {
 	if skill.Manifest.Privacy.Locales == nil {
 		skill.Manifest.Privacy.Locales = make(map[string]alexa.PrivacyLocaleDef)
 	}
-	skill.Manifest.Privacy.Locales[l.Translations.Name] = alexa.PrivacyLocaleDef{
-		PrivacyPolicyURL: l.Translations.GetSnippet(l10n.KeySkillPrivacyPolicyURL),
-		TermsOfUse:       l.Translations.GetSnippet(l10n.KeySkillTermsOfUse),
+	skill.Manifest.Privacy.Locales[l.Translations.GetName()] = alexa.PrivacyLocaleDef{
+		PrivacyPolicyURL: l.Translations.Get(l10n.KeySkillPrivacyPolicyURL),
+		TermsOfUse:       l.Translations.Get(l10n.KeySkillTermsOfUse),
 	}
 }
 

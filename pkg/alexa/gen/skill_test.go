@@ -26,9 +26,9 @@ func TestLocales(t *testing.T) {
 		TextSnippets: map[string][]string{
 			l10n.KeySkillName: []string{"My skill name"},
 		},
-		IntentResponses: map[string]l10n.IntentResponse{
-			"WithSlots": l10n.IntentResponse{},
-		},
+		//IntentResponses: map[string]l10n.IntentResponse{
+		//	"WithSlots": l10n.IntentResponse{},
+		//},
 	}
 	err := l10n.Register(deDE)
 	assert.NoError(t, err)
@@ -39,10 +39,10 @@ func TestLocales(t *testing.T) {
 	for l, _ := range skill.Manifest.Publishing.Locales {
 		loc, err := l10n.Resolve(l)
 		assert.NoError(t, err)
-		assert.Equal(t, "My skill name", loc.GetSnippet(l10n.KeySkillName))
-		assert.NotEmpty(t, loc.GetSnippet("Test"))
-		_, err = loc.GetIntent("DoesNotExist")
-		assert.Error(t, err)
+		assert.Equal(t, "My skill name", loc.Get(l10n.KeySkillName))
+		assert.Empty(t, loc.Get("Test"))
+		//_, err = loc.GetIntent("DoesNotExist")
+		//assert.Error(t, err)
 	}
 
 	s.AddCountry(alexa.CountryCanada)

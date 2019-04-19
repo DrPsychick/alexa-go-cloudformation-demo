@@ -19,10 +19,10 @@ type Application interface {
 	stats.Statable
 
 	Help() (string, string)
-	Stop(l *l10n.Locale) (string, string, string)
-	SSMLDemo(l *l10n.Locale) (string, string, string)
-	SaySomething(l *l10n.Locale) (string, string, string)
-	Demo(l *l10n.Locale) (string, string, string)
+	Stop(l l10n.LocaleInstance) (string, string, string)
+	SSMLDemo(l l10n.LocaleInstance) (string, string, string)
+	SaySomething(l l10n.LocaleInstance) (string, string, string)
+	Demo(l l10n.LocaleInstance) (string, string, string)
 }
 
 func NewMux(app Application) alexa.Handler {

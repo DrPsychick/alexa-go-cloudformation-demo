@@ -6,8 +6,7 @@ import (
 )
 
 var deDE = &l10n.Locale{
-	Name:     "de-DE",
-	Fallback: enUS,
+	Name: "de-DE",
 	Countries: []alexa.Country{
 		alexa.CountryGermany,
 	},
@@ -34,44 +33,45 @@ var deDE = &l10n.Locale{
 			"<speak><voice name=\"Marlene\">Hallo!</voice></speak>",
 			"<speak>Guten <emphasis level=\"strong\">Tag!</emphasis></speak>",
 		},
-	},
-	// Combine localization used in a single response
-	IntentResponses: l10n.IntentResponses{
-		DemoIntent: l10n.IntentResponse{
-			Samples: []string{"schiess' los", "auf geht's", "hop hop"},
-			Title:   []string{"Demo"},
-			Text: []string{
-				"PACE ist geil!",
-				"Jawoll",
-			},
-			SSML: []string{
-				l10n.Speak(
-					l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
-						l10n.UseVoice("Marlene", "iss <emphasis level=\"strong\">geil!</emphasis>"),
-				),
-				l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
-			},
+		SaySomethingSamples: []string{"sag' etwas", "erzähl' mir was"},
+		SaySomethingTitle:   []string{"Antwort", "Titel 2"},
+		SaySomethingText: []string{
+			"Jetzt sag ich dir mal was... Kannst du das wirklich glauben?",
+			"Ich hätte das nie für möglich gehalten!",
+			"Hör' zu!",
 		},
-		SaySomething: l10n.IntentResponse{
-			Samples: []string{"sag' etwas", "erzähl' mir was"},
-			Title:   []string{"Antwort", "Titel 2"},
-			Text: []string{
-				"Jetzt sag ich dir mal was... Kannst du das wirklich glauben?",
-				"Ich hätte das nie für möglich gehalten!",
-				"Hör' zu!",
-			},
-			SSML: []string{
-				"<speak>" +
-					"Sie: <voice name=\"Marlene\">Schatz? Ich fühl mich in letzter Zeit so dick und hässlich, " +
-					"ich brauch dringend ein Kompliment!</voice> " +
-					"Er: <voice name=\"Hans\">Du hast eine hervorragende Beobachtungsgabe, mein Schatz!</voice>" +
-					"</speak>",
-				"<speak>" +
-					"Er: <voice name=\"Hans\">Wenn meine Frau singt, gehe ich immer aus dem Haus, " +
-					"damit die Nachbarn sehen, dass ich sie nicht schlage!</voice>" +
-					"</speak>",
-				"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
-			},
+		SaySomethingSSML: []string{
+			"<speak>" +
+				"Sie: <voice name=\"Marlene\">Schatz? Ich fühl mich in letzter Zeit so dick und hässlich, " +
+				"ich brauch dringend ein Kompliment!</voice> " +
+				"Er: <voice name=\"Hans\">Du hast eine hervorragende Beobachtungsgabe, mein Schatz!</voice>" +
+				"</speak>",
+			"<speak>" +
+				"Er: <voice name=\"Hans\">Wenn meine Frau singt, gehe ich immer aus dem Haus, " +
+				"damit die Nachbarn sehen, dass ich sie nicht schlage!</voice>" +
+				"</speak>",
+			"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
 		},
 	},
+	//// Combine localization used in a single response
+	//IntentResponses: l10n.IntentResponses{
+	//	DemoIntent: l10n.IntentResponse{
+	//		Samples: []string{"schiess' los", "auf geht's", "hop hop"},
+	//		Title:   []string{"Demo"},
+	//		Text: []string{
+	//			"PACE ist geil!",
+	//			"Jawoll",
+	//		},
+	//		SSML: []string{
+	//			l10n.Speak(
+	//				l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
+	//					l10n.UseVoice("Marlene", "iss <emphasis level=\"strong\">geil!</emphasis>"),
+	//			),
+	//			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
+	//		},
+	//	},
+	//	SaySomething: l10n.IntentResponse{
+	//		Samples: []string{"sag' etwas", "erzähl' mir was"},
+	//	},
+	//},
 }

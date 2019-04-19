@@ -31,23 +31,23 @@ func (a *Application) Help() (string, string) {
 }
 
 // Stop is the response to stop the skill
-func (a *Application) Stop(l *l10n.Locale) (string, string, string) {
-	return l.GetSnippet(loca.StopTitle), l.GetSnippet(loca.Stop), ""
+func (a *Application) Stop(l l10n.LocaleInstance) (string, string, string) {
+	return l.GetAny(loca.StopTitle), l.GetAny(loca.Stop), ""
 }
 
 // SimpleResponse handles simple title + text response
-func (a *Application) SaySomething(l *l10n.Locale) (string, string, string) {
-	return l.GetSingleIntentResponse(loca.SaySomething)
+func (a *Application) SaySomething(l l10n.LocaleInstance) (string, string, string) {
+	return l.GetAny(loca.SaySomethingTitle), l.GetAny(loca.SaySomethingText), l.GetAny(loca.SaySomethingSSML)
 }
 
 // SSMLDemo is the intent to demonstrate SSML output with Alexa
-func (a *Application) SSMLDemo(l *l10n.Locale) (string, string, string) {
-	return l.GetSnippet(loca.GreetingTitle), l.GetSnippet(loca.Greeting), l.GetSnippet(loca.GreetingSSML)
+func (a *Application) SSMLDemo(l l10n.LocaleInstance) (string, string, string) {
+	return l.GetAny(loca.GreetingTitle), l.GetAny(loca.Greeting), l.GetAny(loca.GreetingSSML)
 }
 
 // Demo is a simple demo response.
-func (a *Application) Demo(l *l10n.Locale) (string, string, string) {
-	return l.GetSingleIntentResponse(loca.DemoIntent)
+func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
+	return l.Get(loca.GenericTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
 }
 
 // Logger returns the application logger

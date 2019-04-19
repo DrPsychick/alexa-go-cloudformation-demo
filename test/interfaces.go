@@ -20,7 +20,7 @@ type MySubInterface interface {
 // Foo implements both interfaces
 type Foo struct {
 	name     string
-	instance *MySubInterface
+	instance MySubInterface
 }
 
 func (f *Foo) SetName(n string) {
@@ -30,16 +30,15 @@ func (f *Foo) GetName() string {
 	return f.name
 }
 func (f *Foo) SetInstance(i MySubInterface) {
-	f.instance = &i
+	f.instance = i
 }
 func (f *Foo) GetInstance() MySubInterface {
 	if f.instance == nil {
 		// what exactly does this do?
 		// why can I not used this in the test?
-		var m MySubInterface = f
-		f.instance = &m
+		f.instance = f
 	}
-	return *f.instance
+	return f.instance
 }
 
 // Bar implements only the sub interface

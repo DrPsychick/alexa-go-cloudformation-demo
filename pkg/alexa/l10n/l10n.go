@@ -20,10 +20,30 @@ const (
 	KeySkillInvocation          string = "SKILL_Invocation"
 	KeySkillPrivacyPolicyURL    string = "SKILL_PrivacyPolicyURL"
 	KeySkillTermsOfUse          string = "SKILL_TermsOfUse"
+	KeyPostfixSamples           string = "_Samples"
+	KeyPostfixValues            string = "_Values"
 )
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+// LocaleRegistry is the interface for an l10n registry.
+type LocaleRegistry interface {
+	Register(locale LocaleInstance, opts ...RegisterFunc) error
+	Resolve(locale string) (LocaleInstance, error)
+	GetDefault() LocaleInstance
+	GetLocales() map[string]LocaleInstance
+}
+
+// LocaleInstance is the interface for a specific locale.
+type LocaleInstance interface {
+	GetName() string
+	GetCountries() []alexa.Country
+	Set(key string, values []string)
+	Get(key string, args ...interface{}) string
+	GetAny(key string, args ...interface{}) string
+	GetAll(key string, args ...interface{}) []string
 }
 
 // Config contains the options for Locale registration
@@ -46,17 +66,17 @@ func UseVoiceLang(voice string, language string, text string) string {
 
 // DefaultRegistry is the standard registry used
 var DefaultRegistry = &Registry{
-	locales: map[string]*Locale{},
+	locales: map[string]LocaleInstance{},
 }
 
 // Registry is the Locale registry
 type Registry struct {
 	defaultLocale string
-	locales       map[string]*Locale
+	locales       map[string]LocaleInstance
 }
 
-func NewRegistry() *Registry {
-	return &Registry{locales: map[string]*Locale{}}
+func NewRegistry() LocaleRegistry {
+	return &Registry{locales: map[string]LocaleInstance{}}
 }
 
 // RegisterFunc defines the functions to be passed to Register
@@ -69,29 +89,21 @@ func AsDefault() RegisterFunc {
 	}
 }
 
-// TODO Obsolete:
-// AsFallbackFor registers the locale as fallback Locale for the given Locale name
-func AsFallbackFor(name string) RegisterFunc {
-	return func(cfg *Config) {
-		cfg.FallbackFor = name
-	}
-}
-
 // Register registers a new Locale in the DefaultRegistry
-func Register(locale *Locale, opts ...RegisterFunc) error {
+func Register(locale LocaleInstance, opts ...RegisterFunc) error {
 	return DefaultRegistry.Register(locale, opts...)
 }
 
 // Resolve returns the matching Locale from the DefaultRegistry
-func Resolve(name string) (*Locale, error) {
+func Resolve(name string) (LocaleInstance, error) {
 	return DefaultRegistry.Resolve(name)
 }
 
 // Register registers a new locale and fails if it already exists
-func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
-	_, ok := r.locales[l.Name]
+func (r *Registry) Register(l LocaleInstance, opts ...RegisterFunc) error {
+	_, ok := r.locales[l.GetName()]
 	if ok {
-		return fmt.Errorf("locale %s already registered", l.Name)
+		return fmt.Errorf("locale %s already registered", l.GetName())
 	}
 
 	// run all RegisterFuncs
@@ -100,43 +112,25 @@ func (r *Registry) Register(l *Locale, opts ...RegisterFunc) error {
 		opt(&cfg)
 	}
 
-	// order matters, first anything that can fail, then changing data
-	if cfg.FallbackFor != "" {
-		// fallback locale must be registered
-		orig, ok := r.locales[cfg.FallbackFor]
-		if !ok {
-			return fmt.Errorf("cannot be fallback for locale %s as it is not registered", cfg.FallbackFor)
-		}
-
-		// fallback already defined
-		if orig.Fallback != nil {
-			return fmt.Errorf("fallback for locale %s is already registered", orig.Name)
-		}
-
-		// set the fallback
-		fb := r.locales[cfg.FallbackFor]
-		fb.Fallback = l
-	}
-
 	// set locale as default
 	if cfg.DefaultLocale {
-		r.defaultLocale = l.Name
+		r.defaultLocale = l.GetName()
 	}
 
-	r.locales[l.Name] = l
+	r.locales[l.GetName()] = l
 
 	return nil
 }
 
-func (r *Registry) GetDefault() *Locale {
+func (r *Registry) GetDefault() LocaleInstance {
 	return r.locales[r.defaultLocale]
 }
-func (r *Registry) GetLocales() map[string]*Locale {
+func (r *Registry) GetLocales() map[string]LocaleInstance {
 	return r.locales
 }
 
 // Resolve returns the Locale matching the given name or an error
-func (r *Registry) Resolve(locale string) (*Locale, error) {
+func (r *Registry) Resolve(locale string) (LocaleInstance, error) {
 	l, ok := r.locales[locale]
 	if !ok {
 		return nil, fmt.Errorf("locale %s not found", locale)
@@ -144,121 +138,87 @@ func (r *Registry) Resolve(locale string) (*Locale, error) {
 	return l, nil
 }
 
-// Snippets is the actual representation of key -> array of texts in locale
-type Snippets map[string][]string
-
-func (s Snippets) GetFirst(key string) string {
-	return s[key][0]
-}
-
-// Get returns the translation for the snippet
-func (s Snippets) Get(k string, args ...interface{}) (string, error) {
-	if len(s[k]) < 1 {
-		return "", fmt.Errorf("key not defined %s", string(k))
-	}
-	if len(s[k]) == 1 {
-		return fmt.Sprintf(s[k][0], args...), nil
-	}
-	l := len(s[k])
-	r := rand.Intn(l)
-	return fmt.Sprintf(s[k][r], args...), nil
-}
-
-func (s Snippets) GetAll(k string, args ...interface{}) ([]string, error) {
-	if len(s[k]) < 1 {
-		return []string{}, fmt.Errorf("key not defined %s", string(k))
-	}
-	return s[k], nil
-}
+///////////////////////////////////////////
 
 // Locale is a representation of keys in a specific language (and can have a fallback Locale)
 type Locale struct {
-	Name            string          // de-DE, en-US, ...
-	Countries       []alexa.Country // countries associated with this locale
-	Invocation      string          // "my skill"
-	Fallback        *Locale         // points to fallback (or nil)
-	TextSnippets    Snippets
-	IntentResponses IntentResponses
+	Name         string          // de-DE, en-US, ...
+	Countries    []alexa.Country // countries associated with this locale
+	TextSnippets Snippets
 }
 
-func (l Locale) GetName() string {
+func NewLocale(locale string) *Locale {
+	return &Locale{
+		Name:         locale,
+		TextSnippets: Snippets{},
+	}
+}
+
+func (l *Locale) GetName() string {
 	return l.Name
 }
-
-func (l Locale) Get(key string) string {
-	return l.TextSnippets.GetFirst(key)
+func (l *Locale) AddCountry(country string) {
+	l.Countries = append(l.Countries, alexa.Country(country))
+}
+func (l *Locale) GetCountries() []alexa.Country {
+	return l.Countries
 }
 
-func (l Locale) GetAny(key string) string {
-	t, _ := l.TextSnippets.Get(key)
+func (l *Locale) Set(key string, values []string) {
+	l.TextSnippets[key] = values
+}
+
+func (l *Locale) Get(key string, args ...interface{}) string {
+	return l.TextSnippets.GetFirst(key, args...)
+}
+
+func (l *Locale) GetAny(key string, args ...interface{}) string {
+	t, _ := l.TextSnippets.GetAny(key, args...)
 	return t
 }
 
-func (l Locale) GetAll(key string) []string {
-	t, _ := l.TextSnippets.GetAll(key)
+func (l *Locale) GetAll(key string, args ...interface{}) []string {
+	t, _ := l.TextSnippets.GetAll(key, args...)
 	return t
 }
 
-// GetSnippet returns the translation and follows fallback chain
-func (l Locale) GetSnippet(k string, args ...interface{}) string {
-	if r, err := l.TextSnippets.Get(k, args...); err == nil {
-		return r
-	}
-	if l.Fallback != nil {
-		return l.Fallback.GetSnippet(k, args...)
-	}
+////////////////////////////////////
 
-	return string(k)
+// Snippets is the actual representation of key -> array of texts in locale
+type Snippets map[string][]string
+
+func (s Snippets) GetFirst(key string, args ...interface{}) string {
+	_, ok := s[key]
+	if !ok || len(s[key]) == 0 {
+		return ""
+	}
+	return fmt.Sprintf(s[key][0], args...)
 }
 
-// GetAllSnippets returns all available translations and follows fallback chain
-func (l Locale) GetAllSnippets(k string, args ...interface{}) []string {
-	if r, err := l.TextSnippets.GetAll(k); err == nil {
-		return r
+// Get returns the translation for the snippet
+func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
+	_, ok := s[key]
+	if !ok {
+		return "", fmt.Errorf("key not defined %s", key)
 	}
-	if l.Fallback != nil {
-		return l.Fallback.GetAllSnippets(k, args...)
+	if len(s[key]) == 0 {
+		return "", fmt.Errorf("key not defined %s", key)
 	}
-
-	return []string{string(k)}
-}
-
-// GetIntent returns complete localized intent
-func (l Locale) GetIntent(key string) (IntentResponse, error) {
-	if r, ok := l.IntentResponses[key]; ok {
-		return r, nil
+	if len(s[key]) == 1 {
+		return fmt.Sprintf(s[key][0], args...), nil
 	}
-	return IntentResponse{}, fmt.Errorf("No %s translations for intent %s", l.Name, key)
+	l := len(s[key])
+	r := rand.Intn(l)
+	return fmt.Sprintf(s[key][r], args...), nil
 }
 
-// TODO: refactor to return a response object usable by ResponseBuilder?
-func (l Locale) GetSingleIntentResponse(key string) (string, string, string) {
-	ir, _ := l.GetIntent(key)
-
-	if len(ir.Text) > 0 {
-		r := rand.Intn(len(ir.Text))
-		return ir.Title[0], ir.Text[r], ir.SSML[r]
+func (s Snippets) GetAll(k string, args ...interface{}) ([]string, error) {
+	if len(s[k]) == 0 {
+		return []string{}, fmt.Errorf("key not defined %s", k)
 	}
-
-	return string(key + ".Title"), string(key + ".Text"), string(key + ".SSML")
-
+	r := []string{}
+	for _, v := range s[k] {
+		r = append(r, fmt.Sprintf(v, args...))
+	}
+	return r, nil
 }
-
-// Responses is the representation of a list of IntentResponses
-type IntentResponses map[string]IntentResponse
-
-type IntentResponse struct {
-	Samples []string
-	Title   []string
-	Text    []string
-	SSML    []string
-	Slots   map[string]Slot
-}
-
-type Slot struct {
-	Samples             []string
-	PromptElicitations  []alexa.PromptVariations
-	PromptConfirmations []alexa.PromptVariations // TODO: is this correct?
-}
-
-type Prompts map[string][]alexa.PromptVariations
