@@ -7,11 +7,11 @@ type Skill struct {
 
 // Manifest is the parent for all other elements
 type Manifest struct {
-	Version     string        `json:"manifestVersion"`
-	Publishing  Publishing    `json:"publishingInformation"`
-	Apis        *Apis         `json:"apis,omitempty"`
-	Permissions *[]Permission `json:"permissions,omitempty"`
-	Privacy     *Privacy      `json:"privacyAndCompliance"`
+	Version     string       `json:"manifestVersion"`
+	Publishing  Publishing   `json:"publishingInformation"`
+	Apis        *Apis        `json:"apis,omitempty"`
+	Permissions []Permission `json:"permissions,omitempty"`
+	Privacy     *Privacy     `json:"privacyAndCompliance"`
 }
 
 // Publishing information
@@ -188,21 +188,21 @@ type Apis struct {
 	//Health     *Health	`json:"health"`
 	//HouseholdList *HouseholdList `json:"householdList"`
 	//Video *Video `json:"video"`
-	Interfaces *[]string `json:"interfaces,omitempty"`
+	Interfaces []string `json:"interfaces,omitempty"`
 }
 
 // AlexaForBusiness API are available in English only
 type AlexaForBusiness struct {
 	Endpoint   *Endpoint             `json:"endpoint"`
 	Regions    *map[Region]RegionDef `json:"regions"`
-	Interfaces *[]Interface          `json:"interfaces"`
+	Interfaces []Interface           `json:"interfaces,omitempty"`
 }
 
 // Custom API endpoint
 type Custom struct {
 	Endpoint   *Endpoint             `json:"endpoint"`
 	Regions    *map[Region]RegionDef `json:"regions"`
-	Interfaces *[]Interface          `json:"interfaces"`
+	Interfaces []Interface           `json:"interfaces,omitempty"`
 }
 
 // FlashBriefing API endpoint

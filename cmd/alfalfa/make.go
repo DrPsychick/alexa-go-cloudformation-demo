@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
@@ -38,7 +40,7 @@ var skill = alexa.Skill{
 		//	},
 		//	Interfaces: []string{},
 		//},
-		Permissions: &[]alexa.Permission{},
+		Permissions: []alexa.Permission{},
 		Privacy: &alexa.Privacy{
 			IsExportCompliant: true,
 			//Locales: map[alexa.Locale]alexa.PrivacyLocaleDef{
@@ -86,19 +88,19 @@ var modelGerman = alexa.Model{
 						"{Region} status",
 					},
 					Slots: []alexa.ModelSlot{
-						{Name: "Area", Type: "AWS_Area", Samples: []string{"of {Area}"}},
-						{Name: "Region", Type: "AWS_Region", Samples: []string{"of {Region}", "in {Region}"}},
+						{Name: "Area", Type: "AWSArea", Samples: []string{"of {Area}"}},
+						{Name: "Region", Type: "AWSRegion", Samples: []string{"of {Region}", "in {Region}"}},
 					},
 				},
 			},
 			Types: []alexa.ModelType{
-				{Name: "AWS_Area", Values: []alexa.TypeValue{
+				{Name: "AWSArea", Values: []alexa.TypeValue{
 					{Name: alexa.NameValue{Value: "Europe"}},
 					{Name: alexa.NameValue{Value: "North America"}},
 					{Name: alexa.NameValue{Value: "South America"}},
 					{Name: alexa.NameValue{Value: "Asia Pacific"}},
 				}},
-				{Name: "AWS_Region", Values: []alexa.TypeValue{
+				{Name: "AWSRegion", Values: []alexa.TypeValue{
 					{Name: alexa.NameValue{Value: "Frankfurt"}},
 					{Name: alexa.NameValue{Value: "Ireland"}},
 					{Name: alexa.NameValue{Value: "London"}},
@@ -112,20 +114,20 @@ var modelGerman = alexa.Model{
 			Delegation: alexa.DelegationSkillResponse,
 			Intents: []alexa.DialogIntent{
 				{Name: "AWSStatus", Confirmation: false, Slots: []alexa.DialogIntentSlot{
-					{Name: "Area", Type: "AWS_Area", Prompts: alexa.SlotPrompts{
+					{Name: "Area", Type: "AWSArea", Prompts: alexa.SlotPrompts{
 						Elicitation: "Elicit.Intent-AWSStatus.IntentSlot-Area",
 					}},
-					{Name: "Region", Type: "AWS_Region", Prompts: alexa.SlotPrompts{
+					{Name: "Region", Type: "AWSRegion", Prompts: alexa.SlotPrompts{
 						Elicitation: "Elicit.Intent-AWSStatus.IntentSlot-Region",
 					}},
 				}},
 			},
 		},
-		Prompts: &[]alexa.ModelPrompt{
-			{Id: "Elicit.Intent-AWSStatus.IntentSlot-Area", Variations: []alexa.PromptVariations{
+		Prompts: []alexa.ModelPrompt{
+			{Id: "Elicit.Intent-AWSStatus.IntentSlot-Area", Variations: []alexa.PromptVariation{
 				{Type: "PlainText", Value: "From what area do you seek status?"},
 			}},
-			{Id: "Elicit.Intent-AWSStatus.IntentSlot-Region", Variations: []alexa.PromptVariations{
+			{Id: "Elicit.Intent-AWSStatus.IntentSlot-Region", Variations: []alexa.PromptVariation{
 				{Type: "PlainText", Value: "From what region do you want to know the status?"},
 			}},
 		},
@@ -134,8 +136,14 @@ var modelGerman = alexa.Model{
 
 func runMake(c *cli.Context) error {
 	// build skill and models
-	sk, _ := createSkill(l10n.DefaultRegistry)
-	ms, _ := createModels(sk)
+	sk, err := createSkill(l10n.DefaultRegistry)
+	if err != nil {
+		return err
+	}
+	ms, err := createModels(sk)
+	if err != nil {
+		return err
+	}
 
 	if c.Bool("skill") {
 		s, err := sk.Build()
@@ -163,36 +171,38 @@ func runMake(c *cli.Context) error {
 }
 
 // createSkill generates and returns a SkillBuilder.
-func createSkill(r *l10n.Registry) (*gen.SkillBuilder, error) {
+func createSkill(r l10n.LocaleRegistry) (*gen.SkillBuilder, error) {
 	skill := gen.NewSkillBuilder().
 		WithLocaleRegistry(r).
 		WithCategory(alexa.CategoryOrganizersAndAssistants).
 		WithPrivacyFlag(gen.FlagIsExportCompliant, true)
-
-		//WithName(l10n.KeySkillName). // default anyway
-		//WithSummary(l10n.KeySkillSummary). // default
-		//WithDescription(l10n.KeySkillDescription)
-
-	//// Types will automatically add the values from l10n key
-	//ta := gen.NewType(string(loca.TypeArea))
-	//skill.AddType(ta)
-	//tr := gen.NewType(string(loca.TypeRegion))
-	//skill.AddType(tr)
-
-	//// Intents
-	//skill.AddIntentString(string(loca.DemoIntent))
-	//skill.AddIntentString(string(loca.SaySomething))
-
-	// Intent with Slots (will automatically generate Prompts)
-	//i := gen.NewIntent(string(loca.AWSStatusIntent))
-	//i.AddSlot(gen.NewSlot(string(loca.TypeAreaName), ta))
-	//i.AddSlot(gen.NewSlot(string(loca.TypeRegionName), tr))
-	//skill.AddIntent(i)
 
 	return skill, nil
 }
 
 // createModels generates and returns a list of Models.
 func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
+	m := s.AddModel().
+		WithDelegationStrategy(alexa.DelegationSkillResponse)
+
+	m.AddType(loca.TypeArea)
+	m.AddType(loca.TypeRegion)
+
+	m.AddIntent(loca.DemoIntent)
+	m.AddIntent(loca.SaySomething)
+
+	i := m.AddIntent(loca.AWSStatus)
+	i.AddSlot(loca.TypeAreaName, loca.TypeArea)
+	i.AddSlot(loca.TypeRegionName, loca.TypeRegion)
+
+	pb := m.AddElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
+	pb.AddVariation("PlainText").
+		AddVariation("SSML")
+	pb = m.AddConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
+	pb.AddVariation("SSML")
+	if pb == nil {
+		return nil, fmt.Errorf("Elicitation prompt failed to add")
+	}
+
 	return s.BuildModels()
 }

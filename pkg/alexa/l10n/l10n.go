@@ -63,9 +63,7 @@ func UseVoiceLang(voice string, language string, text string) string {
 }
 
 // DefaultRegistry is the standard registry used
-var DefaultRegistry = &Registry{
-	locales: map[string]LocaleInstance{},
-}
+var DefaultRegistry = NewRegistry()
 
 // Registry is the Locale registry
 type Registry struct {

@@ -15,8 +15,7 @@ var registry = l10n.NewRegistry()
 var enUS = &l10n.Locale{
 	Name: "en-US",
 	TextSnippets: map[string][]string{
-		"MyIntent_Samples":            []string{"say one", "say two"},
-		"MY_type_values":              []string{"Value 1", "Value 2"},
+		// Skill
 		"Skill_Instructions":          []string{"My instructions"},
 		l10n.KeySkillName:             []string{"SkillName"},
 		l10n.KeySkillDescription:      []string{"SkillDescription"},
@@ -27,6 +26,7 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillLargeIconURI:     []string{"https://large"},
 		l10n.KeySkillPrivacyPolicyURL: []string{"https://policy"},
 		l10n.KeySkillTermsOfUse:       []string{"https://toc"},
+		l10n.KeySkillInvocation:       []string{"call me"},
 		"Name":                        []string{"name"},
 		"Description":                 []string{"description"},
 		"Summary":                     []string{"summary"},
@@ -36,7 +36,19 @@ var enUS = &l10n.Locale{
 		"LargeIcon":                   []string{"https://large.icon"},
 		"Privacy":                     []string{"https://privacy.url"},
 		"Terms":                       []string{"https://terms.url"},
-		l10n.KeySkillInvocation:       []string{"call me"},
+		// Model
+		// Intents
+		"MyIntent_Samples":                []string{"say one", "say two"},
+		"MyIntent_Title":                  []string{"Title"},
+		"MyIntent_Text":                   []string{"Text1", "Text2"},
+		"MyIntent_SSML":                   []string{l10n.Speak("SSML one"), l10n.Speak("SSML two")},
+		"SlotIntent_Samples":              []string{"what about slot {SlotName}"},
+		"SlotIntent_Title":                []string{"Test intent with slot"},
+		"SlotIntent_Text":                 []string{"it seems to work"},
+		"SlotIntent_SlotName_Elicit_Text": []string{"Which slot did you mean?", "I did not understand, which slot?"},
+		"SlotIntent_SlotName_Elicit_SSML": []string{l10n.Speak("I'm sorry, which slot did you mean?")},
+		// Types
+		"MyType_Values": []string{"Value 1", "Value 2"},
 	},
 }
 
@@ -52,7 +64,8 @@ func TestSetup(t *testing.T) {
 
 func TestSkillBuilder_Build(t *testing.T) {
 	sb := gen.NewSkillBuilder().
-		WithLocaleRegistry(registry)
+		WithLocaleRegistry(registry).
+		WithTestingInstructions("Skill_Instructions")
 	assert.IsType(t, &gen.SkillBuilder{}, sb)
 
 	sk, err := sb.Build()
@@ -74,7 +87,7 @@ func TestSkillBuilder_WithLocaleTestingInstructionsOverwrite(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "My instructions", sk.Manifest.Publishing.TestingInstructions)
 
-	sb.WithLocaleTestingInstructions("en-US", "New instructions")
+	sb.WithLocaleTestingInstructions("New instructions")
 	sk, err = sb.Build()
 	assert.NoError(t, err)
 	assert.Equal(t, "New instructions", sk.Manifest.Publishing.TestingInstructions)
@@ -89,6 +102,7 @@ func TestSkillBuilder_Build_Full(t *testing.T) {
 	sb := gen.NewSkillBuilder().
 		WithLocaleRegistry(registry).
 		WithCategory(alexa.CategoryAstrology).
+		WithTestingInstructions("Skill_Instructions").
 		WithPrivacyFlag(gen.FlagIsExportCompliant, true).
 		WithPrivacyFlag(gen.FlagUsesPersonalInfo, true).
 		WithPrivacyFlag(gen.FlagAllowsPurchases, true).
@@ -120,12 +134,37 @@ func TestSkillBuilder_Build_Full(t *testing.T) {
 func TestSkillBuilder_Build_Locale(t *testing.T) {
 	sb := gen.NewSkillBuilder()
 	sb.AddLocale("en-US").
-		WithLocaleName("my name")
-	sb.AddLocale("de-DE").
-		WithLocaleName("mein name")
+		WithLocaleName("my name").
+		WithLocaleDescription("my description").
+		WithLocaleSummary("my summary").
+		WithLocaleKeywords([]string{"word1", "word2"}).
+		WithLocaleExamples([]string{"make an example", "give an example"}).
+		WithLocaleSmallIcon("https://small.icon").
+		WithLocaleLargeIcon("https://large.icon").
+		WithLocalePrivacyURL("https://privacy.url/en-US/")
+	sb.WithLocaleTestingInstructions("Skill instructions")
+
+	de := sb.AddLocale("de-DE").
+		WithLocaleName("mein name").
+		WithLocaleDescription("beschreibung").
+		WithLocaleSummary("zusammenfassung").
+		WithLocalePrivacyURL("https://privacy.url/de-DE/")
 	sk, err := sb.Build()
+	assert.Error(t, err)
+
+	de.WithLocaleSmallIcon("https://small.icon").
+		WithLocaleLargeIcon("https://large.icon")
+	sk, err = sb.Build()
 	assert.NoError(t, err)
-	assert.Equal(t, "my name", sk.Manifest.Publishing.Locales["en-US"].Name)
+	pl := sk.Manifest.Publishing.Locales
+	pr := sk.Manifest.Privacy.Locales
+	assert.Equal(t, "my name", pl["en-US"].Name)
+	assert.Equal(t, "my description", pl["en-US"].Description)
+	assert.Equal(t, "my summary", pl["en-US"].Summary)
+	assert.Equal(t, []string{"word1", "word2"}, pl["en-US"].Keywords)
+	assert.Equal(t, []string{"make an example", "give an example"}, pl["en-US"].Examples)
+	assert.Equal(t, "https://privacy.url/en-US/", pr["en-US"].PrivacyPolicyURL)
+	assert.Equal(t, "https://privacy.url/de-DE/", pr["de-DE"].PrivacyPolicyURL)
 
 	res, err := json.MarshalIndent(sk, "", "  ")
 	assert.NoError(t, err)
@@ -134,7 +173,24 @@ func TestSkillBuilder_Build_Locale(t *testing.T) {
 	fmt.Printf("%s\n", string(res))
 }
 
-func TestSkillLocaleBuilder_With(t *testing.T) {
+func TestSkillLocaleBuilder_WithLocale(t *testing.T) {
+	lb := gen.NewSkillLocaleBuilder("en-US").
+		WithName("SkillName").
+		WithLocaleName("My Skill").
+		WithLocaleDescription("description").
+		WithLocaleSummary("summary").
+		WithLocaleSmallIcon("https://small.icon").
+		WithLocaleLargeIcon("https://large.icon")
+
+	l, err := lb.BuildPublishingLocale()
+	assert.NoError(t, err)
+	assert.Equal(t, "My Skill", l.Name)
+	res, err := json.MarshalIndent(l, "", "  ")
+	assert.NoError(t, err)
+	fmt.Printf("%s\n", string(res))
+}
+
+func TestSkillLocaleBuilder_WithRegistry(t *testing.T) {
 	lb := gen.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(registry).
 		WithName("Name").

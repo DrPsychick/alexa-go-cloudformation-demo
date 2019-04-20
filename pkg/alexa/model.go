@@ -7,9 +7,9 @@ type Model struct {
 
 // InteractionModel defines the base model structure
 type InteractionModel struct {
-	Language LanguageModel  `json:"languageModel"`
-	Dialog   *Dialog        `json:"dialog,omitempty"`
-	Prompts  *[]ModelPrompt `json:"prompts,omitempty"`
+	Language LanguageModel `json:"languageModel"`
+	Dialog   *Dialog       `json:"dialog,omitempty"`
+	Prompts  []ModelPrompt `json:"prompts,omitempty"`
 }
 
 // LanguageModel
@@ -47,21 +47,19 @@ type NameValue struct {
 }
 
 type Dialog struct {
-	Delegation DialogDelegation `json:"delegationStrategy"`
-	Intents    []DialogIntent   `json:"intents"`
+	Delegation string         `json:"delegationStrategy"`
+	Intents    []DialogIntent `json:"intents,omitempty"`
 }
 
-type DialogDelegation string
-
 const (
-	DelegationSkillResponse DialogDelegation = "SKILL_RESPONSE"
-	DelegationAlways        DialogDelegation = "ALWAYS"
+	DelegationSkillResponse string = "SKILL_RESPONSE"
+	DelegationAlways        string = "ALWAYS"
 )
 
 type DialogIntent struct {
 	Name         string             `json:"name"`
 	Confirmation bool               `json:"confirmationRequired"`
-	Delegation   DialogDelegation   `json:"delegationStrategy,omitempty"`
+	Delegation   string             `json:"delegationStrategy,omitempty"`
 	Prompts      struct{}           `json:"prompts"`
 	Slots        []DialogIntentSlot `json:"slots,omitempty"`
 }
@@ -81,11 +79,11 @@ type SlotPrompts struct {
 }
 
 type ModelPrompt struct {
-	Id         string             `json:"id"`
-	Variations []PromptVariations `json:"variations"`
+	Id         string            `json:"id"`
+	Variations []PromptVariation `json:"variations"`
 }
 
-type PromptVariations struct {
+type PromptVariation struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
 }

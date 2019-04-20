@@ -17,28 +17,24 @@ const (
 
 // SkillBuilder is a logical construct for the skill.
 type SkillBuilder struct {
-	registry          l10n.LocaleRegistry
-	category          alexa.Category
-	countries         []string
-	skillInstructions string
-	skillCountries    []string
-	privacyFlags      map[string]bool
-	locales           map[string]*SkillLocaleBuilder
-	model             *ModelBuilder
+	registry     l10n.LocaleRegistry
+	category     alexa.Category
+	countries    []string
+	instructions string
+	privacyFlags map[string]bool
+	locales      map[string]*SkillLocaleBuilder
+	model        *ModelBuilder
 	//permissions2 *SkillPermissionsBuilder
-
 }
 
 // NewSkillBuilder returns a new basic SkillBuilder
 func NewSkillBuilder() *SkillBuilder {
-	r := l10n.NewRegistry()
-	s := &SkillBuilder{
-		skillInstructions: l10n.KeySkillTestingInstructions,
-		registry:          r,
-		locales:           map[string]*SkillLocaleBuilder{},
-		privacyFlags:      map[string]bool{},
+	return &SkillBuilder{
+		instructions: l10n.KeySkillTestingInstructions,
+		registry:     l10n.NewRegistry(),
+		locales:      map[string]*SkillLocaleBuilder{},
+		privacyFlags: map[string]bool{},
 	}
-	return s
 }
 
 func (s *SkillBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *SkillBuilder {
@@ -57,16 +53,16 @@ func (s *SkillBuilder) WithCountries(countries []string) *SkillBuilder {
 }
 
 func (s *SkillBuilder) WithTestingInstructions(instructions string) *SkillBuilder {
-	s.skillInstructions = instructions
+	s.instructions = instructions
 	return s
 }
 
-func (s *SkillBuilder) WithLocaleTestingInstructions(locale string, instructions string) *SkillBuilder {
-	loc, err := s.registry.Resolve(locale)
-	if err != nil {
+func (s *SkillBuilder) WithLocaleTestingInstructions(instructions string) *SkillBuilder {
+	loc := s.registry.GetDefault()
+	if loc == nil {
 		return s
 	}
-	loc.Set(s.skillInstructions, []string{instructions})
+	loc.Set(s.instructions, []string{instructions})
 	return s
 }
 
@@ -76,7 +72,9 @@ func (s *SkillBuilder) WithPrivacyFlag(flag string, value bool) *SkillBuilder {
 }
 
 func (s *SkillBuilder) AddLocale(locale string) *SkillLocaleBuilder {
-	s.registry.Register(l10n.NewLocale(locale))
+	if err := s.registry.Register(l10n.NewLocale(locale)); err != nil {
+		return nil
+	}
 
 	lb := NewSkillLocaleBuilder(locale).
 		WithLocaleRegistry(s.registry)
@@ -90,10 +88,14 @@ func (s *SkillBuilder) AddCountry(country string) *SkillBuilder {
 }
 
 func (s *SkillBuilder) AddCountries(cs []string) *SkillBuilder {
-	for _, c := range cs {
-		s.countries = append(s.countries, c)
-	}
+	s.countries = append(s.countries, cs...)
 	return s
+}
+
+func (s *SkillBuilder) AddModel() *ModelBuilder {
+	s.model = NewModelBuilder().
+		WithLocaleRegistry(s.registry)
+	return s.model
 }
 
 // Build builds an alexa.Skill object.
@@ -101,12 +103,11 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 	if s.registry == nil || len(s.registry.GetLocales()) == 0 {
 		return nil, fmt.Errorf("No locales registered to build")
 	}
-	//
+	// create SkillLocaleBuilders from registry
 	if s.locales == nil || len(s.locales) == 0 {
 		for n, _ := range s.registry.GetLocales() {
 			s.locales[n] = NewSkillLocaleBuilder(n).
 				WithLocaleRegistry(s.registry)
-
 		}
 	}
 
@@ -119,16 +120,19 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 		},
 	}
 	skill.Manifest.Publishing.Category = s.category
-	// TODO: ensure unique occurance
+	// TODO: ensure unique occurance?
 	if len(s.countries) > 0 {
 		skill.Manifest.Publishing.Countries = s.countries
 	} else {
 		skill.Manifest.Publishing.Worldwide = true
 	}
-	skill.Manifest.Publishing.TestingInstructions = dl.Get(s.skillInstructions)
+	if dl.Get(s.instructions) == "" {
+		return nil, fmt.Errorf("Testing instructions are required! (%s: %s)", dl.GetName(), s.instructions)
+	}
+	skill.Manifest.Publishing.TestingInstructions = dl.Get(s.instructions)
 
 	// TODO: Permissions are required.
-	skill.Manifest.Permissions = &[]alexa.Permission{}
+	skill.Manifest.Permissions = []alexa.Permission{}
 
 	// PrivacyAndCompliance is required.
 	skill.Manifest.Privacy = &alexa.Privacy{}
@@ -149,20 +153,20 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 	}
 
 	// Add elements for every locale.
-	skill.Manifest.Publishing.Locales = make(map[string]alexa.LocaleDef)
-	skill.Manifest.Privacy.Locales = make(map[string]alexa.PrivacyLocaleDef)
-	for n, _ := range s.registry.GetLocales() {
-		if l, err := s.locales[n].BuildPublishingLocale(); err != nil {
+	skill.Manifest.Publishing.Locales = map[string]alexa.LocaleDef{}
+	skill.Manifest.Privacy.Locales = map[string]alexa.PrivacyLocaleDef{}
+	for n, lb := range s.locales {
+		l1, err := lb.BuildPublishingLocale()
+		if err != nil {
 			return nil, err
-		} else {
-			skill.Manifest.Publishing.Locales[n] = l
 		}
+		skill.Manifest.Publishing.Locales[n] = l1
 
-		if l, err := s.locales[n].BuildPrivacyLocale(); err != nil {
+		l2, err := lb.BuildPrivacyLocale()
+		if err != nil {
 			return nil, err
-		} else {
-			skill.Manifest.Privacy.Locales[n] = l
 		}
+		skill.Manifest.Privacy.Locales[n] = l2
 	}
 
 	return skill, nil
@@ -178,6 +182,7 @@ func (s *SkillBuilder) BuildModels() (map[string]*alexa.Model, error) {
 
 //////////////////////////////////
 
+// SkillLocaleBuilder builds elements for a specific locale.
 type SkillLocaleBuilder struct {
 	registry         l10n.LocaleRegistry
 	locale           string
@@ -193,9 +198,13 @@ type SkillLocaleBuilder struct {
 }
 
 func NewSkillLocaleBuilder(locale string) *SkillLocaleBuilder {
+	r := l10n.NewRegistry()
+	if err := r.Register(l10n.NewLocale(locale)); err != nil {
+		return nil
+	}
 	return &SkillLocaleBuilder{
 		locale:           locale,
-		registry:         l10n.NewRegistry(),
+		registry:         r,
 		skillName:        l10n.KeySkillName,
 		skillDescription: l10n.KeySkillDescription,
 		skillSummary:     l10n.KeySkillSummary,
@@ -218,71 +227,152 @@ func (l *SkillLocaleBuilder) WithName(name string) *SkillLocaleBuilder {
 	return l
 }
 func (l *SkillLocaleBuilder) WithLocaleName(name string) *SkillLocaleBuilder {
-	if loc, err := l.registry.Resolve(l.locale); err != nil {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
 		return l
-	} else {
-		loc.Set(l.skillName, []string{name})
 	}
+	loc.Set(l.skillName, []string{name})
 	return l
 }
+
 func (l *SkillLocaleBuilder) WithDescription(description string) *SkillLocaleBuilder {
 	l.skillDescription = description
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocaleDescription(description string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillDescription, []string{description})
+	return l
+}
 
-// TODO: add WithLocale(Description|Summary|...)
 func (l *SkillLocaleBuilder) WithSummary(summary string) *SkillLocaleBuilder {
 	l.skillSummary = summary
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocaleSummary(summary string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillSummary, []string{summary})
+	return l
+}
+
 func (l *SkillLocaleBuilder) WithExamples(examples string) *SkillLocaleBuilder {
 	l.skillExamples = examples
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocaleExamples(examples []string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillExamples, examples)
+	return l
+}
+
 func (l *SkillLocaleBuilder) WithKeywords(keywords string) *SkillLocaleBuilder {
 	l.skillKeywords = keywords
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocaleKeywords(keywords []string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillKeywords, keywords)
+	return l
+}
+
 func (l *SkillLocaleBuilder) WithSmallIcon(smallicon string) *SkillLocaleBuilder {
 	l.skillSmallIcon = smallicon
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocaleSmallIcon(smallicon string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillSmallIcon, []string{smallicon})
+	return l
+}
+
 func (l *SkillLocaleBuilder) WithLargeIcon(largeicon string) *SkillLocaleBuilder {
 	l.skillLargeIcon = largeicon
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocaleLargeIcon(largeicon string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillLargeIcon, []string{largeicon})
+	return l
+}
+
 func (l *SkillLocaleBuilder) WithPrivacyURL(privacy string) *SkillLocaleBuilder {
 	l.skillPrivacyURL = privacy
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocalePrivacyURL(privacyURL string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillPrivacyURL, []string{privacyURL})
+	return l
+}
+
 func (l *SkillLocaleBuilder) WithTermsURL(terms string) *SkillLocaleBuilder {
 	l.skillTermsURL = terms
 	return l
 }
+func (l *SkillLocaleBuilder) WithLocaleTermsURL(termsURL string) *SkillLocaleBuilder {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
+		return l
+	}
+	loc.Set(l.skillTermsURL, []string{termsURL})
+	return l
+}
 
 func (l *SkillLocaleBuilder) BuildPublishingLocale() (alexa.LocaleDef, error) {
-	if loc, err := l.registry.Resolve(l.locale); err != nil {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
 		return alexa.LocaleDef{}, err
-	} else {
-		return alexa.LocaleDef{
-			Name:         loc.Get(l.skillName),
-			Description:  loc.Get(l.skillDescription),
-			Summary:      loc.Get(l.skillSummary),
-			Keywords:     loc.GetAll(l.skillKeywords),
-			Examples:     loc.GetAll(l.skillExamples),
-			SmallIconURI: loc.Get(l.skillSmallIcon),
-			LargeIconURI: loc.Get(l.skillLargeIcon),
-		}, nil
 	}
+	// sanity checks
+	if loc.Get(l.skillName) == "" ||
+		loc.Get(l.skillDescription) == "" ||
+		loc.Get(l.skillSummary) == "" ||
+		loc.Get(l.skillSmallIcon) == "" ||
+		loc.Get(l.skillLargeIcon) == "" {
+		return alexa.LocaleDef{}, fmt.Errorf(
+			"Skill requires a name, description, summary, small icon and large icon... but for '%s' at least one was empty",
+			l.locale,
+		)
+	}
+	return alexa.LocaleDef{
+		Name:         loc.Get(l.skillName),
+		Description:  loc.Get(l.skillDescription),
+		Summary:      loc.Get(l.skillSummary),
+		Keywords:     loc.GetAll(l.skillKeywords),
+		Examples:     loc.GetAll(l.skillExamples),
+		SmallIconURI: loc.Get(l.skillSmallIcon),
+		LargeIconURI: loc.Get(l.skillLargeIcon),
+	}, nil
 }
 
 func (l *SkillLocaleBuilder) BuildPrivacyLocale() (alexa.PrivacyLocaleDef, error) {
-	if loc, err := l.registry.Resolve(l.locale); err != nil {
+	loc, err := l.registry.Resolve(l.locale)
+	if err != nil {
 		return alexa.PrivacyLocaleDef{}, err
-	} else {
-		return alexa.PrivacyLocaleDef{
-			PrivacyPolicyURL: loc.Get(l.skillPrivacyURL),
-			TermsOfUse:       loc.Get(l.skillTermsURL),
-		}, nil
 	}
+	return alexa.PrivacyLocaleDef{
+		PrivacyPolicyURL: loc.Get(l.skillPrivacyURL),
+		TermsOfUse:       loc.Get(l.skillTermsURL),
+	}, nil
 }

@@ -19,8 +19,10 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillLargeIconURI: []string{
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_large.png",
 		},
-		l10n.KeySkillInvocation:          []string{"demo skill"},
-		l10n.KeySkillTestingInstructions: []string{"Alexa, open demo skill. Yes? Say something."},
+		l10n.KeySkillInvocation: []string{"demo skill"},
+		l10n.KeySkillTestingInstructions: []string{
+			"Alexa, open demo skill. Yes? Go ahead.",
+		},
 		l10n.KeySkillPrivacyPolicyURL: []string{
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		},
@@ -28,7 +30,10 @@ var enUS = &l10n.Locale{
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		},
 		l10n.KeySkillExamplePhrases: []string{
-			"Alexa, start demo skill and say something",
+			"Alexa, start demo skill and go ahead",
+			"Go ahead",
+			"Here we go",
+			"How is AWS",
 		},
 		l10n.KeySkillKeywords: []string{
 			"demo", "test", "SSML", "cloudformation", "automation",
@@ -48,23 +53,31 @@ var enUS = &l10n.Locale{
 			"<speak><voice name=\"Marlene\">Hello!</voice></speak>",
 			"<speak><emphasis level=\"strong\">Hi!</emphasis></speak>",
 		},
+		// Intent: "DemoIntent"
+		DemoIntentSamples: []string{"here we go", "go ahead"},
+		DemoIntentTitle:   []string{"Demo"},
+		DemoIntentText:    []string{"PACE is geil", "you're right"},
+		DemoIntentSSML: []string{
+			l10n.Speak(
+				l10n.UseVoiceLang("Joanna", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
+					l10n.UseVoiceLang("Kendra", "en-US", "is <emphasis level=\"strong\">geil!</emphasis>"),
+			),
+			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
+		},
+		// Intent "AWSStatusIntent"
+		AWSStatusSamples:           []string{"how is A.W.S."},
+		AWSStatusTitle:             []string{"AWS Status"},
+		AWSStatusText:              []string{"AWS Status in {Region}"},
+		AWSStatusTypeAreaSamples:   []string{"in {Area}", "of {Area}"},
+		AWSStatusTypeRegionSamples: []string{"in {Region}", "of {Region}"},
+		AWSStatusRegionElicitText:  []string{"In which region?", "Where again?"},
+		AWSStatusRegionElicitSSML: []string{
+			l10n.Speak("In which Region?"), l10n.Speak("Sorry, where?")},
+		AWSStatusAreaConfirmSSML: []string{
+			l10n.Speak("Are you sure?"),
+		},
 	},
 	//IntentResponses: l10n.IntentResponses{
-	//	DemoIntent: l10n.IntentResponse{
-	//		Samples: []string{"schiess' los", "auf geht's", "hop hop"},
-	//		Title:   []string{"Demo"},
-	//		Text: []string{
-	//			"PACE ist geil!",
-	//			"Jawoll",
-	//		},
-	//		SSML: []string{
-	//			l10n.Speak(
-	//				l10n.UseVoiceLang("Joanna", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
-	//					l10n.UseVoiceLang("Kendra", "en-US", "iss <emphasis level=\"strong\">geil!</emphasis>"),
-	//			),
-	//			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
-	//		},
-	//	},
 	//	SaySomething: l10n.IntentResponse{
 	//		Samples: []string{"say something", "tell me a story"},
 	//		Title:   []string{"Answer", "Title 2"},
