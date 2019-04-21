@@ -28,17 +28,17 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillSmallIconURI:        []string{"https://small"},
 		l10n.KeySkillLargeIconURI:        []string{"https://large"},
 		l10n.KeySkillPrivacyPolicyURL:    []string{"https://policy"},
-		l10n.KeySkillTermsOfUse:          []string{"https://toc"},
-		l10n.KeySkillInvocation:          []string{"call me"},
-		"Name":                           []string{"name"},
-		"Description":                    []string{"description"},
-		"Summary":                        []string{"summary"},
-		"Keywords":                       []string{"key", "words"},
-		"Examples":                       []string{"say", "something"},
-		"SmallIcon":                      []string{"https://small.icon"},
-		"LargeIcon":                      []string{"https://large.icon"},
-		"Privacy":                        []string{"https://privacy.url"},
-		"Terms":                          []string{"https://terms.url"},
+		//l10n.KeySkillTermsOfUse:          []string{"https://toc"},
+		l10n.KeySkillInvocation: []string{"call me"},
+		"Name":                  []string{"name"},
+		"Description":           []string{"description"},
+		"Summary":               []string{"summary"},
+		"Keywords":              []string{"key", "words"},
+		"Examples":              []string{"say", "something"},
+		"SmallIcon":             []string{"https://small.icon"},
+		"LargeIcon":             []string{"https://large.icon"},
+		"Privacy":               []string{"https://privacy.url"},
+		"Terms":                 []string{"https://terms.url"},
 		// Model
 		// Intents
 		"MyIntent_Samples":                []string{"say one", "say two"},
@@ -217,6 +217,58 @@ func TestSkillBuilder_Build_Full(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestSkillRestrictions(t *testing.T) {
+	sb := gen.NewSkillBuilder()
+
+	// no category
+	_, err := sb.Build()
+	assert.Error(t, err)
+
+	// no testing instructions (missing locales)
+	sb.WithCategory(alexa.CategoryDating)
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	// no testing instructions (missing translation)
+	en := sb.AddLocale("en-US")
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	// missing skill fields
+	sb.SetDefaultLocaleTestingInstructions("some text")
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	en.WithLocaleName("Name").
+		WithLocaleDescription("Description").
+		WithLocaleSummary("Summary").
+		WithLocaleKeywords([]string{"keyword"}).
+		WithLocaleSmallIcon("https://small").
+		WithLocaleLargeIcon("https://large")
+
+	// max is 3 example phrases
+	en.WithLocaleExamples([]string{"1", "2", "3", "4"})
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	// max is 3 keywords
+	en.WithLocaleKeywords([]string{"1", "2", "3", "4"})
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	// termsOfUse not allowed (yet)
+	en.WithLocaleExamples([]string{"1", "2", "3"})
+	en.WithLocaleKeywords([]string{"1", "2", "3"})
+	en.WithLocaleTermsURL("http://terms")
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	// now it builds...
+	en.WithLocaleTermsURL("")
+	_, err = sb.Build()
+	assert.NoError(t, err)
+}
+
 // SkillLocaleBuilder Case 1
 func TestSkillLocaleBuilder_WithLocale(t *testing.T) {
 	lb := gen.NewSkillLocaleBuilder("en-US").
@@ -246,8 +298,8 @@ func TestSkillLocaleBuilder_WithRegistry(t *testing.T) {
 		WithExamples("Examples").
 		WithSmallIcon("SmallIcon").
 		WithLargeIcon("LargeIcon").
-		WithPrivacyURL("Privacy").
-		WithTermsURL("Terms")
+		WithPrivacyURL("Privacy")
+		//WithTermsURL("Terms")
 
 	l, err := lb.BuildPublishingLocale()
 	assert.NoError(t, err)
@@ -268,7 +320,7 @@ func TestSkillLocaleBuilder_WithRegistry(t *testing.T) {
 	res, err = json.MarshalIndent(pl, "", "  ")
 	assert.NoError(t, err)
 	assert.Contains(t, string(res), "privacy.url")
-	assert.Contains(t, string(res), "terms.url")
+	//assert.Contains(t, string(res), "terms.url")
 }
 
 // helper to compare two builds

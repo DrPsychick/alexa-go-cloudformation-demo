@@ -14,15 +14,14 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillExamplePhrases: []string{
 			"Alexa, starte demo skill und sag etwas",
 			"schiess los",
-			"sag' was",
 			"hop hop",
 		},
 		// fallback to enUS
-		l10n.KeySkillSmallIconURI:        enUS.GetAll(l10n.KeySkillSmallIconURI),
-		l10n.KeySkillLargeIconURI:        enUS.GetAll(l10n.KeySkillLargeIconURI),
-		l10n.KeySkillKeywords:            enUS.GetAll(l10n.KeySkillKeywords),
-		l10n.KeySkillPrivacyPolicyURL:    enUS.GetAll(l10n.KeySkillPrivacyPolicyURL),
-		l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
+		l10n.KeySkillSmallIconURI:     enUS.GetAll(l10n.KeySkillSmallIconURI),
+		l10n.KeySkillLargeIconURI:     enUS.GetAll(l10n.KeySkillLargeIconURI),
+		l10n.KeySkillKeywords:         enUS.GetAll(l10n.KeySkillKeywords),
+		l10n.KeySkillPrivacyPolicyURL: enUS.GetAll(l10n.KeySkillPrivacyPolicyURL),
+		//l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
 		l10n.KeySkillTestingInstructions: enUS.GetAll(l10n.KeySkillTestingInstructions),
 
 		// Type values
