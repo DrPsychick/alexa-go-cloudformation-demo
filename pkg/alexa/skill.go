@@ -7,11 +7,11 @@ type Skill struct {
 
 // Manifest is the parent for all other elements
 type Manifest struct {
-	Version     string        `json:"manifestVersion"`
-	Publishing  Publishing    `json:"publishingInformation"`
-	Apis        *Apis         `json:"apis,omitempty"`
-	Permissions *[]Permission `json:"permissions,omitempty"`
-	Privacy     *Privacy      `json:"privacyAndCompliance"`
+	Version     string       `json:"manifestVersion"`
+	Publishing  Publishing   `json:"publishingInformation"`
+	Apis        *Apis        `json:"apis,omitempty"`
+	Permissions []Permission `json:"permissions,omitempty"`
+	Privacy     *Privacy     `json:"privacyAndCompliance"`
 }
 
 // Publishing information
@@ -19,7 +19,7 @@ type Publishing struct {
 	Locales             map[string]LocaleDef `json:"locales"`
 	Worldwide           bool                 `json:"isAvailableWorldwide"`
 	Category            Category             `json:"category"`
-	Countries           []Country            `json:"distributionCountries"`
+	Countries           []string             `json:"distributionCountries,omitempty"`
 	TestingInstructions string               `json:"testingInstructions"`
 }
 
@@ -34,26 +34,25 @@ type LocaleDef struct {
 	LargeIconURI string   `json:"largeIconUri"`
 }
 
-// Country constants
-type Country string
-
 const (
 	// CountryAustralia is AU
-	CountryAustralia Country = "AU"
+	CountryAustralia string = "AU"
 	// CountryCanada is CA
-	CountryCanada Country = "CA"
+	CountryCanada string = "CA"
 	// CountryGermany is DE
-	CountryGermany Country = "DE"
+	CountryGermany string = "DE"
+	// CountryFrance is FR
+	CountryFrance string = "FR"
 	// CountryGreatBritain is GB
-	CountryGreatBritain Country = "GB"
+	CountryGreatBritain string = "GB"
 	// CountryIndia is IN
-	CountryIndia Country = "IN"
+	CountryIndia string = "IN"
 	// CountryItaly is IT
-	CountryItaly Country = "IT"
+	CountryItaly string = "IT"
 	// CountryJapan is JP
-	CountryJapan Country = "JP"
+	CountryJapan string = "JP"
 	// CountryUnitedStates is US
-	CountryUnitedStates Country = "US"
+	CountryUnitedStates string = "US"
 )
 
 // Category of the Skill that is used for filtering in the Alexa App https://developer.amazon.com/de/docs/smapi/skill-manifest.html#category-enum
@@ -189,21 +188,21 @@ type Apis struct {
 	//Health     *Health	`json:"health"`
 	//HouseholdList *HouseholdList `json:"householdList"`
 	//Video *Video `json:"video"`
-	Interfaces *[]string `json:"interfaces,omitempty"`
+	Interfaces []string `json:"interfaces,omitempty"`
 }
 
 // AlexaForBusiness API are available in English only
 type AlexaForBusiness struct {
 	Endpoint   *Endpoint             `json:"endpoint"`
 	Regions    *map[Region]RegionDef `json:"regions"`
-	Interfaces *[]Interface          `json:"interfaces"`
+	Interfaces []Interface           `json:"interfaces,omitempty"`
 }
 
 // Custom API endpoint
 type Custom struct {
 	Endpoint   *Endpoint             `json:"endpoint"`
 	Regions    *map[Region]RegionDef `json:"regions"`
-	Interfaces *[]Interface          `json:"interfaces"`
+	Interfaces []Interface           `json:"interfaces,omitempty"`
 }
 
 // FlashBriefing API endpoint
@@ -338,12 +337,12 @@ type Permission struct {
 
 // Privacy definition
 type Privacy struct {
-	IsExportCompliant bool                         `json:"isExportCompliant"`
-	ContainsAds       bool                         `json:"containsAds"`
-	AllowsPurchases   bool                         `json:"allowsPurchases"`
-	UsesPersonalInfo  bool                         `json:"usesPersonalInfo"`
-	IsChildDirected   bool                         `json:"isChildDirected"`
-	Locales           *map[string]PrivacyLocaleDef `json:"locales,omitempty"`
+	IsExportCompliant bool                        `json:"isExportCompliant"`
+	ContainsAds       bool                        `json:"containsAds"`
+	AllowsPurchases   bool                        `json:"allowsPurchases"`
+	UsesPersonalInfo  bool                        `json:"usesPersonalInfo"`
+	IsChildDirected   bool                        `json:"isChildDirected"`
+	Locales           map[string]PrivacyLocaleDef `json:"locales,omitempty"`
 }
 
 // PrivacyLocaleDef defines

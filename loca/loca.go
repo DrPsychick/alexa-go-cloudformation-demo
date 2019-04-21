@@ -1,24 +1,59 @@
 package loca
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
+// keys of the project
 const (
-	GreetingTitle     l10n.Key = "greeting_title"
-	Greeting          l10n.Key = "greeting"
-	GreetingSSML      l10n.Key = "greeting_ssml"
-	ByeBye            l10n.Key = "byebye"
-	StopTitle         l10n.Key = "stop_title"
-	Stop              l10n.Key = "stop"
-	SaySomethingTitle l10n.Key = "saysomething_title"
-	SaySomething      l10n.Key = "saysomething"
-	SaySomethingSSML  l10n.Key = "saysomething_ssml"
+	ByeBye       string = "byebye"
+	StopTitle    string = "stop_title"
+	Stop         string = "stop"
+	GenericTitle string = "Alexa"
+
+	// Launch
+	LaunchTitle string = "Launch_Title"
+	LaunchText  string = "Launch_Text"
+	LaunchSSML  string = "Launch_SSML"
+
+	// Intents
+	SaySomething              string = "SaySomething"
+	SaySomethingSamples       string = "SaySomething_Samples"
+	SaySomethingTitle         string = "SaySomething_Title"
+	SaySomethingText          string = "SaySomething_Text"
+	SaySomethingSSML          string = "SaySomething_SSML"
+	DemoIntent                string = "DemoIntent"
+	DemoIntentSamples         string = "DemoIntent_Samples"
+	DemoIntentTitle           string = "DemoIntent_Title"
+	DemoIntentText            string = "DemoIntentText"
+	DemoIntentSSML            string = "DemoIntentSSML"
+	AWSStatus                 string = "AWSStatus"
+	AWSStatusSamples          string = "AWSStatus_Samples"
+	AWSStatusTitle            string = "AWSStatus_Title"
+	AWSStatusText             string = "AWSStatus_Text"
+	AWSStatusSSML             string = "AWSStatus_SSML"
+	AWSStatusAreaSamples      string = "AWSStatus_AWSArea_Samples"
+	AWSStatusRegionSamples    string = "AWSStatus_AWSRegion_Samples"
+	AWSStatusRegionElicitText string = "AWSStatus_Region_Elicit_Text"
+	AWSStatusRegionElicitSSML string = "AWSStatus_Region_Elicit_SSML"
+	AWSStatusAreaConfirmSSML  string = "AWSStatus_Area_Confirm_SSML"
+
+	// Types
+	TypeArea        string = "AWSArea"
+	TypeAreaName    string = "Area"
+	TypeAreaValues  string = "AWSArea_Values"
+	TypeAreaSamples string = "AWSArea_Samples"
+
+	TypeRegion        string = "AWSRegion"
+	TypeRegionName    string = "Region"
+	TypeRegionValues  string = "AWSRegion_Values"
+	TypeRegionSamples string = "AWSRegion_Samples"
 )
 
 func init() {
+	// default first
 	var locales = []*l10n.Locale{
-		deDE, enUS, frFR,
+		enUS, deDE, //frFR,
 	}
 	for _, l := range locales {
 		if err := l10n.Register(l); err != nil {

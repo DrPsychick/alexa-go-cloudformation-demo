@@ -20,7 +20,7 @@ var minimalSkillDef = Skill{
 				},
 			},
 			Category:  "mycategory",
-			Countries: []Country{"DE"},
+			Countries: []string{"DE"},
 		},
 		Apis: &Apis{
 			Custom: &Custom{
@@ -28,11 +28,12 @@ var minimalSkillDef = Skill{
 					URI: "arn:...",
 				},
 			},
-			Interfaces: &[]string{},
+			Interfaces: []string{},
 		},
-		Permissions: &[]Permission{},
+		Permissions: []Permission{},
 		Privacy: &Privacy{
 			IsExportCompliant: true,
+			Locales:           map[string]PrivacyLocaleDef{},
 		},
 	},
 }

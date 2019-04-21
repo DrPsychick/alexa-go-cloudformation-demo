@@ -1,8 +1,8 @@
 package alfalfa
 
 import (
-	//"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -13,7 +13,7 @@ func TestApplicationHelp(t *testing.T) {
 
 	l, err := l10n.Resolve("de-DE")
 	assert.Nil(t, err, "could not resolve locale 'de-DE'!")
-	assert.Equal(t, "de-DE", l.Name)
+	assert.Equal(t, "de-DE", l.GetName())
 
 	title, text, ssmlText := a.SaySomething(l)
 	assert.NotEmpty(t, title, "'title' must not be empty")
