@@ -6,7 +6,6 @@ import (
 
 var enUS = &l10n.Locale{
 	Name: "en-US",
-	// TODO: move simple text (no list) to separate key?
 	TextSnippets: map[string][]string{
 		l10n.KeySkillName:        []string{"Demo Skill"},
 		l10n.KeySkillDescription: []string{"Demo for the golang meetup"},
@@ -42,17 +41,19 @@ var enUS = &l10n.Locale{
 		TypeAreaValues:   []string{"Europe", "North America", "Asia Pacific", "South America"},
 		TypeRegionValues: []string{"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
 
-		GreetingTitle: []string{
+		// Launch request
+		LaunchTitle: []string{
 			"Greeting",
 		},
-		Greeting: []string{
+		LaunchText: []string{
 			"Hello!",
 			"Hi!",
 		},
-		GreetingSSML: []string{
+		LaunchSSML: []string{
 			"<speak><voice name=\"Marlene\">Hello!</voice></speak>",
 			"<speak><emphasis level=\"strong\">Hi!</emphasis></speak>",
 		},
+
 		// Intent: "DemoIntent"
 		DemoIntentSamples: []string{"here we go", "go ahead"},
 		DemoIntentTitle:   []string{"Demo"},
@@ -65,12 +66,12 @@ var enUS = &l10n.Locale{
 			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
 		},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:           []string{"how is A.W.S."},
-		AWSStatusTitle:             []string{"AWS Status"},
-		AWSStatusText:              []string{"AWS Status in {Region}"},
-		AWSStatusTypeAreaSamples:   []string{"in {Area}", "of {Area}"},
-		AWSStatusTypeRegionSamples: []string{"in {Region}", "of {Region}"},
-		AWSStatusRegionElicitText:  []string{"In which region?", "Where again?"},
+		AWSStatusSamples:          []string{"how is A.W.S."},
+		AWSStatusTitle:            []string{"AWS Status"},
+		AWSStatusText:             []string{"AWS Status in {Region}"},
+		AWSStatusAreaSamples:      []string{"in {Area}", "of {Area}"},
+		AWSStatusRegionSamples:    []string{"in {Region}", "of {Region}"},
+		AWSStatusRegionElicitText: []string{"In which region?", "Where again?"},
 		AWSStatusRegionElicitSSML: []string{
 			l10n.Speak("In which Region?"), l10n.Speak("Sorry, where?")},
 		AWSStatusAreaConfirmSSML: []string{

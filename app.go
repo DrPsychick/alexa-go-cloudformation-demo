@@ -21,28 +21,29 @@ func NewApplication(l log.Logger, s stats.Statter) *Application {
 	}
 }
 
-//func (a *Application) Handle() {
-//	panic("implement me or panic hard")
-//}
+// Launch is the response to the launch request.
+func (a *Application) Launch(l l10n.LocaleInstance) (string, string) {
+	return l.Get(loca.LaunchTitle), l.GetAny(loca.LaunchText)
+}
 
-// Help is the response to a help request
+// Help is the response to a help request.
 func (a *Application) Help() (string, string) {
 	return "Help", "No help available!"
 }
 
-// Stop is the response to stop the skill
+// Stop is the response to stop the skill.
 func (a *Application) Stop(l l10n.LocaleInstance) (string, string, string) {
 	return l.GetAny(loca.StopTitle), l.GetAny(loca.Stop), ""
 }
 
-// SimpleResponse handles simple title + text response
+// SimpleResponse handles simple title + text response.
 func (a *Application) SaySomething(l l10n.LocaleInstance) (string, string, string) {
 	return l.GetAny(loca.SaySomethingTitle), l.GetAny(loca.SaySomethingText), l.GetAny(loca.SaySomethingSSML)
 }
 
-// SSMLDemo is the intent to demonstrate SSML output with Alexa
+// SSMLDemo is the intent to demonstrate SSML output with Alexa.
 func (a *Application) SSMLDemo(l l10n.LocaleInstance) (string, string, string) {
-	return l.GetAny(loca.GreetingTitle), l.GetAny(loca.Greeting), l.GetAny(loca.GreetingSSML)
+	return l.GetAny(loca.LaunchTitle), l.GetAny(loca.LaunchText), l.GetAny(loca.LaunchSSML)
 }
 
 // Demo is a simple demo response.
@@ -50,12 +51,12 @@ func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
 	return l.Get(loca.GenericTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
 }
 
-// Logger returns the application logger
+// Logger returns the application logger.
 func (a *Application) Logger() log.Logger {
 	return a.logger
 }
 
-// Statter returns the application statter
+// Statter returns the application statter.
 func (a *Application) Statter() stats.Statter {
 	return a.statter
 }

@@ -57,15 +57,6 @@ func (s *SkillBuilder) WithTestingInstructions(instructions string) *SkillBuilde
 	return s
 }
 
-func (s *SkillBuilder) WithLocaleTestingInstructions(instructions string) *SkillBuilder {
-	loc := s.registry.GetDefault()
-	if loc == nil {
-		return s
-	}
-	loc.Set(s.instructions, []string{instructions})
-	return s
-}
-
 func (s *SkillBuilder) WithPrivacyFlag(flag string, value bool) *SkillBuilder {
 	s.privacyFlags[flag] = value
 	return s
@@ -98,6 +89,22 @@ func (s *SkillBuilder) AddModel() *ModelBuilder {
 	return s.model
 }
 
+func (s *SkillBuilder) SetDefaultLocale(locale string) error {
+	if err := s.registry.SetDefault(locale); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *SkillBuilder) SetDefaultLocaleTestingInstructions(instructions string) error {
+	dl := s.registry.GetDefault()
+	if dl == nil {
+		return fmt.Errorf("No default locale registered!")
+	}
+	dl.Set(s.instructions, []string{instructions})
+	return nil
+}
+
 // Build builds an alexa.Skill object.
 func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 	if s.registry == nil || len(s.registry.GetLocales()) == 0 {
@@ -111,13 +118,20 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 		}
 	}
 
+	// get default locale
 	dl := s.registry.GetDefault()
+	if dl == nil {
+		return nil, fmt.Errorf("No default locale defined!")
+	}
 
 	skill := &alexa.Skill{
 		Manifest: alexa.Manifest{
 			Version:    "1.0",
 			Publishing: alexa.Publishing{},
 		},
+	}
+	if s.category == "" {
+		return nil, fmt.Errorf("Skill category is required!")
 	}
 	skill.Manifest.Publishing.Category = s.category
 	// TODO: ensure unique occurance?

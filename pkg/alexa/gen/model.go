@@ -282,7 +282,7 @@ func NewModelSlotBuilder(intent string, name string, typeName string) *ModelSlot
 		intent:      intent,
 		name:        name,
 		typeName:    typeName,
-		samplesName: intent + "_" + typeName + l10n.KeyPostfixSamples,
+		samplesName: intent + "_" + name + l10n.KeyPostfixSamples,
 	}
 }
 

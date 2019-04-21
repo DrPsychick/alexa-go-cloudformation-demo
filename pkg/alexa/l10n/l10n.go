@@ -32,6 +32,7 @@ type LocaleRegistry interface {
 	Register(locale LocaleInstance, opts ...RegisterFunc) error
 	Resolve(locale string) (LocaleInstance, error)
 	GetDefault() LocaleInstance
+	SetDefault(locale string) error
 	GetLocales() map[string]LocaleInstance
 }
 
@@ -121,6 +122,16 @@ func (r *Registry) Register(l LocaleInstance, opts ...RegisterFunc) error {
 func (r *Registry) GetDefault() LocaleInstance {
 	return r.locales[r.defaultLocale]
 }
+
+func (r *Registry) SetDefault(locale string) error {
+	_, ok := r.locales[locale]
+	if !ok {
+		return fmt.Errorf("Locale '%s' not registered, cannot make it the default!", locale)
+	}
+	r.defaultLocale = locale
+	return nil
+}
+
 func (r *Registry) GetLocales() map[string]LocaleInstance {
 	return r.locales
 }

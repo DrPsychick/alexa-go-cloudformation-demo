@@ -25,20 +25,23 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
 		l10n.KeySkillTestingInstructions: enUS.GetAll(l10n.KeySkillTestingInstructions),
 
-		GreetingTitle: []string{
+		// Type values
+		TypeAreaValues:   []string{"Europa", "Nordamerika", "Südamerika", "Asien"},
+		TypeRegionValues: []string{"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nordvirginia"},
+
+		// Launch request
+		LaunchTitle: []string{
 			"Begrüßung",
 		},
-		Greeting: []string{
+		LaunchText: []string{
 			"Hallo!",
 			"Guten Tag!",
 		},
-		GreetingSSML: []string{
+		LaunchSSML: []string{
 			"<speak><voice name=\"Marlene\">Hallo!</voice></speak>",
 			"<speak>Guten <emphasis level=\"strong\">Tag!</emphasis></speak>",
 		},
-		// Types
-		TypeAreaValues:   []string{"Europa", "Nordamerika", "Südamerika", "Asien"},
-		TypeRegionValues: []string{"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nordvirginia"},
+
 		// Intent: "DemoIntent"
 		DemoIntentSamples: []string{"schiess' los", "auf geht's", "hop hop"},
 		DemoIntentTitle:   []string{"Demo"},
@@ -74,12 +77,12 @@ var deDE = &l10n.Locale{
 			"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
 		},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:           []string{"wie geht's A.W.S."},
-		AWSStatusTitle:             []string{"AWS Status"},
-		AWSStatusText:              []string{"AWS Status in {Region}"},
-		AWSStatusTypeAreaSamples:   []string{"in {Area}", "von {Area}"},
-		AWSStatusTypeRegionSamples: []string{"in {Region}", "der {Region}"},
-		AWSStatusRegionElicitText:  []string{"In welcher Region?", "Wo nochmal?"},
+		AWSStatusSamples:          []string{"wie geht's A.W.S."},
+		AWSStatusTitle:            []string{"AWS Status"},
+		AWSStatusText:             []string{"AWS Status in {Region}"},
+		AWSStatusAreaSamples:      []string{"in {Area}", "von {Area}"},
+		AWSStatusRegionSamples:    []string{"in {Region}", "der {Region}"},
+		AWSStatusRegionElicitText: []string{"In welcher Region?", "Wo nochmal?"},
 		AWSStatusRegionElicitSSML: []string{
 			l10n.Speak("In welcher Region?"), l10n.Speak("Wo bitte?")},
 		AWSStatusAreaConfirmSSML: []string{

@@ -1,292 +1,210 @@
-# Examples of how to use (DRAFT)
+# Examples of how to use `alexa` package
 
-## defining the skill
+## Simple case, Skill with only one language
+Building the skill
 ```go
-const (
-	TypeSlotOne string = "SLOT_One"
-    TypeSlotTwo string = "SLOT_Two"
-	DemoIntent string = "DemoIntent"
-	DemoIntentSlotOne string = "DemoIntent_Slot_One"
-	DemoIntentSlotOneSamples string = "DemoIntent_Slot_One_Samples"
-	MyIntent string = "MyIntent"
-)
-var deDE = &l10n.Locale{
-	Name: "de-DE",
-	Countries: []alexa.Country{alexa.CountryGerman},
-	l10n.KeySkillInvocation: "demo skill",
-	TextSnippets: map[string][]string{
-		"MyKey": []string{"My Value 1", "My Value 2"},
-		DemoIntentTitle: []string{"Demo"},
-		DemoIntentSamples: []string{"starte demo"},
-		DemoIntentSlotOneSamples: []string{"of {Area}", "in {Area}"},
-		SlotOneValues: []string{"Value 1", "Value 2"},
-		SlotTwoValues: []string{"Value A", "Value B"},
-	},
-}
-r := NewRegistry().
-	WithLocale(deDE)
+sb := gen.NewSkillBuilder().
+    WithCategory(alexa.CategoryCommunication).
+    AddCountry("US")
+
+sb.AddLocale("en-US").
+    WithLocaleName("my name").
+    WithLocaleDescription("my description").
+    WithLocaleSummary("my summary").
+    WithLocaleKeywords([]string{"word1", "word2"}).
+    WithLocaleExamples([]string{"make an example", "give an example"}).
+    WithLocaleSmallIcon("https://small.icon").
+    WithLocaleLargeIcon("https://large.icon").
+    WithLocalePrivacyURL("https://privacy.url/en-US/")
+
+// must be used *after* adding a locale
+err = sb.SetDefaultLocaleTestingInstructions("Foo bar")
 [...]
-// generate new SkillBuilder
-skill := gen.NewSkillBuilder().
-	WithCategory(alexa.CategoryShopping).
-	WithModelDelegation(alexa.DelegationSkillResponse).
-	WithPrivacyFlag(gen.FlagIsExportCompliant).
-	WithL10NRegistry(r)
+// *alexa.Skill
+sk, err := sb.Build()
 [...]
-// add locales
-for n, l := range r.GetLocales() {
-    skill = skill.WithLocale(gen.NewLocaleBuilder().WithLocale(n, l).
-    	WithCountries(l.Countries)
-}
-[...]
-
-// new ModelBuilder
-modelBuilder := gen.NewModelBuilder().
-	WithL10NRegistry(r)
-// add types
-typeBuilder = modelBuilder.
-	WithType(loca.TypeSlotOne).WithValuesName(loca.SlotOneValues)
-typeBuilder = modelBuilder.
-	WithType(local.TypeSlotTwo).WithValuesName(loca.SlotTwoValues)
-
-// add simple intent
-intentBuilder = modelBuilder.WithIntent(gen.NewIntentBuilder(loca.MyIntent))
-
-// add intent with samples and slot
-intentBuilder = modelBuilder.WithIntent(gen.NewIntentBuilder(loca.DemoIntent).
-	WithSamples(loca.DemoIntentSamples). // reference key specifically
-	WithSlot(gen.NewIntentSlot(
-		loca.DemoIntentSlotOne, loca.SlotOneType
-    ).WithSlotSamples(local.DemoIntentSlotOneSamples)
-))
-// OR: WithIntent returns an Intent...
-intentBuilder = modelBuilder.WithIntent(loca.DemoIntent).
-	WithSamples(...).WithSlot(...)
-
-s, _ := skill.Build()
-res, _ := json.Marshal(s)
-[...]
-
-for l, m := range modelBuilder.BuildModels() {
-	res, _ := json.Marshal(m)
-	[...]
-}
-```
-
-In a loop over locales
-```go
-type Locale = struct{
-	Name: string,
-	Invocation: string,
-	Description: string,
-	IntentResponses: []IntentResponse,
-	Prompts: map[Id]Prompt,
-	[...]
-}
-
-var skill = &Skill{
-	Intents: []Intent, // may reference slots
-	Types: []Type, // slot types
-	Dialog: Dialog, // tied with slot intent prompts
-	Prompts: []Prompt, // only list of Ids
-}
-
-var enUS = &Locale{
-	Name: "en-US",
-	Invocation: "my demo",
-	Description: "A demo skill",
-	
-}
-
-var locales = []*Locale{
-	enUS, deDE
-}
-[...]
-skill := NewSkill(Type)
-skill.AddCategory(...)
-
-int := skill.AddIntent("MyIntent")
-int.AddSlot("name", "type")
-[...]
-skill.AddType("name")
-[...]
-
-for l, _ := range locales {
-	// 
-	locSkill := skill.AddLocale(l.Name)
-	locSkill.Name = l.Name
-	locSkill.Description = l.Description
-	[...]
-
-	// Skill only references Model (separte output JSON files)
-	intModel := locSkill.AddInteractionModel()
-	
-	// InteractionModel -> LanguageModel (with "invocation")
-	langModel := intModel.AddLanguageModel(l.Invocation)
-	
-	// LanguageModel -> []Intent : Intents are defined on the skill
-	for _, i := range skill.Intents {
-	    locInt := langModel.AddIntent(i.Name)
-	    resp := l.IntentResponses[i.Name]
-	    
-	    // Intent -> []Sample : Samples are defined per locale
-	    for _, s := range resp.Samples {
-	    	locInt.AddSample(s)
-	    }
-	    
-	    // Intent -> []Slot : Slots are defined on the skill
-	    for k, sl := range i.Slots {
-	    	slot := locInt.AddSlot(sl.Name, sl.Type)
-	    	
-	    	// Slot -> []Sample : Slot samples are defined per locale
-	    	for _, s = range resp.Slots[k].Samples {
-	    		slot.AddSample(s)
-	    	}
-	    }
-	 }
-	
-	// Model -> []Type : Types are defined on the skill
-	for _, t := range skill.Types {
-    	type := locSkill.AddType(t.Name)
-    	vals := l.Types[t.Name]
-    	
-    	// Type -> []Value : Values are defined per locale
-    	for _, v := range vals {
-    		type.AddValue(v)
-    	}
-	}
-	
-	// InteractionModel -> Dialog (with "delegationStrategy")
-	dia := intModel.AddDialog(skill.Dialog.DelegationStrategy)
-	
-	// Dialog -> []Intent : Intents are defined on the skill
-	// TODO: Dialog has no locale specific information?
-	for _, i = range l.Intents {
-		// only intents with slots
-		if len(i.Slots) == 0 {
-			continue
-		}
-		int := dia.AddIntent(i.Name, i.ConfirmationRequired)
-		
-		// Intent -> []Prompt
-		for p, _ := range i.Prompts {
-			int.AddPrompt(p.Name, ...)
-		}
-		
-		// Intent -> []Slot
-        for p, _ = range i.Slots {
-            int.AddSlot(p.Name, p.Type, ...)
-        }
-	}
-	
-	// InteractionModel -> []Prompt : Prompts are defined on the skill
-	for _, p = range skill.Prompts {
-	    prompt := intModel.AddPrompt(p.Id)
-	    
-	    // Prompt -> []Variation : Variations are defined per locale
-	    for _, v := range l.Prompts[p.Id] {
-	    	prompt.AddVariation(v.Type, v.Value)
-	    }
-	}
-}
-[...]
-
-skill.RenderSkill()
-skill.RenderModel("de-DE")
+res, err := json.MarshalIndent(sk, "", "  ")
 [...]
 ```
 
-## Defining a flow -> NO!
+Building the model
 ```go
-var simpleFlow = alexa.DialogFlow{
-	Intent: "SaySomething",
-	Samples: []string{
-		"Say something",
-		"Tell me something",
-		"What's up",
-	},
-	Responses: []Response{
-		{text: "Yeah, right!", ssml: "<speak>Jop</speak>"},
-	}
-}
+// you can still use l10n.LocaleRegistry to resolve translations if you wish
+registry := l10n.NewRegistry()
+err := registry.Register(l10n.NewLocale("en-US"))
+[...]
+loc, err := registry.Resolve("en-US")
+loc.Set("MyIntent_Samples", []string{"sample one", "sample two"})
+[...]
+// or: gen.NewModelBuilder()
+mb := sb.AddModel().
+    WithDelegationStrategy(alexa.DelegationSkillResponse).
+    AddLocale("en-US", "my skill").
+    AddLocale("de-DE", "mein skill")
+
+mb.AddType("TypeSlotOne").
+    WithLocaleValues("en-US", []string{"One"}).
+    WithLocaleValues("de-DE", []string{"Eins"})
+
+mb.AddIntent("MyIntent").
+    WithLocaleSamples(loc.GetName(), loc.GetAll("MyIntent_Samples")).
+    WithLocaleSamples("de-DE", []string{"sample eins", "sample zwei"}).
+    AddSlot("SlotName", "TypeSlotOne").
+    WithLocaleSamples(loc.GetName(), []string{"of {Slot}"}).
+    WithLocaleSamples("de-DE", []string{"von {Slot}"})
+
+mb.AddElicitationSlotPrompt("MyIntent", "SlotName").
+    AddVariation("PlainText").
+    WithLocaleValue("de-DE", "PlainText", []string{"Was?", "Wie bitte?"}).
+    WithLocaleValue(loc.GetName(), "PlainText", []string{"What?"})
+
+mb.AddConfirmationSlotPrompt("MyIntent", "SlotName").
+    AddVariation("PlainText").
+    WithLocaleValue(loc.GetName(), "PlainText", []string{"Sure?"}).
+    WithLocaleValue("de-DE", "PlainText", []string{"Sicher?"})
+
+// *alexa.Model
+m, err := mb.BuildLocale("en_US")
+[...]
+res, err := json.MarshalIndent(m, "", "  ")
+[...]
+
+// map[locale]*alexa.Model of models
+ms, err := mb.Build()
 ```
 
-### Generic flow, referencing locale -> NO!
+## International case, multiple languages
+Definining locales
 ```go
-var enUS = &alexa.Locale{
+var enUS = &l10n.Locale{
     Name: "en-US",
-    Intents: []Intent{
-        Intent{
-            Name: "SaySomething"
-            Samples: []string{
-                "Say something",
-                "Tell me something",
-                "What's up",
-            },
-            Responses: []Response{
-                { Text: "Yeah, right!", SSML: "<speak>Jop</speak>" },
-            },
-        },
-    },
+    TextSnippets: map[string][]string{
+        // Skill
+        l10n.KeySkillName:                []string{"SkillName"},
+        l10n.KeySkillDescription:         []string{"SkillDescription"},
+        l10n.KeySkillSummary:             []string{"SkillSummary"},
+        l10n.KeySkillKeywords:            []string{"Keyword1", "Keyword2"},
+        l10n.KeySkillExamplePhrases:      []string{"start me", "boot me up"},
+        l10n.KeySkillSmallIconURI:        []string{"https://small"},
+        l10n.KeySkillLargeIconURI:        []string{"https://large"},
+        l10n.KeySkillPrivacyPolicyURL:    []string{"https://policy"},
+        l10n.KeySkillTermsOfUse:          []string{"https://toc"},
+        l10n.KeySkillInvocation:          []string{"call me"},
+        l10n.KeySkillTestingInstructions: []string{"Initial instructions"},
+        // My Intent
+        "MyIntent_Samples":                []string{"say one", "say two"},
+        "MyIntent_Title":                  []string{"Title"},
+        "MyIntent_Text":                   []string{"Text1", "Text2"},
+        "MyIntent_SSML":                   []string{l10n.Speak("SSML one"), l10n.Speak("SSML two")},
+        // Slot Intent
+        "SlotIntent_Samples":              []string{"what about slot {SlotName}"},
+        "SlotIntent_Title":                []string{"Test intent with slot"},
+        "SlotIntent_Text":                 []string{"it seems to work"},
+        "SlotIntent_SlotName_Samples":     []string{"of {SlotName}", "{SlotName}"},
+        "SlotIntent_SlotName_Elicit_Text": []string{"Which slot did you mean?", "I did not understand, which slot?"},
+        "SlotIntent_SlotName_Elicit_SSML": []string{l10n.Speak("I'm sorry, which slot did you mean?")},
+        // Types
+        "MyType_Values":                   []string{"Value 1", "Value 2"},
 }
+//var deDE = &l10n.Locale{...}
+```
+Building the skill
+```go
+// register the locales... first one automatically is default
+registry := l10n.NewRegistry()
+// there are multiple ways to set the default explicitly
+registry.Register(enUS, l10n.AsDefault())
+registry.SetDefault("en-US")
 
-for _, i := range l.Intents {
-    simpleIntent := alexa.SimpleIntent{
-    	Intent: i.Name,
-    	Samples: i.Samples,
-    	Responses: i.Responses,
-    }
-    app.RegisterIntent(simpleIntent)
-}
+// pass the registry
+sb := gen.NewSkillBuilder().
+    WithLocaleRegistry(registry).
+    WithCategory(alexa.CategoryFashionAndStyle)
+[...]
+// *alexa.Skill
+s, err := sb.Build()
+```
+Building the models
+```go
+// pass the registry
+mb := gen.NewModelBuilder().
+    WithLocaleRegistry(registry).
+    WithDelegationStrategy(alexa.DelegationSkillResponse)
+// add intents, types, slots, prompts, ...
+mb.AddType("MyType") // looks up "MyType_Values
+mb.AddIntent("MyIntent") // looks up "MyIntent_Samples"
+mb.AddIntent("SlotIntent"). // looks up "SlotIntent_Samples"
+    AddSlot("SlotName", "MyType") // looks up "SlotIntent_SlotName_Samples"
 
+mb.AddElicitationSlotPrompt("SlotIntent", "SlotName").
+    AddVariation("PlainText").
+    AddVariation("SSML")
+
+ms, err := mb.Build()
 ```
 
-## Make it simple!
+## Expert case (build your own)
+Simply build your own JSON
+```go
+var skill = &alexa.Skill{...}
+var modelEnUs = &alexa.Model{...}
+```
+As you're an expert, you can easily figure out how to do that in detail by looking at the tests: 
+https://github.com/DrPsychick/alexa-go-cloudformation-demo/blob/master/pkg/alexa/skill_test.go
+
+
+# Make it simple!
+Simple `key -> []value` lookups
 ```go
 // de-DE.go
 // only key -> value. Convention defines the structure
 var deDE = &l10n.Locale{
-	Snippets: [l10n.Key][]string{
-		MyIntentTitle: []string{
-			"Title",
-		},
-		MyIntentText: []string{
-			"Text",
-		},
-		MyIntentSSML: []string{
-			"<speak>Text</speak>"
-		},
-	},
+    TextSnippets: map[string][]string{
+        MyIntentTitle: []string{
+            "Title",
+        },
+        MyIntentText: []string{
+            "Text",
+        },
+        MyIntentSSML: []string{
+            "<speak>Text</speak>"
+        },
+        // you can fallback to a different locale
+        MyKey:        enUS.GetAll(MyKey),
+    },
 }
 [...]
+```
 
+We have to define somewhere in code how it will react, so why not keep the link to loca keys?
+```go
 // app.go
 // Links intent to response (flow)
-func (a *Application) handleMyIntent(l *Locale) (string, string, string) {
-	return l.GetSnippet(MyIntentTitle), l.GetSnippet(MyIntentText), l.GetSnippet(MyIntentSSML)
+func (a *Application) handleMyIntent(l l10n.LocaleInstance) (string, string, string) {
+    return l.GetSnippet(MyIntentTitle), l.GetSnippet(MyIntentText), l.GetSnippet(MyIntentSSML)
 }
 
 // More complex function
-func (a *Application) handleComplexIntent(l *Locale, s Slots, ...) (string, string, string) {
-	// do something based on the slots provided
-	// trigger reprompt if unclear, ...
-	return title, text, ssml // and more: Media (visual Alexa), Sounds, ...?
+func (a *Application) handleComplexIntent(l l10n.LocaleInstance, s Slots, ...) (string, string, string) {
+    // do something based on the slots provided
+    // trigger reprompt if unclear, ...
+    return title, text, ssml // and more: Media (visual Alexa), Sounds, ...?
 }
 ```
 
-
 ## So, where does it go?
+Still TODO: we define Intents and Slots for the model and I would like to use this definition for lambda
 ```go
 // app.go
 func (a *Application) initialize() { // or in NewApplication
-	// define the skill
-	skill := alexa.NewSkill(Type)
-	// add general elements which are part of the skill
-	skill.AddIntents(...)
-	skill.AddSlots(...)
-	
-	// loop over locales and add them
-	for _, l := range locales {
+    // define the skill
+    skill := alexa.NewSkill(Type)
+    // add general elements which are part of the skill
+    skill.AddIntents(...)
+    skill.AddSlots(...)
+    
+    // loop over locales and add them
+    for _, l := range locales {
         skill.AddLocale(locale) // locale is part of alexa package
         // AddLocale can loop over intents etc. and fetch locale for each element
     }

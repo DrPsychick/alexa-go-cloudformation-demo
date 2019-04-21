@@ -18,6 +18,7 @@ type Application interface {
 	log.Loggable
 	stats.Statable
 
+	Launch(l l10n.LocaleInstance) (string, string)
 	Help() (string, string)
 	Stop(l l10n.LocaleInstance) (string, string, string)
 	SSMLDemo(l l10n.LocaleInstance) (string, string, string)
@@ -28,7 +29,7 @@ type Application interface {
 func NewMux(app Application) alexa.Handler {
 	mux := alexa.NewServerMux()
 
-	mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch)
+	mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
 	mux.HandleRequestTypeFunc(alexa.TypeCanFulfillIntentRequest, handleCanFulfillIntent)
 
 	mux.HandleIntent(alexa.HelpIntent, handleHelp(app))
@@ -42,16 +43,6 @@ func NewMux(app Application) alexa.Handler {
 	return mux
 }
 
-func handleLaunch(b *alexa.ResponseBuilder, r *alexa.Request) {
-	title := "Launch"
-	//text := "Willkommen beim Karlsruhe Golang Meetup #3!"
-	text := "Ja?"
-
-	b.WithSpeech(text).
-		WithSimpleCard(title, text).
-		WithShouldEndSession(false)
-}
-
 func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.Request) {
 	intent := r.Intent.Name
 	if intent == SSMLDemoIntent || intent == SaySomethingIntent || intent == DemoIntent {
@@ -63,6 +54,19 @@ func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.Request) {
 
 	b.WithCanFulfillIntent(&alexa.CanFulfillIntent{
 		CanFulfill: "NO",
+	})
+}
+
+func handleLaunch(app Application) alexa.HandlerFunc {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		l, err := l10n.Resolve(r.Locale)
+		if err != nil {
+			return
+		}
+		title, text := app.Launch(l)
+
+		b.WithSpeech(text).
+			WithSimpleCard(title, text)
 	})
 }
 
