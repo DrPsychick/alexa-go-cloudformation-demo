@@ -25,17 +25,17 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillPrivacyPolicyURL: []string{
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		},
-		l10n.KeySkillTermsOfUse: []string{
-			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
-		},
+		// Error: privacyAndCompliance.locales.en-US - object instance has properties which are not allowed by the schema: ["termsOfUse"]
+		//l10n.KeySkillTermsOfUse: []string{
+		//	"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
+		//},
 		l10n.KeySkillExamplePhrases: []string{
 			"Alexa, start demo skill and go ahead",
-			"Go ahead",
 			"Here we go",
 			"How is AWS",
 		},
 		l10n.KeySkillKeywords: []string{
-			"demo", "test", "SSML", "cloudformation", "automation",
+			"demo", "test", "SSML",
 		},
 		// Type values
 		TypeAreaValues:   []string{"Europe", "North America", "Asia Pacific", "South America"},

@@ -58,7 +58,7 @@ aws cloudformation package --template-file cloudformation.yml --output-template-
 #     ret=$?
 # fi
 
-aws cloudformation deploy \
+res=$(aws cloudformation deploy \
     --template-file cf-template-package.yml \
     --stack-name $CF_STACK_NAME \
     --capabilities CAPABILITY_IAM \
@@ -68,16 +68,19 @@ aws cloudformation deploy \
         ASKVendorId=$ASKVendorId \
         ASKS3Bucket=$ASKS3Bucket \
         ASKS3Key=$ASKS3Key \
-        ASKSkillTestingInstructions="$ASKSkillTestingInstructions"
+        ASKSkillTestingInstructions="$ASKSkillTestingInstructions")
 
 ret=$?
+failed=$(echo "$res" | grep "Failed")
 echo "exitcode: $ret"
 if [ $ret -eq 0 ]; then
     echo "Successful."
-elif [ $ret -eq 255 ]; then
+elif [ $ret -eq 255 -a -z "$failed" ]; then
     echo "No changes made..."
 else
     # do NOT run this on travis, it exposes ALL parameter values: aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME;
-    aws cloudformation delete-stack --stack-name $CF_STACK_NAME;
+    # do NOT delete the stack: aws cloudformation delete-stack --stack-name $CF_STACK_NAME;
+    aws cloudformation describe-stack-events --max-items 5 --stack-name $CF_STACK_NAME |grep -C2 FAIL |grep 'Resource\(Type\|Status\)'
+    exit 1 # failed
 fi
 )

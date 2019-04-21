@@ -369,6 +369,12 @@ func (l *SkillLocaleBuilder) BuildPublishingLocale() (alexa.LocaleDef, error) {
 			l.locale,
 		)
 	}
+	if len(loc.GetAll(l.skillExamples)) > 3 {
+		return alexa.LocaleDef{}, fmt.Errorf("Only 3 examplePhrases are allowed! (%s)", l.locale)
+	}
+	if len(loc.GetAll(l.skillKeywords)) > 3 {
+		return alexa.LocaleDef{}, fmt.Errorf("Only 3 keywords are allowed! (%s)", l.locale)
+	}
 	return alexa.LocaleDef{
 		Name:         loc.Get(l.skillName),
 		Description:  loc.Get(l.skillDescription),
@@ -385,8 +391,14 @@ func (l *SkillLocaleBuilder) BuildPrivacyLocale() (alexa.PrivacyLocaleDef, error
 	if err != nil {
 		return alexa.PrivacyLocaleDef{}, err
 	}
-	return alexa.PrivacyLocaleDef{
+	p := alexa.PrivacyLocaleDef{
 		PrivacyPolicyURL: loc.Get(l.skillPrivacyURL),
-		TermsOfUse:       loc.Get(l.skillTermsURL),
-	}, nil
+	}
+	// seems not (yet) supported ?!?
+	// Error: privacyAndCompliance.locales.en-US - object instance has properties which are not allowed by the schema: ["termsOfUse"]
+	if loc.Get(l.skillTermsURL) != "" {
+		return alexa.PrivacyLocaleDef{}, fmt.Errorf("'termsOfUse' makes Skill deployment fail! (%s)", l.locale)
+		//p.TermsOfUse = loc.Get(l.skillTermsURL)
+	}
+	return p, nil
 }
