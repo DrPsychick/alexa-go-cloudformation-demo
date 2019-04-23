@@ -25,6 +25,7 @@ script:
   - go vet ./...
   - go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
   - goveralls -coverprofile=profile.cov -service=travis-ci
+  - 'echo "$TRAVIS_BRANCH"; if [[ $TRAVIS_BRANCH =~ ^development|master$ ]]; then echo "ok"; fi'
 
 before_deploy:
   - pip3 install --upgrade --user awscli
