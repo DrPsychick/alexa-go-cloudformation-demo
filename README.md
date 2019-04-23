@@ -99,8 +99,8 @@ Before first "release"
     * [ ] simple app example explanation in docs
 * [ ] add test cases for lambda (request/response)
     * [ ] [Issue #25](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/25)
-* [ ] Add staging deploy (validation) [Issue #30](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/30)
-    * [ ] **decide**: staging deploy -> review+fix **or** try to validate as much as possible before deploying (see [Issue #17](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/17))
+* [x] Add staging deploy (validation) [Issue #30](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/30)
+    * [x] **decide**: staging deploy -> review+fix **or** try to validate as much as possible before deploying (see [Issue #17](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/17))
 * [x] implement and integrate `l10n` package
     * [x] support SSML output
         * [ ] [Issue #29](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/29)
