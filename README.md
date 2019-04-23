@@ -73,15 +73,13 @@ export ASKVendorId=<VendorId>
 
 ```export $(grep -v '^#' .env | xargs)```
 
-### Build and Run `deploy.sh`
-* build
-
-```go build -a -o ./deploy/app ./cmd/alfalfa```
-
+### Run `deploy.sh`
 * run `deploy.sh`
     * generates `skill.json` and `<locale>.json` files for Alexa and uploads to S3
-    * packages lambda function and uploads to S3
-    * deploys via cloudformation
+    * deploys via cloudformation (staging or production)
+        * packages lambda function and uploads to S3
+    * deletes the cloudformation stack after **staging** deploy (unless you set `KEEP_STACK=1`)
+    * you **can** set a different `CF_STACK_NAME`, but `deploy.sh` will still append `-staging`...
 
 ```bash ./cloudformation/deploy.sh```
 

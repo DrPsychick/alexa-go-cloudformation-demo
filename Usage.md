@@ -1,4 +1,4 @@
-# Examples of how to use `alexa` package
+# how to use `alexa` package to build skill and models
 
 ## Simple case, Skill with only one language
 Building the skill
@@ -151,6 +151,9 @@ var modelEnUs = &alexa.Model{...}
 ```
 As you're an expert, you can easily figure out how to do that in detail by looking at the tests: 
 https://github.com/DrPsychick/alexa-go-cloudformation-demo/blob/master/pkg/alexa/skill_test.go
+
+# how to use `alexa` package to build lambda
+
 
 
 # Make it simple!

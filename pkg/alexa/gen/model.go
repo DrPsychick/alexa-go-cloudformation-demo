@@ -145,6 +145,7 @@ func (m *ModelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 	am.Model.Language.Types = mts
 
 	// add prompts - only if we have intents with slots
+	// TODO: "Add...Prompt" should not fail, it should fail during build()!
 	am.Model.Prompts = []alexa.ModelPrompt{}
 	for _, p := range m.prompts {
 		mp, err := p.BuildLocale(locale)
@@ -155,6 +156,7 @@ func (m *ModelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 	}
 
 	// add intents
+	// TODO: ensure that slot types are defined, if not: fail
 	am.Model.Dialog = &alexa.Dialog{}
 	if m.delegation != "" {
 		am.Model.Dialog.Delegation = m.delegation

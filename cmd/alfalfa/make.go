@@ -196,10 +196,13 @@ func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	i.AddSlot(loca.TypeRegionName, loca.TypeRegion)
 
 	pb := m.AddElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
-	pb.AddVariation("PlainText").
-		AddVariation("SSML")
+	if pb != nil {
+		pb.AddVariation("PlainText").AddVariation("SSML")
+	}
 	pb = m.AddConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
-	pb.AddVariation("SSML")
+	if pb != nil {
+		pb.AddVariation("SSML")
+	}
 	if pb == nil {
 		return nil, fmt.Errorf("Elicitation prompt failed to add")
 	}

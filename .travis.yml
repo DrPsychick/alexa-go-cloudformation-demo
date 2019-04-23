@@ -39,7 +39,7 @@ deploy:
   on:
     #tags: true
     go: "1.12.x"
-    branch: master
+    condition: $TRAVIS_BRANCH =~ ^develop|master$
 
 notifications:
   email:
