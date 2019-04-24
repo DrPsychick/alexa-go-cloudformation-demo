@@ -11,53 +11,54 @@ import (
 )
 
 var registry = l10n.NewRegistry()
-var sb1 *gen.SkillBuilder // case 1: directly input one language
-var sb2 *gen.SkillBuilder // case 2: pass LocaleRegistry
 
 var enUS = &l10n.Locale{
 	Name: "en-US",
 	TextSnippets: map[string][]string{
 		// Skill
-		l10n.KeySkillTestingInstructions: []string{"Initial instructions"},
-		"Skill_Instructions":             []string{"My instructions"},
-		l10n.KeySkillName:                []string{"SkillName"},
-		l10n.KeySkillDescription:         []string{"SkillDescription"},
-		l10n.KeySkillSummary:             []string{"SkillSummary"},
-		l10n.KeySkillKeywords:            []string{"Keyword1", "Keyword2"},
-		l10n.KeySkillExamplePhrases:      []string{"start me", "boot me up"},
-		l10n.KeySkillSmallIconURI:        []string{"https://small"},
-		l10n.KeySkillLargeIconURI:        []string{"https://large"},
-		l10n.KeySkillPrivacyPolicyURL:    []string{"https://policy"},
-		//l10n.KeySkillTermsOfUse:          []string{"https://toc"},
-		l10n.KeySkillInvocation: []string{"call me"},
-		"Name":                  []string{"name"},
-		"Description":           []string{"description"},
-		"Summary":               []string{"summary"},
-		"Keywords":              []string{"key", "words"},
-		"Examples":              []string{"say", "something"},
-		"SmallIcon":             []string{"https://small.icon"},
-		"LargeIcon":             []string{"https://large.icon"},
-		"Privacy":               []string{"https://privacy.url"},
-		"Terms":                 []string{"https://terms.url"},
+		l10n.KeySkillTestingInstructions: {"Initial instructions"},
+		"Skill_Instructions":             {"My instructions"},
+		l10n.KeySkillName:                {"SkillName"},
+		l10n.KeySkillDescription:         {"SkillDescription"},
+		l10n.KeySkillSummary:             {"SkillSummary"},
+		l10n.KeySkillKeywords:            {"Keyword1", "Keyword2"},
+		l10n.KeySkillExamplePhrases:      {"start me", "boot me up"},
+		l10n.KeySkillSmallIconURI:        {"https://small"},
+		l10n.KeySkillLargeIconURI:        {"https://large"},
+		l10n.KeySkillPrivacyPolicyURL:    {"https://policy"},
+		//l10n.KeySkillTermsOfUse:          {"https://toc"},
+		l10n.KeySkillInvocation: {"call me"},
+		"Name":                  {"name"},
+		"Description":           {"description"},
+		"Summary":               {"summary"},
+		"Keywords":              {"key", "words"},
+		"Examples":              {"say", "something"},
+		"SmallIcon":             {"https://small.icon"},
+		"LargeIcon":             {"https://large.icon"},
+		"Privacy":               {"https://privacy.url"},
+		"Terms":                 {"https://terms.url"},
 		// Model
 		// Intents
-		"MyIntent_Samples":                []string{"say one", "say two"},
-		"MyIntent_Title":                  []string{"Title"},
-		"MyIntent_Text":                   []string{"Text1", "Text2"},
-		"MyIntent_SSML":                   []string{l10n.Speak("SSML one"), l10n.Speak("SSML two")},
-		"SlotIntent_Samples":              []string{"what about slot {SlotName}"},
-		"SlotIntent_Title":                []string{"Test intent with slot"},
-		"SlotIntent_Text":                 []string{"it seems to work"},
-		"SlotIntent_SlotName_Samples":     []string{"of {SlotName}", "{SlotName}"},
-		"SlotIntent_SlotName_Elicit_Text": []string{"Which slot did you mean?", "I did not understand, which slot?"},
-		"SlotIntent_SlotName_Elicit_SSML": []string{l10n.Speak("I'm sorry, which slot did you mean?")},
+		"MyIntent_Samples":                {"say one", "say two"},
+		"MyIntent_Title":                  {"Title"},
+		"MyIntent_Text":                   {"Text1", "Text2"},
+		"MyIntent_SSML":                   {l10n.Speak("SSML one"), l10n.Speak("SSML two")},
+		"SlotIntent_Samples":              {"what about slot {SlotName}"},
+		"SlotIntent_Title":                {"Test intent with slot"},
+		"SlotIntent_Text":                 {"it seems to work"},
+		"SlotIntent_SlotName_Samples":     {"of {SlotName}", "{SlotName}"},
+		"SlotIntent_SlotName_Elicit_Text": {"Which slot did you mean?", "I did not understand, which slot?"},
+		"SlotIntent_SlotName_Elicit_SSML": {l10n.Speak("I'm sorry, which slot did you mean?")},
 		// Types
-		"MyType_Values": []string{"Value 1", "Value 2"},
+		"MyType_Values": {"Value 1", "Value 2"},
 	},
 }
 
 func init() {
-	registry.Register(enUS, l10n.AsDefault())
+	if err := registry.Register(enUS, l10n.AsDefault()); err != nil {
+		panic("something went horribly wrong")
+	}
+
 }
 
 func TestSetup(t *testing.T) {
@@ -89,6 +90,8 @@ func TestSkillBuilder_Build_Locale(t *testing.T) {
 		WithLocaleSmallIcon("https://small.icon").
 		WithLocaleLargeIcon("https://large.icon").
 		WithLocalePrivacyURL("https://privacy.url/en-US/")
+	err = sb1.SetDefaultLocale("en-US")
+	assert.NoError(t, err)
 
 	// this can only be called after adding a locale! TODO: make this part of Locale
 	err = sb1.SetDefaultLocaleTestingInstructions("Foo bar")
@@ -217,25 +220,27 @@ func TestSkillBuilder_Build_Full(t *testing.T) {
 	assert.Error(t, err)
 }
 
+// Cover skill validations
 func TestSkillRestrictions(t *testing.T) {
 	sb := gen.NewSkillBuilder()
 
-	// no category
+	// no locales
 	_, err := sb.Build()
 	assert.Error(t, err)
 
-	// no testing instructions (missing locales)
-	sb.WithCategory(alexa.CategoryDating)
-	_, err = sb.Build()
-	assert.Error(t, err)
-
-	// no testing instructions (missing translation)
+	// no category
 	en := sb.AddLocale("en-US")
 	_, err = sb.Build()
 	assert.Error(t, err)
 
+	// no testing instructions (missing translation)
+	sb.WithCategory(alexa.CategoryDating)
+	_, err = sb.Build()
+	assert.Error(t, err)
+
 	// missing skill fields
-	sb.SetDefaultLocaleTestingInstructions("some text")
+	err = sb.SetDefaultLocaleTestingInstructions("some text")
+	assert.NoError(t, err)
 	_, err = sb.Build()
 	assert.Error(t, err)
 
@@ -252,12 +257,12 @@ func TestSkillRestrictions(t *testing.T) {
 	assert.Error(t, err)
 
 	// max is 3 keywords
+	en.WithLocaleExamples([]string{"1", "2", "3"})
 	en.WithLocaleKeywords([]string{"1", "2", "3", "4"})
 	_, err = sb.Build()
 	assert.Error(t, err)
 
 	// termsOfUse not allowed (yet)
-	en.WithLocaleExamples([]string{"1", "2", "3"})
 	en.WithLocaleKeywords([]string{"1", "2", "3"})
 	en.WithLocaleTermsURL("http://terms")
 	_, err = sb.Build()
@@ -267,6 +272,46 @@ func TestSkillRestrictions(t *testing.T) {
 	en.WithLocaleTermsURL("")
 	_, err = sb.Build()
 	assert.NoError(t, err)
+}
+
+// Cover error cases
+func TestErrors(t *testing.T) {
+	sb := gen.NewSkillBuilder()
+	// AddLocale
+	sb2 := sb.AddLocale("en-US")
+	assert.IsType(t, &gen.SkillLocaleBuilder{}, sb2)
+	sb3 := sb.AddLocale("en-US")
+	assert.Nil(t, sb3)
+
+	// fuck it up hard: no locale set in locale builder
+	l := &gen.SkillLocaleBuilder{}
+	l.WithLocaleRegistry(l10n.NewRegistry())
+	l2 := l.WithLocaleName("foo")
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocaleSummary("foo")
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocaleDescription("foo")
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocaleExamples([]string{"foo", "bar"})
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocaleKeywords([]string{"foo", "bar"})
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocaleSmallIcon("https://foo")
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocaleLargeIcon("https://bar")
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocalePrivacyURL("https://foo")
+	assert.Equal(t, l, l2)
+	l2 = l.WithLocaleTermsURL("https://bar")
+	assert.Equal(t, l, l2)
+
+	pl, err := l.BuildPublishingLocale()
+	assert.Error(t, err)
+	assert.Empty(t, pl)
+
+	pl2, err := l.BuildPrivacyLocale()
+	assert.Error(t, err)
+	assert.Empty(t, pl2)
 }
 
 // SkillLocaleBuilder Case 1
