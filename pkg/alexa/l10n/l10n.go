@@ -170,7 +170,8 @@ func (l *Locale) Set(key string, values []string) {
 }
 
 func (l *Locale) Get(key string, args ...interface{}) string {
-	return l.TextSnippets.GetFirst(key, args...)
+	t, _ := l.TextSnippets.GetFirst(key, args...)
+	return t
 }
 
 func (l *Locale) GetAny(key string, args ...interface{}) string {
@@ -188,22 +189,19 @@ func (l *Locale) GetAll(key string, args ...interface{}) []string {
 // Snippets is the actual representation of key -> array of texts in locale
 type Snippets map[string][]string
 
-func (s Snippets) GetFirst(key string, args ...interface{}) string {
+func (s Snippets) GetFirst(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
-		return ""
+		return "", fmt.Errorf("key not defined or empty: %s", key)
 	}
-	return fmt.Sprintf(s[key][0], args...)
+	return fmt.Sprintf(s[key][0], args...), nil
 }
 
 // Get returns the translation for the snippet
 func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
-	if !ok {
-		return "", fmt.Errorf("key not defined %s", key)
-	}
-	if len(s[key]) == 0 {
-		return "", fmt.Errorf("key not defined %s", key)
+	if !ok || len(s[key]) == 0 {
+		return "", fmt.Errorf("key not defined or empty: %s", key)
 	}
 	if len(s[key]) == 1 {
 		return fmt.Sprintf(s[key][0], args...), nil
@@ -213,12 +211,13 @@ func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 	return fmt.Sprintf(s[key][r], args...), nil
 }
 
-func (s Snippets) GetAll(k string, args ...interface{}) ([]string, error) {
-	if len(s[k]) == 0 {
-		return []string{}, fmt.Errorf("key not defined %s", k)
+func (s Snippets) GetAll(key string, args ...interface{}) ([]string, error) {
+	_, ok := s[key]
+	if !ok || len(s[key]) == 0 {
+		return []string{}, fmt.Errorf("key not defined or empty: %s", key)
 	}
 	r := []string{}
-	for _, v := range s[k] {
+	for _, v := range s[key] {
 		r = append(r, fmt.Sprintf(v, args...))
 	}
 	return r, nil

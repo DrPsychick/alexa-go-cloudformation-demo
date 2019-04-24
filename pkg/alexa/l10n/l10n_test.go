@@ -34,13 +34,6 @@ var deDE = &l10n.Locale{
 			"Hello %s",
 		},
 	},
-	//IntentResponses: l10n.IntentResponses{
-	//	Greeting: l10n.IntentResponse{
-	//		Title: []string{"title"},
-	//		Text:  []string{"text a", "text b"},
-	//		SSML:  []string{"<speak>foo bar</speak>"},
-	//	},
-	//},
 }
 
 var enUS = &l10n.Locale{
@@ -64,14 +57,21 @@ var enUS = &l10n.Locale{
 func TestNewRegistry(t *testing.T) {
 	registry = l10n.NewRegistry()
 	assert.Empty(t, registry.GetLocales())
-	assert.Empty(t, registry.GetDefault())
+	assert.Nil(t, registry.GetDefault())
 }
 
 func TestRegisterLocale(t *testing.T) {
 	assert.NotNil(t, registry)
+	err := registry.SetDefault("de-DE")
+	assert.Error(t, err)
 
-	err := registry.Register(deDE)
+	_, err = registry.Resolve("en-US")
+	assert.Error(t, err)
+
+	err = registry.Register(deDE)
 	assert.NoError(t, err)
+	err = registry.Register(deDE)
+	assert.Error(t, err)
 
 	l, err := registry.Resolve(deDE.Name)
 	assert.NoError(t, err)
@@ -84,6 +84,11 @@ func TestRegisterLocale(t *testing.T) {
 
 	assert.Equal(t, 2, len(registry.GetLocales()))
 	assert.Equal(t, enUS, registry.GetDefault())
+
+	err = registry.SetDefault("de-DE")
+	assert.NoError(t, err)
+	assert.Equal(t, deDE, registry.GetDefault())
+
 }
 
 func TestLocaleKeyNotExists(t *testing.T) {
@@ -92,8 +97,19 @@ func TestLocaleKeyNotExists(t *testing.T) {
 	l, err := registry.Resolve("de-DE")
 	assert.NoError(t, err)
 
-	trans := l.GetAny("not exists")
-	assert.Empty(t, trans)
+	tx := l.Get("not exists")
+	assert.Empty(t, tx)
+	tx = l.GetAny("not exists")
+	assert.Empty(t, tx)
+	txs := l.GetAll("not exists")
+	assert.Empty(t, txs)
+
+	_, err = deDE.TextSnippets.GetFirst("not exists")
+	assert.Error(t, err)
+	_, err = deDE.TextSnippets.GetAny("not exists")
+	assert.Error(t, err)
+	_, err = deDE.TextSnippets.GetAll("not exists")
+	assert.Error(t, err)
 }
 
 func TestLocaleGetAny(t *testing.T) {
@@ -118,18 +134,3 @@ func TestGetWithParam(t *testing.T) {
 	assert.Equal(t, "Hello there", l.GetAny(WithParam, "there"))
 	assert.Equal(t, "Hello there", l.GetAll(WithParam, "there")[0])
 }
-
-//func TestRegisterFallback(t *testing.T) {
-//	err := l10n.Register(enUS, l10n.AsFallbackFor("de-DE"))
-//	assert.Nil(t, err, "Register of locale %s failed: %s", enUS.Name, err)
-//
-//	l, _ := l10n.Resolve("de-DE")
-//	assert.NotNil(t, l.GetFallback())                                 // fallback Locale is set
-//	assert.NotEmpty(t, l.GetAny(ByeBye))                     // fallback key is used
-//	assert.Equal(t, "Fallback text", l.GetAny(FallbackTest)) // fallback content is returned
-//}
-
-//func TestFallbackToKey(t *testing.T) {
-//	l, _ := l10n.Resolve("en-US")
-//	assert.Equal(t, "not_found", l.GetAny("not_found")) // no fallback: return key name
-//}
