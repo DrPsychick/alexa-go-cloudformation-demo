@@ -18,7 +18,7 @@ const (
 	KeySkillTestingInstructions string = "SKILL_TestingInstructions"
 	KeySkillInvocation          string = "SKILL_Invocation"
 	KeySkillPrivacyPolicyURL    string = "SKILL_PrivacyPolicyURL"
-	KeySkillTermsOfUse          string = "SKILL_TermsOfUse"
+	KeySkillTermsOfUseURL       string = "SKILL_TermsOfUse"
 	KeyPostfixSamples           string = "_Samples"
 	KeyPostfixValues            string = "_Values"
 )

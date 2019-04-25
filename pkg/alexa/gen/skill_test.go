@@ -26,7 +26,7 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillSmallIconURI:        {"https://small"},
 		l10n.KeySkillLargeIconURI:        {"https://large"},
 		l10n.KeySkillPrivacyPolicyURL:    {"https://policy"},
-		//l10n.KeySkillTermsOfUse:          {"https://toc"},
+		//l10n.KeySkillTermsOfUseURL:       {"https://toc"},
 		l10n.KeySkillInvocation: {"call me"},
 		"Name":                  {"name"},
 		"Description":           {"description"},
@@ -127,6 +127,12 @@ func TestSkillBuilder_Build_Locale(t *testing.T) {
 	assert.Contains(t, string(res), "my name")
 
 	assert.NoError(t, testBuildImmutability(sb1))
+
+	m := sb1.AddModel()
+	assert.IsType(t, &gen.ModelBuilder{}, m)
+	ms, err := sb1.BuildModels()
+	assert.NoError(t, err)
+	assert.IsType(t, map[string]*alexa.Model{}, ms)
 
 	fmt.Printf("%s\n", string(res))
 }
@@ -264,6 +270,7 @@ func TestSkillRestrictions(t *testing.T) {
 
 	// termsOfUse not allowed (yet)
 	en.WithLocaleKeywords([]string{"1", "2", "3"})
+	en.WithTermsURL(l10n.KeySkillTermsOfUseURL)
 	en.WithLocaleTermsURL("http://terms")
 	_, err = sb.Build()
 	assert.Error(t, err)

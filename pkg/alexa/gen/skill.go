@@ -237,7 +237,7 @@ func NewSkillLocaleBuilder(locale string) *SkillLocaleBuilder {
 		skillSmallIcon:   l10n.KeySkillSmallIconURI,
 		skillLargeIcon:   l10n.KeySkillLargeIconURI,
 		skillPrivacyURL:  l10n.KeySkillPrivacyPolicyURL,
-		skillTermsURL:    l10n.KeySkillTermsOfUse,
+		skillTermsURL:    l10n.KeySkillTermsOfUseURL,
 	}
 }
 
