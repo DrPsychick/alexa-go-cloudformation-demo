@@ -97,6 +97,24 @@ func TestModelBuilder_Build(t *testing.T) {
 }
 
 // individual functions
+func TestModelWith(t *testing.T) {
+	mb := gen.NewModelBuilder().
+		WithLocaleRegistry(registry).
+		WithInvocation("MyInvocationKey").
+		AddLocale("en-US", "invoke me")
+	// fails because "en-US" is already in registry!
+	assert.Nil(t, mb)
+
+	mb = gen.NewModelBuilder().
+		WithInvocation("MyInvocationKey").
+		AddLocale("fo-BA", "invoke me")
+	assert.IsType(t, &gen.ModelBuilder{}, mb)
+
+	ms, err := mb.Build()
+	assert.NoError(t, err)
+	assert.Equal(t, "invoke me", ms["fo-BA"].Model.Language.Invocation)
+}
+
 func TestIntentBuilder(t *testing.T) {
 	loc := registry.GetDefault()
 

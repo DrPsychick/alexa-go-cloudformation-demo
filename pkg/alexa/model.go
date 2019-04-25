@@ -60,8 +60,12 @@ type DialogIntent struct {
 	Name         string             `json:"name"`
 	Confirmation bool               `json:"confirmationRequired"`
 	Delegation   string             `json:"delegationStrategy,omitempty"`
-	Prompts      struct{}           `json:"prompts"`
+	Prompts      IntentPrompt       `json:"prompts,omitempty"`
 	Slots        []DialogIntentSlot `json:"slots,omitempty"`
+}
+
+type IntentPrompt struct {
+	Confirmation string `json:"confirmation,omitempty"`
 }
 
 type DialogIntentSlot struct {

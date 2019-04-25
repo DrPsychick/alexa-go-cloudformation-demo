@@ -40,7 +40,9 @@ func (m *ModelBuilder) WithDelegationStrategy(strategy string) *ModelBuilder {
 
 func (m *ModelBuilder) AddLocale(locale string, invocation string) *ModelBuilder {
 	loc := l10n.NewLocale(locale)
-	m.registry.Register(loc)
+	if err := m.registry.Register(loc); err != nil {
+		return nil
+	}
 	loc.Set(m.invocation, []string{invocation})
 	return m
 }
@@ -318,8 +320,8 @@ func (s *ModelSlotBuilder) WithElicitationPrompt(id string) *ModelSlotBuilder {
 	return s
 }
 
-func (s *ModelSlotBuilder) WithSlotPrompt(prompt string) *ModelSlotBuilder {
-
+func (s *ModelSlotBuilder) WithIntentConfirmationPrompt(prompt string) *ModelSlotBuilder {
+	// TODO: WithIntentConfirmationPrompt - https://developer.amazon.com/docs/custom-skills/define-the-dialog-to-collect-and-confirm-required-information.html#intent-confirmation
 	return s
 }
 
