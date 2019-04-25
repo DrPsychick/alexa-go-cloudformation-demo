@@ -54,6 +54,14 @@ var enUS = &l10n.Locale{
 	},
 }
 
+func TestDefaultRegistry(t *testing.T) {
+	err := l10n.Register(deDE)
+	assert.NoError(t, err)
+	deDE2, err := l10n.Resolve("de-DE")
+	assert.NoError(t, err)
+	assert.Equal(t, deDE, deDE2)
+}
+
 func TestNewRegistry(t *testing.T) {
 	registry = l10n.NewRegistry()
 	assert.Empty(t, registry.GetLocales())
@@ -89,6 +97,17 @@ func TestRegisterLocale(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, deDE, registry.GetDefault())
 
+}
+
+func TestLocale(t *testing.T) {
+	l := l10n.NewLocale("fo-BA")
+	assert.IsType(t, &l10n.Locale{}, l)
+	assert.Equal(t, "fo-BA", l.Name)
+
+	vals := []string{"bar1", "bar2"}
+	l.Set("foo", vals)
+	v2 := l.GetAll("foo")
+	assert.Equal(t, vals, v2)
 }
 
 func TestLocaleKeyNotExists(t *testing.T) {

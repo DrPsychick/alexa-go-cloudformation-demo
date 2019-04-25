@@ -41,7 +41,7 @@ func (m *ModelBuilder) WithDelegationStrategy(strategy string) *ModelBuilder {
 func (m *ModelBuilder) AddLocale(locale string, invocation string) *ModelBuilder {
 	loc := l10n.NewLocale(locale)
 	m.registry.Register(loc)
-	loc.TextSnippets[m.invocation] = []string{invocation}
+	loc.Set(m.invocation, []string{invocation})
 	return m
 }
 
