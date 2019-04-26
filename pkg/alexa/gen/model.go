@@ -478,16 +478,16 @@ type PromptVariationsBuilder struct {
 }
 
 func NewPromptVariations(intent string, slot string, promptType string, varType string) *PromptVariationsBuilder {
-	t := varType
+	t := l10n.KeyPostfixSSML
 	if varType == "PlainText" {
-		t = "Text"
+		t = l10n.KeyPostfixText
 	}
 	return &PromptVariationsBuilder{
 		registry:   l10n.NewRegistry(),
 		intent:     intent,
 		slot:       slot,
 		promptType: promptType,
-		vars:       map[string]string{varType: fmt.Sprintf("%s_%s_%s_%s", intent, slot, promptType, t)},
+		vars:       map[string]string{varType: fmt.Sprintf("%s_%s_%s%s", intent, slot, promptType, t)},
 	}
 }
 
@@ -497,11 +497,11 @@ func (v *PromptVariationsBuilder) WithLocaleRegistry(registry l10n.LocaleRegistr
 }
 
 func (v *PromptVariationsBuilder) AddVariation(varType string) *PromptVariationsBuilder {
-	t := varType
-	if t == "PlainText" {
-		t = "Text"
+	t := l10n.KeyPostfixSSML
+	if varType == "PlainText" {
+		t = l10n.KeyPostfixText
 	}
-	v.vars[varType] = fmt.Sprintf("%s_%s_%s_%s", v.intent, v.slot, v.promptType, t)
+	v.vars[varType] = fmt.Sprintf("%s_%s_%s%s", v.intent, v.slot, v.promptType, t)
 	return v
 }
 
@@ -509,7 +509,7 @@ func (v *PromptVariationsBuilder) WithTypeValue(varType string, valueName string
 	v.vars[varType] = valueName
 	return v
 }
-func (v *PromptVariationsBuilder) WithLocaleValue(locale string, varType string, values []string) *PromptVariationsBuilder {
+func (v *PromptVariationsBuilder) WithLocaleTypeValue(locale string, varType string, values []string) *PromptVariationsBuilder {
 	loc, err := v.registry.Resolve(locale)
 	if err != nil {
 		return v

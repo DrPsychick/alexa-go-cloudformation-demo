@@ -21,6 +21,9 @@ const (
 	KeySkillTermsOfUseURL       string = "SKILL_TermsOfUse"
 	KeyPostfixSamples           string = "_Samples"
 	KeyPostfixValues            string = "_Values"
+	KeyPostfixTitle             string = "_Title"
+	KeyPostfixText              string = "_Text"
+	KeyPostfixSSML              string = "_SSML"
 )
 
 func init() {

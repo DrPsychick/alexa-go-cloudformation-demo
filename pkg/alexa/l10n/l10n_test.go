@@ -55,6 +55,9 @@ var enUS = &l10n.Locale{
 }
 
 func TestDefaultRegistry(t *testing.T) {
+	// make sure we have an empty default
+	l10n.DefaultRegistry = l10n.NewRegistry()
+
 	err := l10n.Register(deDE)
 	assert.NoError(t, err)
 	deDE2, err := l10n.Resolve("de-DE")

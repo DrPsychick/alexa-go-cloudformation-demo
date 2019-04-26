@@ -13,6 +13,7 @@ import (
 // Case 1: input multiple languages directly
 func TestModelBuilder_BuildLocale(t *testing.T) {
 	loc, err := registry.Resolve("en-US")
+	assert.NoError(t, err)
 	loc.Set("MyIntent_SlotName_Samples", []string{"of {Slot}"})
 	assert.NoError(t, err)
 
@@ -34,13 +35,13 @@ func TestModelBuilder_BuildLocale(t *testing.T) {
 
 	mb.AddElicitationSlotPrompt("MyIntent", "SlotName").
 		AddVariation("PlainText").
-		WithLocaleValue("de-DE", "PlainText", []string{"Was?", "Wie bitte?"}).
-		WithLocaleValue(loc.GetName(), "PlainText", []string{"What?"})
+		WithLocaleTypeValue("de-DE", "PlainText", []string{"Was?", "Wie bitte?"}).
+		WithLocaleTypeValue(loc.GetName(), "PlainText", []string{"What?"})
 
 	mb.AddConfirmationSlotPrompt("MyIntent", "SlotName").
 		AddVariation("PlainText").
-		WithLocaleValue(loc.GetName(), "PlainText", []string{"Sure?"}).
-		WithLocaleValue("de-DE", "PlainText", []string{"Sicher?"})
+		WithLocaleTypeValue(loc.GetName(), "PlainText", []string{"Sure?"}).
+		WithLocaleTypeValue("de-DE", "PlainText", []string{"Sicher?"})
 
 	m, err := mb.BuildLocale(loc.GetName())
 	assert.NoError(t, err)
@@ -167,12 +168,17 @@ func TestTypeBuilder(t *testing.T) {
 
 func TestNewElicitationModelPromptBuilder(t *testing.T) {
 	r := l10n.NewRegistry()
-	r.Register(l10n.NewLocale("en-US"))
+	err := r.Register(l10n.NewLocale("en-US"))
+	assert.NoError(t, err)
 
 	pb := gen.NewElicitationPromptBuilder("MyIntent", "MySlot").
 		WithLocaleRegistry(r)
-	pb.AddVariation("PlainText").
-		WithLocaleValue("en-US", "PlainText", []string{"What?"})
+	// fail: no variations
+	_, err = pb.BuildLocale("en-US")
+	assert.Error(t, err)
+
+	ptv := pb.AddVariation("PlainText").
+		WithLocaleTypeValue("en-US", "PlainText", []string{"What?"})
 
 	mp, err := pb.BuildLocale("en-US")
 	assert.NoError(t, err)
@@ -182,10 +188,19 @@ func TestNewElicitationModelPromptBuilder(t *testing.T) {
 	assert.Contains(t, mp.Id, "MySlot")
 	assert.Equal(t, "What?", mp.Variations[0].Value)
 
+	l, err := r.Resolve("en-US")
+	assert.NoError(t, err)
+	l.Set("MyTypeValueKey", []string{"Which?"})
+
+	ptv.WithTypeValue("PlainText", "MyTypeValueKey")
+	mp, err = pb.BuildLocale("en-US")
+	assert.NoError(t, err)
+	assert.Equal(t, "Which?", mp.Variations[0].Value)
+
 	pb = gen.NewConfirmationPromptBuilder("MyIntent", "MySlot").
 		WithLocaleRegistry(r)
 	pb.AddVariation("SSML").
-		WithLocaleValue("en-US", "SSML", []string{"Confirm!"})
+		WithLocaleTypeValue("en-US", "SSML", []string{"Confirm!"})
 	mp, err = pb.BuildLocale("en-US")
 	assert.NoError(t, err)
 	assert.Contains(t, mp.Id, "Confirm")
