@@ -241,11 +241,11 @@ func (i *ModelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelInte
 
 	mss := []alexa.ModelSlot{}
 	for _, s := range i.slots {
-		s, err := s.BuildIntentSlot(locale)
+		is, err := s.BuildIntentSlot(locale)
 		if err != nil {
 			return alexa.ModelIntent{}, err
 		}
-		mss = append(mss, s)
+		mss = append(mss, is)
 	}
 	mi.Slots = mss
 
@@ -259,7 +259,11 @@ func (i *ModelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogInten
 	}
 	dis := []alexa.DialogIntentSlot{}
 	for _, s := range i.slots {
-		dis = append(dis, s.BuildDialogSlot(locale))
+		ds, err := s.BuildDialogSlot(locale)
+		if err != nil {
+			return alexa.DialogIntent{}, err
+		}
+		dis = append(dis, ds)
 	}
 	di.Slots = dis
 	return di, nil
@@ -338,7 +342,10 @@ func (s *ModelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, erro
 	return ms, nil
 }
 
-func (s *ModelSlotBuilder) BuildDialogSlot(locale string) alexa.DialogIntentSlot {
+func (s *ModelSlotBuilder) BuildDialogSlot(locale string) (alexa.DialogIntentSlot, error) {
+	if _, err := s.registry.Resolve(locale); err != nil {
+		return alexa.DialogIntentSlot{}, err
+	}
 	ds := alexa.DialogIntentSlot{
 		Name:         s.name,
 		Type:         s.typeName,
@@ -351,7 +358,7 @@ func (s *ModelSlotBuilder) BuildDialogSlot(locale string) alexa.DialogIntentSlot
 	if s.elicitationPrompt != "" {
 		ds.Prompts.Elicitation = s.elicitationPrompt
 	}
-	return ds
+	return ds, nil
 }
 
 /////////////////////////////////////////////

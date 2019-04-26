@@ -234,3 +234,58 @@ func TestModelBuilder_AddIntent(t *testing.T) {
 	assert.Equal(t, "MyIntent", i[0].Name)
 	assert.Equal(t, []string{"say one", "say two"}, i[0].Samples)
 }
+
+func TestModelBuilderErrors(t *testing.T) {
+	mb := gen.NewModelBuilder()
+
+	// fail: no matching intent-slot
+	mpb := mb.AddElicitationSlotPrompt("foo", "bar")
+	assert.Nil(t, mpb)
+	mb.AddIntent("foo")
+	mpb = mb.AddConfirmationSlotPrompt("foo", "bar")
+	assert.Nil(t, mpb)
+
+	// fail: no locale
+	_, err := mb.BuildLocale("en-US")
+	assert.Error(t, err)
+}
+
+func TestModelIntentBuilderErrors(t *testing.T) {
+	mib := gen.NewModelIntentBuilder("foo")
+
+	// fail: no locale
+	m2 := mib.WithLocaleSamples("en-US", []string{"foo"})
+	assert.Equal(t, mib, m2)
+	_, err := mib.BuildLanguageIntent("en-US")
+	assert.Error(t, err)
+}
+
+func TestModelSlotBuilderErrors(t *testing.T) {
+	msb := gen.NewModelSlotBuilder("foo", "slot", "SlotType")
+
+	// fail: no locale
+	m2 := msb.WithLocaleSamples("en-US", []string{"foo"})
+	assert.Equal(t, msb, m2)
+	_, err := msb.BuildIntentSlot("en-US")
+	assert.Error(t, err)
+	_, err = msb.BuildDialogSlot("en-US")
+	assert.Error(t, err)
+}
+
+func TestPromptVariationsBuilderErrors(t *testing.T) {
+	// break it hard
+	pvb := &gen.PromptVariationsBuilder{}
+	r := l10n.NewRegistry()
+
+	// fail: no locale
+	_, err := pvb.WithLocaleRegistry(r).BuildLocale("en-US")
+	assert.Error(t, err)
+	p2 := pvb.WithLocaleTypeValue("en-US", "PlainText", []string{"foo"})
+	assert.Equal(t, pvb, p2)
+
+	// fail: no variations
+	err = r.Register(l10n.NewLocale("en-US"))
+	assert.NoError(t, err)
+	_, err = pvb.WithLocaleRegistry(r).BuildLocale("en-US")
+	assert.Error(t, err)
+}
