@@ -7,11 +7,11 @@ import (
 var deDE = &l10n.Locale{
 	Name: "de-DE",
 	TextSnippets: map[string][]string{
-		l10n.KeySkillName:        []string{"Demo Skill"},
-		l10n.KeySkillDescription: []string{"Demonstrationsskill für das Meetup"},
-		l10n.KeySkillSummary:     []string{"Dieser Skill demonstriert was man mit dem DrPsychick/alexa package machen kann"},
-		l10n.KeySkillInvocation:  []string{"demo skill"},
-		l10n.KeySkillExamplePhrases: []string{
+		l10n.KeySkillName:        {"Demo Skill"},
+		l10n.KeySkillDescription: {"Demonstrationsskill für das Meetup"},
+		l10n.KeySkillSummary:     {"Dieser Skill demonstriert was man mit dem DrPsychick/alexa package machen kann"},
+		l10n.KeySkillInvocation:  {"demo skill"},
+		l10n.KeySkillExamplePhrases: {
 			"Alexa, starte demo skill und sag etwas",
 			"schiess los",
 			"hop hop",
@@ -25,30 +25,30 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillTestingInstructions: enUS.GetAll(l10n.KeySkillTestingInstructions),
 
 		// Type values
-		TypeAreaValues:   []string{"Europa", "Nordamerika", "Südamerika", "Asien"},
-		TypeRegionValues: []string{"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nordvirginia"},
+		TypeAreaValues:   {"Europa", "Nordamerika", "Südamerika", "Asien"},
+		TypeRegionValues: {"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nordvirginia"},
 
 		// Launch request
-		LaunchTitle: []string{
+		LaunchTitle: {
 			"Begrüßung",
 		},
-		LaunchText: []string{
+		LaunchText: {
 			"Hallo!",
 			"Guten Tag!",
 		},
-		LaunchSSML: []string{
+		LaunchSSML: {
 			"<speak><voice name=\"Marlene\">Hallo!</voice></speak>",
 			"<speak>Guten <emphasis level=\"strong\">Tag!</emphasis></speak>",
 		},
 
 		// Intent: "DemoIntent"
-		DemoIntentSamples: []string{"schiess' los", "auf geht's", "hop hop"},
-		DemoIntentTitle:   []string{"Demo"},
-		DemoIntentText: []string{
+		DemoIntentSamples: {"schiess' los", "auf geht's", "hop hop"},
+		DemoIntentTitle:   {"Demo"},
+		DemoIntentText: {
 			"PACE ist geil!",
 			"Jawoll",
 		},
-		DemoIntentSSML: []string{
+		DemoIntentSSML: {
 			l10n.Speak(
 				l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
 					l10n.UseVoice("Marlene", "iss <emphasis level=\"strong\">geil!</emphasis>"),
@@ -56,14 +56,14 @@ var deDE = &l10n.Locale{
 			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
 		},
 		// Intent: "SaySomething"
-		SaySomethingSamples: []string{"sag' etwas", "erzähl' mir was"},
-		SaySomethingTitle:   []string{"Antwort", "Titel 2"},
-		SaySomethingText: []string{
+		SaySomethingSamples: {"sag' etwas", "erzähl' mir was"},
+		SaySomethingTitle:   {"Antwort", "Titel 2"},
+		SaySomethingText: {
 			"Jetzt sag ich dir mal was... Kannst du das wirklich glauben?",
 			"Ich hätte das nie für möglich gehalten!",
 			"Hör' zu!",
 		},
-		SaySomethingSSML: []string{
+		SaySomethingSSML: {
 			"<speak>" +
 				"Sie: <voice name=\"Marlene\">Schatz? Ich fühl mich in letzter Zeit so dick und hässlich, " +
 				"ich brauch dringend ein Kompliment!</voice> " +
@@ -76,15 +76,15 @@ var deDE = &l10n.Locale{
 			"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
 		},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:          []string{"wie geht's A.W.S."},
-		AWSStatusTitle:            []string{"AWS Status"},
-		AWSStatusText:             []string{"AWS Status in {Region}"},
-		AWSStatusAreaSamples:      []string{"in {Area}", "von {Area}"},
-		AWSStatusRegionSamples:    []string{"in {Region}", "der {Region}"},
-		AWSStatusRegionElicitText: []string{"In welcher Region?", "Wo nochmal?"},
-		AWSStatusRegionElicitSSML: []string{
+		AWSStatusSamples:          {"wie geht's A.W.S."},
+		AWSStatusTitle:            {"AWS Status"},
+		AWSStatusText:             {"AWS Status in {Region}"},
+		AWSStatusAreaSamples:      {"in {Area}", "von {Area}"},
+		AWSStatusRegionSamples:    {"in {Region}", "der {Region}"},
+		AWSStatusRegionElicitText: {"In welcher Region?", "Wo nochmal?"},
+		AWSStatusRegionElicitSSML: {
 			l10n.Speak("In welcher Region?"), l10n.Speak("Wo bitte?")},
-		AWSStatusAreaConfirmSSML: []string{
+		AWSStatusAreaConfirmSSML: {
 			l10n.Speak("Sicher in Region?"),
 		},
 	},

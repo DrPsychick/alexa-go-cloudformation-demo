@@ -129,7 +129,7 @@ func (r *Registry) GetDefault() LocaleInstance {
 func (r *Registry) SetDefault(locale string) error {
 	_, ok := r.locales[locale]
 	if !ok {
-		return fmt.Errorf("Locale '%s' not registered, cannot make it the default!", locale)
+		return fmt.Errorf("locale '%s' is not registered, cannot make it the default", locale)
 	}
 	r.defaultLocale = locale
 	return nil
@@ -219,7 +219,7 @@ func (s Snippets) GetAll(key string, args ...interface{}) ([]string, error) {
 	if !ok || len(s[key]) == 0 {
 		return []string{}, fmt.Errorf("key not defined or empty: %s", key)
 	}
-	r := []string{}
+	var r []string
 	for _, v := range s[key] {
 		r = append(r, fmt.Sprintf(v, args...))
 	}

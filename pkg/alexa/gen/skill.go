@@ -104,7 +104,7 @@ func (s *SkillBuilder) WithDefaultLocale(locale string) *SkillBuilder {
 func (s *SkillBuilder) WithDefaultLocaleTestingInstructions(instructions string) *SkillBuilder {
 	dl := s.registry.GetDefault()
 	if dl == nil {
-		s.error = fmt.Errorf("No default locale registered!")
+		s.error = fmt.Errorf("no default locale registered")
 		return s
 	}
 	dl.Set(s.instructions, []string{instructions})
@@ -121,7 +121,7 @@ func (s *SkillBuilder) WithModel() *SkillBuilder {
 // Locale returns the corresponding locale builder.
 func (s *SkillBuilder) Locale(locale string) *SkillLocaleBuilder {
 	if _, ok := s.locales[locale]; !ok {
-		s.error = fmt.Errorf("No builder registered for locale %s", locale)
+		s.error = fmt.Errorf("no builder registered for locale '%s'", locale)
 		return &SkillLocaleBuilder{}
 	}
 	return s.locales[locale]
@@ -130,7 +130,7 @@ func (s *SkillBuilder) Locale(locale string) *SkillLocaleBuilder {
 // Model returns the corresponding model builder.
 func (s *SkillBuilder) Model() *ModelBuilder {
 	if s.model == nil {
-		s.error = fmt.Errorf("No model builder registered!")
+		s.error = fmt.Errorf("no model builder registered")
 		return &ModelBuilder{}
 	}
 	return s.model
@@ -142,7 +142,7 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 		return nil, s.error
 	}
 	if s.registry == nil || len(s.registry.GetLocales()) == 0 {
-		return nil, fmt.Errorf("No locales registered to build")
+		return nil, fmt.Errorf("no locales registered to build")
 	}
 	// create SkillLocaleBuilders from registry
 	if s.locales == nil || len(s.locales) == 0 {
@@ -155,7 +155,7 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 	// get default locale
 	dl := s.registry.GetDefault()
 	if dl == nil {
-		return nil, fmt.Errorf("No default locale defined!")
+		return nil, fmt.Errorf("no default locale defined")
 	}
 
 	skill := &alexa.Skill{
@@ -165,7 +165,7 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 		},
 	}
 	if s.category == "" {
-		return nil, fmt.Errorf("Skill category is required!")
+		return nil, fmt.Errorf("skill category is required")
 	}
 	skill.Manifest.Publishing.Category = s.category
 	// TODO: ensure unique occurance?
@@ -175,7 +175,7 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 		skill.Manifest.Publishing.Worldwide = true
 	}
 	if dl.Get(s.instructions) == "" {
-		return nil, fmt.Errorf("Testing instructions are required! (%s: %s)", dl.GetName(), s.instructions)
+		return nil, fmt.Errorf("testing instructions are required (%s: %s)", dl.GetName(), s.instructions)
 	}
 	skill.Manifest.Publishing.TestingInstructions = dl.Get(s.instructions)
 
@@ -226,7 +226,7 @@ func (s *SkillBuilder) BuildModels() (map[string]*alexa.Model, error) {
 		return nil, s.error
 	}
 	if s.model == nil {
-		return nil, fmt.Errorf("No model to build")
+		return nil, fmt.Errorf("no model to build")
 	}
 	return s.model.Build()
 }
@@ -446,15 +446,15 @@ func (l *SkillLocaleBuilder) BuildPublishingLocale() (alexa.LocaleDef, error) {
 		loc.Get(l.skillSmallIcon) == "" ||
 		loc.Get(l.skillLargeIcon) == "" {
 		return alexa.LocaleDef{}, fmt.Errorf(
-			"Skill requires a name, description, summary, small icon and large icon... but for '%s' at least one was empty",
+			"skill requires a name, description, summary, small icon and large icon... but for '%s' at least one was empty",
 			l.locale,
 		)
 	}
 	if len(loc.GetAll(l.skillExamples)) > 3 {
-		return alexa.LocaleDef{}, fmt.Errorf("Only 3 examplePhrases are allowed! (%s)", l.locale)
+		return alexa.LocaleDef{}, fmt.Errorf("only 3 examplePhrases are allowed (%s)", l.locale)
 	}
 	if len(loc.GetAll(l.skillKeywords)) > 3 {
-		return alexa.LocaleDef{}, fmt.Errorf("Only 3 keywords are allowed! (%s)", l.locale)
+		return alexa.LocaleDef{}, fmt.Errorf("only 3 keywords are allowed (%s)", l.locale)
 	}
 	return alexa.LocaleDef{
 		Name:         loc.Get(l.skillName),

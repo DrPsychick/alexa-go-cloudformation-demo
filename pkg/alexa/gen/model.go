@@ -136,7 +136,7 @@ func (m *ModelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 		},
 	}
 
-	mts := []alexa.ModelType{}
+	var mts []alexa.ModelType
 	for _, t := range m.types {
 		mt, err := t.Build(locale)
 		if err != nil {
@@ -239,7 +239,7 @@ func (i *ModelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelInte
 		Samples: loc.GetAll(i.samplesName),
 	}
 
-	mss := []alexa.ModelSlot{}
+	var mss []alexa.ModelSlot
 	for _, s := range i.slots {
 		is, err := s.BuildIntentSlot(locale)
 		if err != nil {
@@ -257,7 +257,7 @@ func (i *ModelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogInten
 		Name: i.name,
 		// TODO: Confirmation, Delegation, ...
 	}
-	dis := []alexa.DialogIntentSlot{}
+	var dis []alexa.DialogIntentSlot
 	for _, s := range i.slots {
 		ds, err := s.BuildDialogSlot(locale)
 		if err != nil {
@@ -402,7 +402,7 @@ func (t *ModelTypeBuilder) Build(locale string) (alexa.ModelType, error) {
 	if err != nil {
 		return alexa.ModelType{}, err
 	}
-	var tv = []alexa.TypeValue{}
+	var tv []alexa.TypeValue
 	for _, v := range loc.GetAll(t.valuesName) {
 		tv = append(tv, alexa.TypeValue{Name: alexa.NameValue{Value: v}})
 	}
@@ -456,7 +456,7 @@ func (p *ModelPromptBuilder) AddVariation(varType string) *PromptVariationsBuild
 func (p *ModelPromptBuilder) BuildLocale(locale string) (alexa.ModelPrompt, error) {
 	if len(p.variations) == 0 {
 		return alexa.ModelPrompt{}, fmt.Errorf(
-			"Prompt '%s' requires variations! (%s)",
+			"prompt '%s' requires variations (%s)",
 			p.id, locale)
 	}
 	mp := alexa.ModelPrompt{
@@ -526,7 +526,7 @@ func (v *PromptVariationsBuilder) WithLocaleTypeValue(locale string, varType str
 }
 
 func (v *PromptVariationsBuilder) BuildLocale(locale string) ([]alexa.PromptVariation, error) {
-	vs := []alexa.PromptVariation{}
+	var vs []alexa.PromptVariation
 	loc, err := v.registry.Resolve(locale)
 	if err != nil {
 		return vs, err
@@ -534,7 +534,7 @@ func (v *PromptVariationsBuilder) BuildLocale(locale string) ([]alexa.PromptVari
 	// only useful with content, can never happen if ppl. use NewPromptVariationsBuilder :)
 	if len(v.vars) == 0 {
 		return []alexa.PromptVariation{}, fmt.Errorf(
-			"Prompt requires variations! (%s: %s-%s-%s)",
+			"prompt requires variations (%s: %s-%s-%s)",
 			locale, v.promptType, v.intent, v.slot)
 	}
 	// loop over variation types
@@ -548,7 +548,7 @@ func (v *PromptVariationsBuilder) BuildLocale(locale string) ([]alexa.PromptVari
 	}
 	if len(vs) == 0 {
 		return []alexa.PromptVariation{}, fmt.Errorf(
-			"Prompt requires variations with values! (%s: %s-%s-%s)",
+			"prompt requires variations with values (%s: %s-%s-%s)",
 			locale, v.promptType, v.intent, v.slot)
 	}
 	return vs, nil

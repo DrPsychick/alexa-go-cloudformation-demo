@@ -5,7 +5,7 @@
 if [ -z "$ASKS3Bucket" \
     -o -z "$ASKS3Key" \
     -o -z "$ASKClientId" \
-    -o -z "$$ASKClientSecret" \
+    -o -z "$ASKClientSecret" \
     -o -z "$ASKRefreshToken" \
     -o -z "$ASKVendorId" \
     -o -z "$CF_STACK_NAME" \

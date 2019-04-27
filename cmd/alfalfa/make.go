@@ -83,7 +83,7 @@ func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 		pb.AddVariation("SSML")
 	}
 	if pb == nil {
-		return nil, fmt.Errorf("Elicitation prompt failed to add")
+		return nil, fmt.Errorf("elicitation prompt failed to add")
 	}
 
 	return s.BuildModels()

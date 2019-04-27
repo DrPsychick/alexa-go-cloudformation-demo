@@ -317,7 +317,7 @@ func TestSkillBuilder_ErrorsAddingLocaleTwice(t *testing.T) {
 }
 
 // SkillBuilder No default locale is covered.
-func TestSkillBuilder_ErrorsIfNoLocale(t *testing.T) {
+func TestSkillBuilder_ErrorsIfNoDefaultLocale(t *testing.T) {
 	sb := gen.NewSkillBuilder().WithDefaultLocale("fr-FR")
 	_, err := sb.Build()
 	assert.Error(t, err)
@@ -326,8 +326,8 @@ func TestSkillBuilder_ErrorsIfNoLocale(t *testing.T) {
 	_, err = sb.Build()
 	assert.Error(t, err)
 
-	slb := gen.NewSkillBuilder().
-		Locale("fr-FR")
+	sb = gen.NewSkillBuilder()
+	slb := sb.Locale("fr-FR")
 	_, err = sb.Build()
 	assert.Error(t, err)
 	assert.Equal(t, &gen.SkillLocaleBuilder{}, slb)
