@@ -48,12 +48,6 @@ type LocaleInstance interface {
 	GetAll(key string, args ...interface{}) []string
 }
 
-// Config contains the options for Locale registration
-type Config struct {
-	DefaultLocale bool
-	FallbackFor   string
-}
-
 // TODO: move to `ssml` package
 func Speak(text string) string {
 	return "<speak>" + text + "</speak>"
@@ -66,41 +60,66 @@ func UseVoiceLang(voice string, language string, text string) string {
 	return `<voice name="` + voice + `"><lang xml:lang="` + language + `">` + text + `</lang></voice>`
 }
 
-// DefaultRegistry is the standard registry used
+// DefaultRegistry is the standard registry used.
 var DefaultRegistry = NewRegistry()
 
-// Registry is the Locale registry
-type Registry struct {
-	defaultLocale string
-	locales       map[string]LocaleInstance
+// Config contains the options for Locale registration
+type Config struct {
+	DefaultLocale bool
+	FallbackFor   string
 }
 
-func NewRegistry() LocaleRegistry {
-	return &Registry{locales: map[string]LocaleInstance{}}
-}
-
-// RegisterFunc defines the functions to be passed to Register
+// RegisterFunc defines the functions to be passed to Register.
 type RegisterFunc func(cfg *Config)
 
-// AsDefault sets the given Locale the default
+// AsDefault registers the given Locale as the default.
 func AsDefault() RegisterFunc {
 	return func(cfg *Config) {
 		cfg.DefaultLocale = true
 	}
 }
 
-// Register registers a new Locale in the DefaultRegistry
+// Registry is the Locale registry.
+type Registry struct {
+	defaultLocale string
+	locales       map[string]LocaleInstance
+}
+
+// NewRegistry returns an empty Registry.
+func NewRegistry() LocaleRegistry {
+	return &Registry{locales: map[string]LocaleInstance{}}
+}
+
+// Register registers a new Locale in the DefaultRegistry.
 func Register(locale LocaleInstance, opts ...RegisterFunc) error {
 	return DefaultRegistry.Register(locale, opts...)
 }
 
-// Resolve returns the matching Locale from the DefaultRegistry
+// GetDefault returns the default locale in the DefaultRegistry.
+func GetDefault() LocaleInstance {
+	return DefaultRegistry.GetDefault()
+}
+
+// SetDefault sets the default locale in the DefaultRegistry.
+func SetDefault(locale string) error {
+	return DefaultRegistry.SetDefault(locale)
+}
+
+// GetLocales returns the locales registered in the DefaultRegistry.
+func GetLocales() map[string]LocaleInstance {
+	return DefaultRegistry.GetLocales()
+}
+
+// Resolve returns the matching locale from the DefaultRegistry
 func Resolve(name string) (LocaleInstance, error) {
 	return DefaultRegistry.Resolve(name)
 }
 
 // Register registers a new locale and fails if it already exists
 func (r *Registry) Register(l LocaleInstance, opts ...RegisterFunc) error {
+	if l.GetName() == "" {
+		return fmt.Errorf("cannot register locale with no name")
+	}
 	_, ok := r.locales[l.GetName()]
 	if ok {
 		return fmt.Errorf("locale %s already registered", l.GetName())
@@ -122,10 +141,12 @@ func (r *Registry) Register(l LocaleInstance, opts ...RegisterFunc) error {
 	return nil
 }
 
+// GetDefault returns the default locale.
 func (r *Registry) GetDefault() LocaleInstance {
 	return r.locales[r.defaultLocale]
 }
 
+// SetDefault sets the default locale which must be registered.
 func (r *Registry) SetDefault(locale string) error {
 	_, ok := r.locales[locale]
 	if !ok {
@@ -135,6 +156,7 @@ func (r *Registry) SetDefault(locale string) error {
 	return nil
 }
 
+// GetLocales returns all registered locales.
 func (r *Registry) GetLocales() map[string]LocaleInstance {
 	return r.locales
 }
@@ -150,13 +172,14 @@ func (r *Registry) Resolve(locale string) (LocaleInstance, error) {
 
 ///////////////////////////////////////////
 
-// Locale is a representation of keys in a specific language (and can have a fallback Locale)
+// Locale is a representation of keys in a specific language.
 type Locale struct {
 	Name         string // de-DE, en-US, ...
 	TextSnippets Snippets
-	foo          Snippets
+	errors       []error
 }
 
+// NewLocale creates a new, empty locale.
 func NewLocale(locale string) *Locale {
 	return &Locale{
 		Name:         locale,
@@ -164,34 +187,54 @@ func NewLocale(locale string) *Locale {
 	}
 }
 
+// GetName returns the name of the locale.
 func (l *Locale) GetName() string {
 	return l.Name
 }
 
+// Set sets the translations for a key.
 func (l *Locale) Set(key string, values []string) {
 	l.TextSnippets[key] = values
 }
 
+// Get returns the first translation.
 func (l *Locale) Get(key string, args ...interface{}) string {
-	t, _ := l.TextSnippets.GetFirst(key, args...)
+	t, err := l.TextSnippets.GetFirst(key, args...)
+	if err != nil {
+		l.errors = append(l.errors, err)
+	}
 	return t
 }
 
+// GetAny returns a random translation.
 func (l *Locale) GetAny(key string, args ...interface{}) string {
-	t, _ := l.TextSnippets.GetAny(key, args...)
+	t, err := l.TextSnippets.GetAny(key, args...)
+	if err != nil {
+		l.errors = append(l.errors, err)
+	}
 	return t
 }
 
+// GetAll returns all translations.
 func (l *Locale) GetAll(key string, args ...interface{}) []string {
-	t, _ := l.TextSnippets.GetAll(key, args...)
+	t, err := l.TextSnippets.GetAll(key, args...)
+	if err != nil {
+		l.errors = append(l.errors, err)
+	}
 	return t
+}
+
+// GetErrors returns key lookup errors that occurred.
+func (l *Locale) GetErrors() []error {
+	return l.errors
 }
 
 ////////////////////////////////////
 
-// Snippets is the actual representation of key -> array of texts in locale
+// Snippets is the actual representation of key -> array of translations in a locale.
 type Snippets map[string][]string
 
+// GetFirst returns the first translation for the snippet.
 func (s Snippets) GetFirst(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
@@ -200,7 +243,7 @@ func (s Snippets) GetFirst(key string, args ...interface{}) (string, error) {
 	return fmt.Sprintf(s[key][0], args...), nil
 }
 
-// Get returns the translation for the snippet
+// GetAny returns a random translation for the snippet.
 func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
@@ -214,6 +257,7 @@ func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 	return fmt.Sprintf(s[key][r], args...), nil
 }
 
+// GetAll returns all translations of the snippet.
 func (s Snippets) GetAll(key string, args ...interface{}) ([]string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
