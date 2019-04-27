@@ -3,6 +3,7 @@ package l10n
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -46,6 +47,7 @@ type LocaleInstance interface {
 	Get(key string, args ...interface{}) string
 	GetAny(key string, args ...interface{}) string
 	GetAll(key string, args ...interface{}) []string
+	GetErrors() []error
 }
 
 // TODO: move to `ssml` package
@@ -203,6 +205,7 @@ func (l *Locale) Get(key string, args ...interface{}) string {
 	if err != nil {
 		l.errors = append(l.errors, err)
 	}
+	l.appendErrorMissingParam(key, []string{t})
 	return t
 }
 
@@ -212,6 +215,7 @@ func (l *Locale) GetAny(key string, args ...interface{}) string {
 	if err != nil {
 		l.errors = append(l.errors, err)
 	}
+	l.appendErrorMissingParam(key, []string{t})
 	return t
 }
 
@@ -221,12 +225,22 @@ func (l *Locale) GetAll(key string, args ...interface{}) []string {
 	if err != nil {
 		l.errors = append(l.errors, err)
 	}
+	l.appendErrorMissingParam(key, t)
 	return t
 }
 
 // GetErrors returns key lookup errors that occurred.
 func (l *Locale) GetErrors() []error {
 	return l.errors
+}
+
+func (l *Locale) appendErrorMissingParam(key string, texts []string) {
+	for _, t := range texts {
+		if strings.Contains(t, "%!") &&
+			strings.Contains(t, "(MISSING)") {
+			l.errors = append(l.errors, fmt.Errorf("key '%s' requires parameter: %s", key, t))
+		}
+	}
 }
 
 ////////////////////////////////////

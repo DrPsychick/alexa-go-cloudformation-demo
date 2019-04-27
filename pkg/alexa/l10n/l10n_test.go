@@ -195,6 +195,34 @@ func TestLocale_Set(t *testing.T) {
 	assert.Equal(t, vals, v2)
 }
 
+// Locale get random key is covered.
+func TestLocale_GetAny(t *testing.T) {
+	// requires registry setup
+	assert.NotNil(t, registry)
+
+	patch := monkey.Patch(rand.Intn, func(i int) int {
+		return 1
+	})
+	defer patch.Unpatch()
+
+	l, err := registry.Resolve("de-DE")
+	assert.NoError(t, err)
+	assert.Equal(t, "Hallo", l.GetAny(Greeting))
+}
+
+// Locale get with param is covered.
+func TestLocale_GetWithParam(t *testing.T) {
+	// requires registry setup
+	assert.NotNil(t, registry)
+
+	l, err := registry.Resolve("de-DE")
+	assert.NoError(t, err)
+
+	assert.Equal(t, "Hello there", l.Get(WithParam, "there"))
+	assert.Equal(t, "Hello there", l.GetAny(WithParam, "there"))
+	assert.Equal(t, "Hello there", l.GetAll(WithParam, "there")[0])
+}
+
 // Locale key does not exist is covered.
 func TestLocale_KeyNotExists(t *testing.T) {
 	// setup
@@ -210,45 +238,25 @@ func TestLocale_KeyNotExists(t *testing.T) {
 	assert.Empty(t, tx)
 	txs := l.GetAll("not exists")
 	assert.Empty(t, txs)
-
-	_, err = deDE.TextSnippets.GetFirst("not exists")
-	assert.Error(t, err)
-	_, err = deDE.TextSnippets.GetAny("not exists")
-	assert.Error(t, err)
-	_, err = deDE.TextSnippets.GetAll("not exists")
-	assert.Error(t, err)
+	assert.Len(t, l.GetErrors(), 3)
 }
 
-// Locale get random key is covered.
-func TestLocale_GetAny(t *testing.T) {
-	assert.NotNil(t, registry)
-
-	patch := monkey.Patch(rand.Intn, func(i int) int {
-		return 1
-	})
-	defer patch.Unpatch()
-
-	l, err := registry.Resolve("de-DE")
-	assert.NoError(t, err)
-	assert.Equal(t, "Hallo", l.GetAny(Greeting))
-}
-
-// Locale get with param is covered.
-func TestLocale_GetWithParam(t *testing.T) {
-	assert.NotNil(t, registry)
-
-	l, err := registry.Resolve("de-DE")
-	assert.NoError(t, err)
-
-	assert.Equal(t, "Hello there", l.Get(WithParam, "there"))
-	assert.Equal(t, "Hello there", l.GetAny(WithParam, "there"))
-	assert.Equal(t, "Hello there", l.GetAll(WithParam, "there")[0])
-}
-
-// Locale error
+// Locale empty locale is covered.
 func TestLocale_Errors(t *testing.T) {
 	l := &l10n.Locale{}
 	assert.Empty(t, l.GetName())
 	assert.Empty(t, l.Get("foo"))
 	assert.Len(t, l.GetErrors(), 1)
+}
+
+// Locale with no param
+func TestLocale_ErrorNoParam(t *testing.T) {
+	// requires registry setup
+	assert.NotNil(t, registry)
+	l, err := registry.Resolve("de-DE")
+	assert.NoError(t, err)
+
+	assert.Equal(t, "Hello %!s(MISSING)", l.Get(WithParam))
+	assert.Len(t, l.GetErrors(), 1)
+	assert.NotEmpty(t, l.GetErrors())
 }
