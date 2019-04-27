@@ -58,7 +58,6 @@ func init() {
 	if err := registry.Register(enUS, l10n.AsDefault()); err != nil {
 		panic("something went horribly wrong")
 	}
-
 }
 
 func TestSetup(t *testing.T) {
@@ -204,6 +203,9 @@ func TestSkillBuilder_WithModel(t *testing.T) {
 
 	m := sb.Model()
 	assert.IsType(t, &gen.ModelBuilder{}, m)
+
+	_, err := sb.BuildModels()
+	assert.NoError(t, err)
 }
 
 // SkillBuilder Missing elements are covered.
@@ -341,6 +343,34 @@ func TestSkillBuilder_ErrorsIfNoModel(t *testing.T) {
 
 	sb.Model()
 	_, err = sb.BuildModels()
+	assert.Error(t, err)
+}
+
+// SkillBuilder Incomplete second locale is covered.
+func TestSkillBuilder_ErrorsIfSecondLocaleIsIncomplete(t *testing.T) {
+	// setup
+	deDE := &l10n.Locale{
+		Name: "de-DE",
+		TextSnippets: map[string][]string{
+			l10n.KeySkillTestingInstructions: {"Initial instructions"},
+			l10n.KeySkillName:                {"SkillName"},
+			l10n.KeySkillDescription:         {"SkillDescription"},
+			l10n.KeySkillSummary:             {"SkillSummary"},
+			l10n.KeySkillKeywords:            {"Keyword1", "Keyword2"},
+			l10n.KeySkillExamplePhrases:      {"start me", "boot me up"},
+			//l10n.KeySkillSmallIconURI:        {"https://small"},
+			//l10n.KeySkillLargeIconURI:        {"https://large"},
+			//l10n.KeySkillPrivacyPolicyURL:    {"https://policy"},
+		},
+	}
+	err := registry.Register(deDE)
+	assert.NoError(t, err)
+	sb := gen.NewSkillBuilder().
+		WithLocaleRegistry(registry).
+		WithCategory(alexa.CategoryNews)
+
+	// some keys missing for 'de-DE'
+	_, err = sb.Build()
 	assert.Error(t, err)
 }
 

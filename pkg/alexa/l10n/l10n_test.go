@@ -14,7 +14,7 @@ const ByeBye string = "byebye"
 const WithParam string = "withparam"
 const FallbackTest string = "fallback_test"
 
-var registry l10n.LocaleRegistry
+var registry = l10n.NewRegistry()
 var deDE = &l10n.Locale{
 	Name: "de-DE",
 	TextSnippets: l10n.Snippets{
@@ -54,12 +54,11 @@ var enUS = &l10n.Locale{
 
 // initialize registry
 func init() {
-	registry = l10n.NewRegistry()
-	if err := registry.Register(enUS); err != nil {
-		panic("register 'enUS' failed")
-	}
 	if err := registry.Register(deDE); err != nil {
 		panic("register 'deDE' failed")
+	}
+	if err := registry.Register(enUS, l10n.AsDefault()); err != nil {
+		panic("register 'enUS' failed")
 	}
 }
 
@@ -102,7 +101,10 @@ func TestRegistry_DefineDefault(t *testing.T) {
 
 // Registry register locale is covered.
 func TestRegistry_Register(t *testing.T) {
+	// setup
 	loc := &l10n.Locale{}
+
+	// fails: no name
 	err := l10n.Register(loc)
 	assert.Error(t, err)
 
@@ -110,7 +112,7 @@ func TestRegistry_Register(t *testing.T) {
 	err = l10n.Register(loc)
 	assert.NoError(t, err)
 
-	// cannot register twice
+	// fails: cannot register twice
 	err = l10n.Register(loc)
 	assert.Error(t, err)
 
@@ -126,7 +128,6 @@ func TestRegistry_GetLocales(t *testing.T) {
 	// setup
 	l10n.DefaultRegistry = l10n.NewRegistry()
 	r := l10n.NewRegistry()
-
 	ls := l10n.GetLocales()
 	assert.Empty(t, ls)
 	ls = r.GetLocales()
