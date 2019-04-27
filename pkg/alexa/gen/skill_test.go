@@ -29,8 +29,8 @@ var enUS = &l10n.Locale{
 		//l10n.KeySkillTermsOfUseURL:       {"https://toc"},
 		l10n.KeySkillInvocation: {"call me"},
 		"Name":                  {"name"},
-		"Description":           {"description"},
 		"Summary":               {"summary"},
+		"Description":           {"description"},
 		"Keywords":              {"key", "words"},
 		"Examples":              {"say", "something"},
 		"SmallIcon":             {"https://small.icon"},
@@ -67,316 +67,465 @@ func TestSetup(t *testing.T) {
 	assert.Equal(t, enUS, registry.GetDefault())
 }
 
-// Case 1: input multiple languages directly
-func TestSkillBuilder_Build_Locale(t *testing.T) {
-	sb1 := gen.NewSkillBuilder().
-		WithCategory(alexa.CategoryCommunication).
-		AddCountry("US")
-
-	// fails: no default locale
-	err := sb1.SetDefaultLocaleTestingInstructions("Foo bar")
-	assert.Error(t, err)
-	// fails: no locales registered
-	err = sb1.SetDefaultLocale("en-US")
-	assert.Error(t, err)
-
-	// first locale is automatically the default (TODO: remove this magic)
-	sb1.AddLocale("en-US").
-		WithLocaleName("my name").
-		WithLocaleDescription("my description").
-		WithLocaleSummary("my summary").
-		WithLocaleKeywords([]string{"word1", "word2"}).
-		WithLocaleExamples([]string{"make an example", "give an example"}).
-		WithLocaleSmallIcon("https://small.icon").
-		WithLocaleLargeIcon("https://large.icon").
-		WithLocalePrivacyURL("https://privacy.url/en-US/")
-	err = sb1.SetDefaultLocale("en-US")
-	assert.NoError(t, err)
-
-	// this can only be called after adding a locale! TODO: make this part of Locale
-	err = sb1.SetDefaultLocaleTestingInstructions("Foo bar")
-	assert.NoError(t, err)
-
-	de := sb1.AddLocale("de-DE").
-		WithLocaleName("mein name").
-		WithLocaleDescription("beschreibung").
-		WithLocaleSummary("zusammenfassung").
-		WithLocalePrivacyURL("https://privacy.url/de-DE/")
-	// fails, missing icons
-	sk, err := sb1.Build()
-	assert.Error(t, err)
-
-	de.WithLocaleSmallIcon("https://small.icon").
-		WithLocaleLargeIcon("https://large.icon")
-	sk, err = sb1.Build()
-	assert.NoError(t, err)
-
-	pl := sk.Manifest.Publishing.Locales
-	pr := sk.Manifest.Privacy.Locales
-	assert.Equal(t, "my name", pl["en-US"].Name)
-	assert.Equal(t, "my description", pl["en-US"].Description)
-	assert.Equal(t, "my summary", pl["en-US"].Summary)
-	assert.Equal(t, "zusammenfassung", pl["de-DE"].Summary)
-	assert.Equal(t, []string{"word1", "word2"}, pl["en-US"].Keywords)
-	assert.Equal(t, []string{"make an example", "give an example"}, pl["en-US"].Examples)
-	assert.Equal(t, "https://privacy.url/en-US/", pr["en-US"].PrivacyPolicyURL)
-	assert.Equal(t, "https://privacy.url/de-DE/", pr["de-DE"].PrivacyPolicyURL)
-
-	res, err := json.MarshalIndent(sk, "", "  ")
-	assert.NoError(t, err)
-	assert.Contains(t, string(res), "my name")
-
-	assert.NoError(t, testBuildImmutability(sb1))
-
-	m := sb1.AddModel()
-	assert.IsType(t, &gen.ModelBuilder{}, m)
-	ms, err := sb1.BuildModels()
-	assert.NoError(t, err)
-	assert.IsType(t, map[string]*alexa.Model{}, ms)
-
-	fmt.Printf("%s\n", string(res))
-}
-
-// Case 2: input LocaleRegistry with locales that use required keys
-func TestSkillBuilder_Build(t *testing.T) {
+// SkillBuilder Build with registry is covered.
+func TestSkillBuilder_WithLocaleRegistry(t *testing.T) {
 	sb := gen.NewSkillBuilder().
 		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryFashionAndStyle)
-	assert.IsType(t, &gen.SkillBuilder{}, sb)
+		WithCategory(alexa.CategoryKnowledgeAndTrivia)
 
+	_, err := sb.Build()
+	assert.NoError(t, err)
+	assert.NoError(t, testBuilderImmutability(sb))
+}
+
+// SkillBuilder Lookup locale keys is covered.
+func TestSkillBuilder_LocaleKeyLookups(t *testing.T) {
+	// setup
+	sb := gen.NewSkillBuilder().
+		WithLocaleRegistry(registry).
+		WithCategory(alexa.CategoryNews)
+	us := enUS.TextSnippets
+
+	// takes default keys
 	sk, err := sb.Build()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, sk)
-	assert.Equal(t, "Initial instructions", sk.Manifest.Publishing.TestingInstructions)
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, us[l10n.KeySkillTestingInstructions][0], sk.Manifest.Publishing.TestingInstructions)
 
-	// use our own l10n key for instructions
+	// define our own keys
 	sb.WithTestingInstructions("Skill_Instructions")
 	sk, err = sb.Build()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, sk)
-	assert.Equal(t, "My instructions", sk.Manifest.Publishing.TestingInstructions)
-
-	res, err := json.MarshalIndent(sk, "", "  ")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, string(res))
-	assert.NotContains(t, string(res), "null")
-
-	assert.NoError(t, testBuildImmutability(sb))
-
-	fmt.Printf("%s\n", string(res))
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, us["Skill_Instructions"][0], sk.Manifest.Publishing.TestingInstructions)
 }
 
-// SkillBuilder individual functions
-func TestSkillBuilder_WithLocaleTestingInstructionsOverwrite(t *testing.T) {
+// SkillBuilder Defining default locale is covered.
+func TestSkillBuilder_DefineDefaultLocale(t *testing.T) {
+	// setup: skill with first local as default
 	sb := gen.NewSkillBuilder().
-		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryDeliveryAndTakeout).
-		WithTestingInstructions("Skill_Instructions")
+		WithCategory(alexa.CategoryDeviceTracking).
+		AddLocale("en-US").
+		WithDefaultLocaleTestingInstructions("test it")
+	sb.Locale("en-US").
+		WithLocaleName("name").
+		WithLocaleSummary("summary").
+		WithLocaleDescription("description").
+		WithLocaleSmallIcon("small").
+		WithLocaleLargeIcon("large")
 	sk, err := sb.Build()
 	assert.NoError(t, err)
-	assert.Equal(t, "My instructions", sk.Manifest.Publishing.TestingInstructions)
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, "test it", sk.Manifest.Publishing.TestingInstructions)
 
-	// overwrite testing instructions
-	err = sb.SetDefaultLocaleTestingInstructions("New instructions")
-	assert.NoError(t, err)
+	// add FR as default
+	sb.AddLocale("fr-FR", l10n.AsDefault()).
+		WithDefaultLocaleTestingInstructions("test le").
+		Locale("fr-FR").
+		WithLocaleName("nom").
+		WithLocaleSummary("sommaire").
+		WithLocaleDescription("description").
+		WithLocaleSmallIcon("petit").
+		WithLocaleLargeIcon("gros")
 	sk, err = sb.Build()
 	assert.NoError(t, err)
-	assert.Equal(t, "New instructions", sk.Manifest.Publishing.TestingInstructions)
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, "test le", sk.Manifest.Publishing.TestingInstructions)
 
-	res, err := json.MarshalIndent(sk, "", "  ")
+	// add DE and later make it default
+	sb.AddLocale("de-DE").Locale("de-DE").
+		WithLocaleName("name").
+		WithLocaleSummary("zusammenfassung").
+		WithLocaleDescription("beschreibung").
+		WithLocaleSmallIcon("klein").
+		WithLocaleLargeIcon("groß")
+	sk, err = sb.Build()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, string(res))
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, "test le", sk.Manifest.Publishing.TestingInstructions)
 
-	assert.NoError(t, testBuildImmutability(sb))
+	sb.WithDefaultLocale("de-DE").
+		WithDefaultLocaleTestingInstructions("teste es")
+	sk, err = sb.Build()
+	assert.NoError(t, err)
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, "teste es", sk.Manifest.Publishing.TestingInstructions)
 }
 
-// SkillBuilder cover all functions
-func TestSkillBuilder_Build_Full(t *testing.T) {
+// SkillBuilder Defining countries is covered.
+func TestSkillBuilder_DefineCountries(t *testing.T) {
+	// setup
 	sb := gen.NewSkillBuilder().
 		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryAstrology).
-		WithTestingInstructions("Skill_Instructions").
+		WithCategory(alexa.CategoryTvGuides)
+
+	// add
+	sb.AddCountry("US").AddCountries([]string{"US", "CA"})
+	sk, err := sb.Build()
+	assert.NoError(t, err)
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, []string{"US", "US", "CA"}, sk.Manifest.Publishing.Countries)
+
+	// set/overwrite
+	sb.WithCountries([]string{"FR", "DE"})
+	sk, err = sb.Build()
+	assert.NoError(t, err)
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, []string{"FR", "DE"}, sk.Manifest.Publishing.Countries)
+}
+
+// SkillBuilder Privacy flags are covered.
+func TestSkillBuilder_WithPrivacyFlag(t *testing.T) {
+	// setup
+	sb := gen.NewSkillBuilder().
+		WithLocaleRegistry(registry).
+		WithCategory(alexa.CategoryUnitConverters).
 		WithPrivacyFlag(gen.FlagIsExportCompliant, true).
-		WithPrivacyFlag(gen.FlagUsesPersonalInfo, true).
-		WithPrivacyFlag(gen.FlagAllowsPurchases, true).
 		WithPrivacyFlag(gen.FlagContainsAds, true).
 		WithPrivacyFlag(gen.FlagIsChildDirected, true).
-		AddCountry(alexa.CountryFrance).
-		WithCountries([]string{alexa.CountryGermany}).
-		AddCountries([]string{alexa.CountryCanada, alexa.CountryAustralia})
-	assert.NotEmpty(t, registry.GetLocales())
+		WithPrivacyFlag(gen.FlagAllowsPurchases, true).
+		WithPrivacyFlag(gen.FlagUsesPersonalInfo, true)
 
 	sk, err := sb.Build()
 	assert.NoError(t, err)
-	res, err := json.MarshalIndent(sk, "", "  ")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, string(res))
+	assert.NoError(t, testBuilderImmutability(sb))
+	assert.Equal(t, true, sk.Manifest.Privacy.IsExportCompliant)
+	assert.Equal(t, true, sk.Manifest.Privacy.ContainsAds)
+	assert.Equal(t, true, sk.Manifest.Privacy.IsChildDirected)
+	assert.Equal(t, true, sk.Manifest.Privacy.AllowsPurchases)
+	assert.Equal(t, true, sk.Manifest.Privacy.UsesPersonalInfo)
+}
 
-	assert.Contains(t, string(res), alexa.CategoryAstrology)
-	assert.NotContains(t, string(res), "FR")
-	assert.Contains(t, string(res), "DE")
-	assert.Contains(t, string(res), "CA")
-	assert.Contains(t, string(res), "AU")
+// SkillBuilder Model is covered.
+func TestSkillBuilder_WithModel(t *testing.T) {
+	sb := gen.NewSkillBuilder().
+		WithLocaleRegistry(registry).
+		WithModel()
 
-	assert.NoError(t, testBuildImmutability(sb))
+	m := sb.Model()
+	assert.IsType(t, &gen.ModelBuilder{}, m)
+}
 
-	fmt.Printf("Full Skill: %s\n", string(res))
+// SkillBuilder Missing elements are covered.
+func TestSkillBuilder_ErrorsIfElementsAreMissing(t *testing.T) {
+	// setup
+	sb := gen.NewSkillBuilder().
+		AddLocale("en-US")
 
-	_, err = sb.BuildModels()
+	// no category
+	_, err := sb.Build()
 	assert.Error(t, err)
 }
 
-// Cover skill validations
-func TestSkillRestrictions(t *testing.T) {
-	sb := gen.NewSkillBuilder()
+// SkillBuilder To many elements are covered.
+func TestSkillBuilder_ErrorsIfTooManyElements(t *testing.T) {
+	// setup
+	sb := gen.NewSkillBuilder().
+		WithCategory(alexa.CategoryFriendsAndFamily).
+		AddLocale("en-US").
+		WithDefaultLocaleTestingInstructions("test it")
+	sb.Locale("en-US").
+		WithLocaleName("Name").
+		WithLocaleDescription("Description").
+		WithLocaleSummary("Summary").
+		WithLocaleSmallIcon("https://small").
+		WithLocaleLargeIcon("https://large")
+
+	// max is 3 example phrases
+	sb.Locale("en-US").WithLocaleExamples([]string{"1", "2", "3", "4"})
+	_, err := sb.Build()
+	assert.Error(t, err)
+
+	// max is 3 keywords
+	sb.Locale("en-US").
+		WithLocaleExamples([]string{"1", "2", "3"}).
+		WithLocaleKeywords([]string{"1", "2", "3", "4"})
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	// termsOfUse not allowed (yet)
+	sb.Locale("en-US").
+		WithLocaleKeywords([]string{"1", "2", "3"}).
+		WithTermsURL("MyTermsOfUseURL").
+		WithLocaleTermsURL("http://terms")
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	// now it builds...
+	sb.Locale("en-US").WithLocaleTermsURL("")
+	_, err = sb.Build()
+	assert.NoError(t, err)
+	assert.NoError(t, testBuilderImmutability(sb))
+}
+
+// SkillBuilder Incomplete locale errors are covered.
+func TestSkillBuilder_ErrorsIfLocaleIsIncomplete(t *testing.T) {
+	sb := gen.NewSkillBuilder().
+		WithCategory(alexa.CategoryCookingAndRecipe)
 
 	// no locales
 	_, err := sb.Build()
 	assert.Error(t, err)
 
-	// no category
-	en := sb.AddLocale("en-US")
+	// missing testing instructions translation
+	sb.AddLocale("en-US")
 	_, err = sb.Build()
 	assert.Error(t, err)
 
-	// no testing instructions (missing translation)
-	sb.WithCategory(alexa.CategoryDating)
+	// missing translations
+	sb.WithDefaultLocaleTestingInstructions("test it...")
+	_, err = sb.Build()
+	assert.Error(t, err)
+	sb.Locale("en-US").WithLocaleName("my name")
+	_, err = sb.Build()
+	assert.Error(t, err)
+	sb.Locale("en-US").WithLocaleSummary("summary")
+	_, err = sb.Build()
+	assert.Error(t, err)
+	sb.Locale("en-US").WithLocaleDescription("description")
+	_, err = sb.Build()
+	assert.Error(t, err)
+	sb.Locale("en-US").WithLocaleKeywords([]string{"key", "words"})
+	_, err = sb.Build()
+	assert.Error(t, err)
+	sb.Locale("en-US").WithLocaleExamples([]string{"ex", "amples"})
+	_, err = sb.Build()
+	assert.Error(t, err)
+	sb.Locale("en-US").WithLocaleSmallIcon("https://small")
 	_, err = sb.Build()
 	assert.Error(t, err)
 
-	// missing skill fields
-	err = sb.SetDefaultLocaleTestingInstructions("some text")
-	assert.NoError(t, err)
-	_, err = sb.Build()
-	assert.Error(t, err)
-
-	en.WithLocaleName("Name").
-		WithLocaleDescription("Description").
-		WithLocaleSummary("Summary").
-		WithLocaleKeywords([]string{"keyword"}).
-		WithLocaleSmallIcon("https://small").
-		WithLocaleLargeIcon("https://large")
-
-	// max is 3 example phrases
-	en.WithLocaleExamples([]string{"1", "2", "3", "4"})
-	_, err = sb.Build()
-	assert.Error(t, err)
-
-	// max is 3 keywords
-	en.WithLocaleExamples([]string{"1", "2", "3"})
-	en.WithLocaleKeywords([]string{"1", "2", "3", "4"})
-	_, err = sb.Build()
-	assert.Error(t, err)
-
-	// termsOfUse not allowed (yet)
-	en.WithLocaleKeywords([]string{"1", "2", "3"})
-	en.WithTermsURL(l10n.KeySkillTermsOfUseURL)
-	en.WithLocaleTermsURL("http://terms")
-	_, err = sb.Build()
-	assert.Error(t, err)
-
-	// now it builds...
-	en.WithLocaleTermsURL("")
+	// last one missing
+	sb.Locale("en-US").WithLocaleLargeIcon("https://large")
 	_, err = sb.Build()
 	assert.NoError(t, err)
+	assert.NoError(t, testBuilderImmutability(sb))
 }
 
-// Cover error cases
-func TestErrors(t *testing.T) {
+// SkillBuilder Adding locale twice is covered.
+func TestSkillBuilder_ErrorsAddingLocaleTwice(t *testing.T) {
+	sb := gen.NewSkillBuilder().
+		WithCategory(alexa.CategoryKnowledgeAndTrivia).
+		AddLocale("en-US").
+		WithDefaultLocaleTestingInstructions("test it...").
+		AddLocale("en-US")
+	assert.IsType(t, &gen.SkillBuilder{}, sb)
+	slb := sb.Locale("en-US")
+	assert.IsType(t, &gen.SkillLocaleBuilder{}, slb)
+	_, err := sb.Build()
+	assert.Error(t, err)
+}
+
+// SkillBuilder No default locale is covered.
+func TestSkillBuilder_ErrorsIfNoLocale(t *testing.T) {
+	sb := gen.NewSkillBuilder().WithDefaultLocale("fr-FR")
+	_, err := sb.Build()
+	assert.Error(t, err)
+
+	sb = gen.NewSkillBuilder().WithDefaultLocaleTestingInstructions("foo bar")
+	_, err = sb.Build()
+	assert.Error(t, err)
+
+	slb := gen.NewSkillBuilder().
+		Locale("fr-FR")
+	_, err = sb.Build()
+	assert.Error(t, err)
+	assert.Equal(t, &gen.SkillLocaleBuilder{}, slb)
+}
+
+// SkillBuilder No model is covered.
+func TestSkillBuilder_ErrorsIfNoModel(t *testing.T) {
 	sb := gen.NewSkillBuilder()
-	// AddLocale
-	sb2 := sb.AddLocale("en-US")
-	assert.IsType(t, &gen.SkillLocaleBuilder{}, sb2)
-	sb3 := sb.AddLocale("en-US")
-	assert.Nil(t, sb3)
+	_, err := sb.BuildModels()
+	assert.Error(t, err)
 
-	// fuck it up hard: no locale set in locale builder
-	l := &gen.SkillLocaleBuilder{}
-	l.WithLocaleRegistry(l10n.NewRegistry())
-	l2 := l.WithLocaleName("foo")
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocaleSummary("foo")
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocaleDescription("foo")
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocaleExamples([]string{"foo", "bar"})
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocaleKeywords([]string{"foo", "bar"})
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocaleSmallIcon("https://foo")
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocaleLargeIcon("https://bar")
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocalePrivacyURL("https://foo")
-	assert.Equal(t, l, l2)
-	l2 = l.WithLocaleTermsURL("https://bar")
-	assert.Equal(t, l, l2)
+	sb.Model()
+	_, err = sb.BuildModels()
+	assert.Error(t, err)
+}
 
+// SkillLocaleBuilder No locale is covered.
+func TestSkillLocaleBuilder_ErrorsIfNoLocale(t *testing.T) {
+	// overwrite with empty registry
+	l := gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry())
+	_, err := l.BuildPublishingLocale()
+	assert.Error(t, err)
+	_, err2 := l.BuildPrivacyLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	// each setup fails (sets error on SkillLocaleBuilder)
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleName("foo")
+	_, err = l.BuildPublishingLocale()
+	assert.Error(t, err)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleSummary("foo")
+	_, err2 = l.BuildPublishingLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleDescription("foo")
+	_, err2 = l.BuildPublishingLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleExamples([]string{"foo", "bar"})
+	_, err2 = l.BuildPublishingLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleKeywords([]string{"foo", "bar"})
+	_, err2 = l.BuildPublishingLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleSmallIcon("https://foo")
+	_, err2 = l.BuildPublishingLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleLargeIcon("https://bar")
+	_, err2 = l.BuildPublishingLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocalePrivacyURL("https://foo")
+	_, err2 = l.BuildPublishingLocale()
+	assert.Error(t, err2)
+	assert.Equal(t, err, err2)
+
+	l = gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(l10n.NewRegistry()).
+		WithLocaleTermsURL("https://bar")
 	pl, err := l.BuildPublishingLocale()
 	assert.Error(t, err)
 	assert.Empty(t, pl)
+	assert.Equal(t, err, err2)
 
-	pl2, err := l.BuildPrivacyLocale()
-	assert.Error(t, err)
+	// fails with the same error
+	pl2, err2 := l.BuildPrivacyLocale()
+	assert.Error(t, err2)
 	assert.Empty(t, pl2)
+	assert.Equal(t, err, err2)
 }
 
-// SkillLocaleBuilder Case 1
-func TestSkillLocaleBuilder_WithLocale(t *testing.T) {
-	lb := gen.NewSkillLocaleBuilder("en-US").
-		WithName("SkillName").
-		WithLocaleName("My Skill").
-		WithLocaleDescription("description").
-		WithLocaleSummary("summary").
-		WithLocaleSmallIcon("https://small.icon").
-		WithLocaleLargeIcon("https://large.icon")
+// SkillLocaleBuilder Build with registry is covered.
+func TestSkillLocaleBuilder_WithLocaleRegistry(t *testing.T) {
+	// setup
+	slb := gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(registry)
 
-	l, err := lb.BuildPublishingLocale()
+	// builds without errors
+	_, err := slb.BuildPublishingLocale()
 	assert.NoError(t, err)
-	assert.Equal(t, "My Skill", l.Name)
-	res, err := json.MarshalIndent(l, "", "  ")
+	_, err = slb.BuildPrivacyLocale()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, string(res))
+	assert.NoError(t, testLocalBuilderImmutability(slb))
 }
 
-// SkillLocaleBuilder Case 2
-func TestSkillLocaleBuilder_WithRegistry(t *testing.T) {
-	lb := gen.NewSkillLocaleBuilder("en-US").
-		WithLocaleRegistry(registry).
+// SkillLocaleBuilder Lookup locale keys is covered.
+func TestSkillLocaleBuilder_LocaleKeyLookups(t *testing.T) {
+	// setup
+	slb := gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleRegistry(registry)
+	us := enUS.TextSnippets
+
+	// takes default keys
+	pbl, err := slb.BuildPublishingLocale()
+	assert.NoError(t, err)
+	assert.NoError(t, testLocalBuilderImmutability(slb))
+	assert.Equal(t, us[l10n.KeySkillName][0], pbl.Name)
+	assert.Equal(t, us[l10n.KeySkillSummary][0], pbl.Summary)
+	assert.Equal(t, us[l10n.KeySkillDescription][0], pbl.Description)
+	assert.Equal(t, us[l10n.KeySkillExamplePhrases][1], pbl.Examples[1])
+	assert.Equal(t, us[l10n.KeySkillKeywords][0], pbl.Keywords[0])
+	assert.Equal(t, us[l10n.KeySkillSmallIconURI][0], pbl.SmallIconURI)
+	assert.Equal(t, us[l10n.KeySkillLargeIconURI][0], pbl.LargeIconURI)
+
+	prl, err := slb.BuildPrivacyLocale()
+	assert.NoError(t, err)
+	assert.NoError(t, testLocalBuilderImmutability(slb))
+	assert.Equal(t, us[l10n.KeySkillPrivacyPolicyURL][0], prl.PrivacyPolicyURL)
+
+	// define our own keys
+	slb.WithLocaleRegistry(registry).
 		WithName("Name").
-		WithDescription("Description").
 		WithSummary("Summary").
-		WithKeywords("Keywords").
+		WithDescription("Description").
 		WithExamples("Examples").
+		WithKeywords("Keywords").
 		WithSmallIcon("SmallIcon").
 		WithLargeIcon("LargeIcon").
 		WithPrivacyURL("Privacy")
-		//WithTermsURL("Terms")
 
-	l, err := lb.BuildPublishingLocale()
+	pbl, err = slb.BuildPublishingLocale()
 	assert.NoError(t, err)
+	assert.NoError(t, testLocalBuilderImmutability(slb))
+	assert.Equal(t, us["Name"][0], pbl.Name)
+	assert.Equal(t, us["Summary"][0], pbl.Summary)
+	assert.Equal(t, us["Description"][0], pbl.Description)
+	assert.Equal(t, us["Examples"][1], pbl.Examples[1])
+	assert.Equal(t, us["Keywords"][0], pbl.Keywords[0])
+	assert.Equal(t, us["SmallIcon"][0], pbl.SmallIconURI)
+	assert.Equal(t, us["LargeIcon"][0], pbl.LargeIconURI)
 
-	res, err := json.MarshalIndent(l, "", "  ")
+	prl, err = slb.BuildPrivacyLocale()
 	assert.NoError(t, err)
-	assert.Contains(t, string(res), ": \"name\"")
-	assert.Contains(t, string(res), ": \"description\"")
-	assert.Contains(t, string(res), ": \"summary\"")
-	assert.Contains(t, string(res), "\"say\",")
-	assert.Contains(t, string(res), "\"key\",")
-	assert.Contains(t, string(res), "small.icon")
-	assert.Contains(t, string(res), "large.icon")
+	assert.NoError(t, testLocalBuilderImmutability(slb))
+	assert.Equal(t, us["Privacy"][0], prl.PrivacyPolicyURL)
+}
 
-	pl, err := lb.BuildPrivacyLocale()
-	assert.NoError(t, err)
+// SkillLocaleBuilder Set locale translations is covered.
+func TestSkillLocaleBuilder_WithLocale(t *testing.T) {
+	// setup
+	us := enUS.TextSnippets
+	// set translations of default keys
+	slb := gen.NewSkillLocaleBuilder("en-US").
+		WithLocaleName(us["Name"][0]).
+		WithLocaleSummary(us["Summary"][0]).
+		WithLocaleDescription(us["Description"][0]).
+		WithLocaleSmallIcon(us["SmallIcon"][0]).
+		WithLocaleLargeIcon(us["LargeIcon"][0]).
+		WithLocaleExamples(us["Examples"]).
+		WithLocaleKeywords(us["Keywords"]).
+		WithLocalePrivacyURL(us["Privacy"][0])
 
-	res, err = json.MarshalIndent(pl, "", "  ")
+	pbl, err := slb.BuildPublishingLocale()
 	assert.NoError(t, err)
-	assert.Contains(t, string(res), "privacy.url")
-	//assert.Contains(t, string(res), "terms.url")
+	assert.NoError(t, testLocalBuilderImmutability(slb))
+	assert.Equal(t, us["Name"][0], pbl.Name)
+	assert.Equal(t, us["Summary"][0], pbl.Summary)
+	assert.Equal(t, us["Description"][0], pbl.Description)
+	assert.Equal(t, us["Examples"][1], pbl.Examples[1])
+	assert.Equal(t, us["Keywords"][0], pbl.Keywords[0])
+	assert.Equal(t, us["SmallIcon"][0], pbl.SmallIconURI)
+	assert.Equal(t, us["LargeIcon"][0], pbl.LargeIconURI)
+
+	prl, err := slb.BuildPrivacyLocale()
+	assert.NoError(t, err)
+	assert.NoError(t, testLocalBuilderImmutability(slb))
+	assert.Equal(t, us["Privacy"][0], prl.PrivacyPolicyURL)
 }
 
 // helper to compare two builds
-func testBuildImmutability(s *gen.SkillBuilder) error {
+func testBuilderImmutability(s *gen.SkillBuilder) error {
 	s1, err := s.Build()
 	if err != nil {
 		return err
@@ -396,6 +545,46 @@ func testBuildImmutability(s *gen.SkillBuilder) error {
 	}
 	if string(res1) != string(res2) {
 		return fmt.Errorf("Building skill is not immutable!\n%+v\n%+v", string(res1), string(res2))
+	}
+	return nil
+}
+
+// helper to compare two builds
+func testLocalBuilderImmutability(l *gen.SkillLocaleBuilder) error {
+	pbl1, err := l.BuildPublishingLocale()
+	if err != nil {
+		return err
+	}
+	rpbl1, err := json.MarshalIndent(pbl1, "", "  ")
+	if err != nil {
+		return err
+	}
+	prl1, err := l.BuildPrivacyLocale()
+	if err != nil {
+		return err
+	}
+	rprl1, err := json.MarshalIndent(prl1, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	pbl2, err := l.BuildPublishingLocale()
+	if err != nil {
+		return err
+	}
+	rpbl2, err := json.MarshalIndent(pbl2, "", "  ")
+	if err != nil {
+		return err
+	}
+	prl2, err := l.BuildPrivacyLocale()
+	if err != nil {
+		return err
+	}
+	rprl2, err := json.MarshalIndent(prl2, "", "  ")
+
+	if string(rpbl1) != string(rpbl2) ||
+		string(rprl1) != string(rprl2) {
+		return fmt.Errorf("Building locale is not immutable!\n%+v\n%+v", string(rpbl1), string(rpbl2))
 	}
 	return nil
 }
