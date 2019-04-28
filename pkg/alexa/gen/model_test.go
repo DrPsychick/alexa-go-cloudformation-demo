@@ -146,12 +146,12 @@ func TestModelBuilder_WithType(t *testing.T) {
 	assert.Len(t, m1.Model.Language.Types, 1)
 
 	assert.NoError(t, err2)
-	assert.Equal(t, "bar", m2.Model.Language.Types[1].Name)
 	assert.Len(t, m2.Model.Language.Types, 2)
 
 	assert.NoError(t, err3)
 	assert.Equal(t, mt1, mt3)
 	assert.Len(t, m3.Model.Language.Types, 2)
+	assert.Equal(t, []string{"foo"}, en.GetAll(TypeValuesKey))
 }
 
 // modelBuilder with slot prompts are covered.
@@ -275,7 +275,6 @@ func TestModelIntentBuilder_WithSlot(t *testing.T) {
 
 	assert.NoError(t, err2)
 	assert.Len(t, i2.Slots, 2)
-	assert.Equal(t, "BarType", i2.Slots[0].Type)
 }
 
 // modelIntentBuilder errors if no locale is covered.
@@ -481,8 +480,6 @@ func TestNewConfirmationPromptBuilder(t *testing.T) {
 // modelPromptBuilder with variation is covered.
 func TestModelPromptBuilder_WithVariation(t *testing.T) {
 	assert.NotNil(t, registry)
-	en, err := registry.Resolve("en-US")
-	assert.NoError(t, err)
 	mpb := gen.NewElicitationPromptBuilder("SlotIntent", "SlotName").
 		WithLocaleRegistry(registry)
 
@@ -503,16 +500,14 @@ func TestModelPromptBuilder_WithVariation(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, pvbText)
+	assert.Len(t, pvs.Variations, 2)
 
 	assert.NoError(t, err2)
 	assert.NotNil(t, pvbSSML)
+	assert.Len(t, pvs2.Variations, 3)
 
 	assert.NoError(t, err3)
 	assert.Equal(t, pvbText, pvbText2)
-
-	assert.Equal(t, en.Get("SlotIntent_SlotName_Elicit_Text"), pvs.Variations[0].Value)
-	assert.Equal(t, en.Get("SlotIntent_SlotName_Elicit_SSML"), pvs2.Variations[2].Value)
-	assert.Len(t, pvs2.Variations, 3)
 	assert.Len(t, pvs3.Variations, 3)
 }
 
