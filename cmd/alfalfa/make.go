@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
@@ -64,27 +63,25 @@ func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	m := s.WithModel().Model().
 		WithDelegationStrategy(alexa.DelegationSkillResponse)
 
-	m.AddType(loca.TypeArea)
-	m.AddType(loca.TypeRegion)
+	m.WithType(loca.TypeArea)
+	m.WithType(loca.TypeRegion)
 
-	m.AddIntent(loca.DemoIntent)
-	m.AddIntent(loca.SaySomething)
+	m.WithIntent(loca.DemoIntent)
+	m.WithIntent(loca.SaySomething)
+	m.WithIntent(loca.AWSStatus)
 
-	i := m.AddIntent(loca.AWSStatus)
-	i.AddSlot(loca.TypeAreaName, loca.TypeArea)
-	i.AddSlot(loca.TypeRegionName, loca.TypeRegion)
+	m.Intent(loca.AWSStatus).
+		WithSlot(loca.TypeAreaName, loca.TypeArea).
+		WithSlot(loca.TypeRegionName, loca.TypeRegion)
 
-	pb := m.AddElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
-	if pb != nil {
-		pb.AddVariation("PlainText").AddVariation("SSML")
-	}
-	pb = m.AddConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
-	if pb != nil {
-		pb.AddVariation("SSML")
-	}
-	if pb == nil {
-		return nil, fmt.Errorf("elicitation prompt failed to add")
-	}
+	m.WithElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
+	m.ElicitationPrompt(loca.AWSStatus, loca.TypeRegionName).
+		WithVariation("PlainText").
+		WithVariation("SSML")
+
+	m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
+	m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).
+		WithVariation("SSML")
 
 	return s.BuildModels()
 }

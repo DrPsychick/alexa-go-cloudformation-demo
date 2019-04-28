@@ -24,7 +24,7 @@ type SkillBuilder struct {
 	instructions string
 	privacyFlags map[string]bool
 	locales      map[string]*SkillLocaleBuilder
-	model        *ModelBuilder
+	model        *modelBuilder
 	//permissions2 *SkillPermissionsBuilder
 }
 
@@ -80,7 +80,7 @@ func (s *SkillBuilder) AddCountries(cs []string) *SkillBuilder {
 	return s
 }
 
-// AddLocale creates, registers locale and adds a new locale builder.
+// WithLocale creates, registers locale and adds a new locale builder.
 func (s *SkillBuilder) AddLocale(locale string, opts ...l10n.RegisterFunc) *SkillBuilder {
 	if err := s.registry.Register(l10n.NewLocale(locale), opts...); err != nil {
 		s.error = err
@@ -111,7 +111,7 @@ func (s *SkillBuilder) WithDefaultLocaleTestingInstructions(instructions string)
 	return s
 }
 
-// AddModel creates and returns a new ModelBuilder attached to the skill.
+// AddModel creates and returns a new modelBuilder attached to the skill.
 func (s *SkillBuilder) WithModel() *SkillBuilder {
 	s.model = NewModelBuilder().
 		WithLocaleRegistry(s.registry)
@@ -128,10 +128,10 @@ func (s *SkillBuilder) Locale(locale string) *SkillLocaleBuilder {
 }
 
 // Model returns the corresponding model builder.
-func (s *SkillBuilder) Model() *ModelBuilder {
+func (s *SkillBuilder) Model() *modelBuilder {
 	if s.model == nil {
 		s.error = fmt.Errorf("no model builder registered")
-		return &ModelBuilder{}
+		return &modelBuilder{}
 	}
 	return s.model
 }

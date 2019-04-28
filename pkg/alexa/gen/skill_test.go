@@ -39,16 +39,17 @@ var enUS = &l10n.Locale{
 		"Terms":                 {"https://terms.url"},
 		// Model
 		// Intents
-		"MyIntent_Samples":                {"say one", "say two"},
-		"MyIntent_Title":                  {"Title"},
-		"MyIntent_Text":                   {"Text1", "Text2"},
-		"MyIntent_SSML":                   {l10n.Speak("SSML one"), l10n.Speak("SSML two")},
-		"SlotIntent_Samples":              {"what about slot {SlotName}"},
-		"SlotIntent_Title":                {"Test intent with slot"},
-		"SlotIntent_Text":                 {"it seems to work"},
-		"SlotIntent_SlotName_Samples":     {"of {SlotName}", "{SlotName}"},
-		"SlotIntent_SlotName_Elicit_Text": {"Which slot did you mean?", "I did not understand, which slot?"},
-		"SlotIntent_SlotName_Elicit_SSML": {l10n.Speak("I'm sorry, which slot did you mean?")},
+		"MyIntent_Samples":                 {"say one", "say two"},
+		"MyIntent_Title":                   {"Title"},
+		"MyIntent_Text":                    {"Text1", "Text2"},
+		"MyIntent_SSML":                    {l10n.Speak("SSML one"), l10n.Speak("SSML two")},
+		"SlotIntent_Samples":               {"what about slot {SlotName}"},
+		"SlotIntent_Title":                 {"Test intent with slot"},
+		"SlotIntent_Text":                  {"it seems to work"},
+		"SlotIntent_SlotName_Samples":      {"of {SlotName}", "{SlotName}"},
+		"SlotIntent_SlotName_Elicit_Text":  {"Which slot did you mean?", "I did not understand, which slot?"},
+		"SlotIntent_SlotName_Elicit_SSML":  {l10n.Speak("I'm sorry, which slot did you mean?")},
+		"SlotIntent_SlotName_Confirm_SSML": {l10n.Speak("Are you sure you know what you're doing?")},
 		// Types
 		"MyType_Values": {"Value 1", "Value 2"},
 	},
@@ -201,11 +202,12 @@ func TestSkillBuilder_WithModel(t *testing.T) {
 		WithLocaleRegistry(registry).
 		WithModel()
 
-	m := sb.Model()
-	assert.IsType(t, &gen.ModelBuilder{}, m)
+	ms1, err1 := sb.BuildModels()
+	ms2, err2 := sb.Model().Build()
 
-	_, err := sb.BuildModels()
-	assert.NoError(t, err)
+	assert.NoError(t, err1)
+	assert.NoError(t, err2)
+	assert.Equal(t, ms1, ms2)
 }
 
 // SkillBuilder Missing elements are covered.

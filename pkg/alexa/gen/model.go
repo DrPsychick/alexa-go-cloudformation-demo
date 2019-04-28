@@ -6,64 +6,77 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
-// ModelBuilder builds an alexa.Model instance for a locale
-type ModelBuilder struct {
+// modelBuilder builds an alexa.Model instance for a locale
+type modelBuilder struct {
 	registry   l10n.LocaleRegistry
 	invocation string
 	delegation string
-	intents    []*ModelIntentBuilder
-	types      []*ModelTypeBuilder
-	prompts    []*ModelPromptBuilder
+	intents    map[string]*modelIntentBuilder
+	types      map[string]*modelTypeBuilder
+	prompts    map[string]*modelPromptBuilder
+	error      error
 }
 
-func NewModelBuilder() *ModelBuilder {
-	return &ModelBuilder{
+// NewModelBuilder returns an initialized modelBuilder.
+func NewModelBuilder() *modelBuilder {
+	return &modelBuilder{
 		registry:   l10n.NewRegistry(),
 		invocation: l10n.KeySkillInvocation,
+		intents:    map[string]*modelIntentBuilder{},
+		types:      map[string]*modelTypeBuilder{},
+		prompts:    map[string]*modelPromptBuilder{},
 	}
 }
 
-func (m *ModelBuilder) WithLocaleRegistry(r l10n.LocaleRegistry) *ModelBuilder {
+// WithLocaleRegistry passes a locale registry.
+func (m *modelBuilder) WithLocaleRegistry(r l10n.LocaleRegistry) *modelBuilder {
 	m.registry = r
 	return m
 }
 
-func (m *ModelBuilder) WithInvocation(invocation string) *ModelBuilder {
+// WithInvocation sets the lookup key for the invocation.
+func (m *modelBuilder) WithInvocation(invocation string) *modelBuilder {
 	m.invocation = invocation
 	return m
 }
 
-func (m *ModelBuilder) WithDelegationStrategy(strategy string) *ModelBuilder {
+// WithDelegationStrategy sets the model delegation strategy.
+func (m *modelBuilder) WithDelegationStrategy(strategy string) *modelBuilder {
 	m.delegation = strategy
 	return m
 }
 
-func (m *ModelBuilder) AddLocale(locale string, invocation string) *ModelBuilder {
+// WithLocale creates and sets a new locale.
+func (m *modelBuilder) WithLocale(locale string, invocation string) *modelBuilder {
 	loc := l10n.NewLocale(locale)
 	if err := m.registry.Register(loc); err != nil {
-		return nil
+		m.error = err
+		return m
 	}
 	loc.Set(m.invocation, []string{invocation})
 	return m
 }
 
-func (m *ModelBuilder) AddIntent(name string) *ModelIntentBuilder {
+// WithIntent creates and sets a new named intent.
+func (m *modelBuilder) WithIntent(name string) *modelBuilder {
 	i := NewModelIntentBuilder(name).
 		WithLocaleRegistry(m.registry)
-	m.intents = append(m.intents, i)
-	return i
+	m.intents[name] = i
+	return m
 }
 
-func (m *ModelBuilder) AddType(name string) *ModelTypeBuilder {
+// WithType creates and sets a new named type.
+func (m *modelBuilder) WithType(name string) *modelBuilder {
 	t := NewModelTypeBuilder(name).
 		WithLocaleRegistry(m.registry)
-	m.types = append(m.types, t)
-	return t
+	m.types[name] = t
+	return m
 }
 
-func (m *ModelBuilder) AddElicitationSlotPrompt(intent string, slot string) *ModelPromptBuilder {
+// WithElicitationSlotPrompt creates and sets an elicitation prompt for the intent-slot.
+func (m *modelBuilder) WithElicitationSlotPrompt(intent string, slot string) *modelBuilder {
 	// intent and slot must exist!
-	var sl *ModelSlotBuilder
+	var sl *modelSlotBuilder
 	for _, i := range m.intents {
 		for _, s := range i.slots {
 			if i.name == intent && s.name == slot {
@@ -73,20 +86,23 @@ func (m *ModelBuilder) AddElicitationSlotPrompt(intent string, slot string) *Mod
 		}
 	}
 	if sl == nil {
-		return nil
+		m.error = fmt.Errorf("no matching intent slot: %s-%s", intent, slot)
+		return m
 	}
 
 	p := NewElicitationPromptBuilder(intent, slot).
 		WithLocaleRegistry(m.registry)
-	m.prompts = append(m.prompts, p)
+	m.prompts[p.id] = p
 
 	// link slot to prompt
 	sl.WithElicitationPrompt(p.id)
-	return p
+	return m
 }
-func (m *ModelBuilder) AddConfirmationSlotPrompt(intent string, slot string) *ModelPromptBuilder {
+
+// WithConfirmationSlotPrompt creates and sets a confirmation prompt for the intent-slot.
+func (m *modelBuilder) WithConfirmationSlotPrompt(intent string, slot string) *modelBuilder {
 	// intent and slot must exist!
-	var sl *ModelSlotBuilder
+	var sl *modelSlotBuilder
 	for _, i := range m.intents {
 		for _, s := range i.slots {
 			if i.name == intent && s.name == slot {
@@ -101,14 +117,40 @@ func (m *ModelBuilder) AddConfirmationSlotPrompt(intent string, slot string) *Mo
 
 	p := NewConfirmationPromptBuilder(intent, slot).
 		WithLocaleRegistry(m.registry)
-	m.prompts = append(m.prompts, p)
+	m.prompts[p.id] = p
 
 	// link slot to prompt
 	sl.WithConfirmationPrompt(p.id)
-	return p
+	return m
 }
 
-func (m *ModelBuilder) Build() (map[string]*alexa.Model, error) {
+// Intent returns the named intent.
+func (m *modelBuilder) Intent(name string) *modelIntentBuilder {
+	return m.intents[name]
+}
+
+// Type returns the named type.
+func (m *modelBuilder) Type(name string) *modelTypeBuilder {
+	return m.types[name]
+}
+
+// ElicitationPrompt returns the elicitation prompt for the intent-slot.
+func (m *modelBuilder) ElicitationPrompt(intent string, slot string) *modelPromptBuilder {
+	pb := NewElicitationPromptBuilder(intent, slot)
+	return m.prompts[pb.id]
+}
+
+// ConfirmationPrompt returns the confirmation prompt for the intent-slot.
+func (m *modelBuilder) ConfirmationPrompt(intent string, slot string) *modelPromptBuilder {
+	pb := NewConfirmationPromptBuilder(intent, slot)
+	return m.prompts[pb.id]
+}
+
+// Build generates a Model for each locale.
+func (m *modelBuilder) Build() (map[string]*alexa.Model, error) {
+	if m.error != nil {
+		return nil, m.error
+	}
 	ams := make(map[string]*alexa.Model)
 
 	// build model for each locale registered
@@ -122,7 +164,11 @@ func (m *ModelBuilder) Build() (map[string]*alexa.Model, error) {
 	return ams, nil
 }
 
-func (m *ModelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
+// BuildLocale generates a Model for the locale.
+func (m *modelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
+	if m.error != nil {
+		return nil, m.error
+	}
 	loc, err := m.registry.Resolve(locale)
 	if err != nil {
 		return &alexa.Model{}, err
@@ -184,51 +230,62 @@ func (m *ModelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 
 ///////////////////////////////////////////////////////
 
-// ModelIntentBuilder
-type ModelIntentBuilder struct {
+type modelIntentBuilder struct {
 	registry    l10n.LocaleRegistry
 	name        string
 	samplesName string
-	slots       []*ModelSlotBuilder
+	slots       map[string]*modelSlotBuilder
+	error       error
 }
 
-func NewModelIntentBuilder(name string) *ModelIntentBuilder {
-	return &ModelIntentBuilder{
+// NewModelIntentBuilder returns an initialized modelIntentBuilder.
+func NewModelIntentBuilder(name string) *modelIntentBuilder {
+	return &modelIntentBuilder{
 		registry:    l10n.NewRegistry(),
 		name:        name,
 		samplesName: name + l10n.KeyPostfixSamples,
+		slots:       map[string]*modelSlotBuilder{},
 	}
 }
 
-func (i *ModelIntentBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *ModelIntentBuilder {
+// WithLocaleRegistry passes a locale registry.
+func (i *modelIntentBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *modelIntentBuilder {
 	i.registry = registry
 	return i
 }
 
 // WithSamples overwrites the locale lookup key.
-func (i *ModelIntentBuilder) WithSamples(samplesName string) *ModelIntentBuilder {
+func (i *modelIntentBuilder) WithSamples(samplesName string) *modelIntentBuilder {
 	i.samplesName = samplesName
 	return i
 }
 
 // WithLocaleSamples sets the lookup key translations for a specific locale.
-func (i *ModelIntentBuilder) WithLocaleSamples(locale string, samples []string) *ModelIntentBuilder {
+func (i *modelIntentBuilder) WithLocaleSamples(locale string, samples []string) *modelIntentBuilder {
 	loc, err := i.registry.Resolve(locale)
 	if err != nil {
+		i.error = err
 		return i
 	}
 	loc.Set(i.samplesName, samples)
 	return i
 }
 
-func (i *ModelIntentBuilder) AddSlot(name string, typeName string) *ModelSlotBuilder {
+// WithSlot creates and sets a named slot for the intent.
+func (i *modelIntentBuilder) WithSlot(name string, typeName string) *modelIntentBuilder {
 	sb := NewModelSlotBuilder(i.name, name, typeName).
 		WithLocaleRegistry(i.registry)
-	i.slots = append(i.slots, sb)
-	return sb
+	i.slots[name] = sb
+	return i
 }
 
-func (i *ModelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelIntent, error) {
+// Slot returns a named slot of the intent.
+func (i *modelIntentBuilder) Slot(name string) *modelSlotBuilder {
+	return i.slots[name]
+}
+
+// BuildLanguageIntent generates a ModelIntent for the locale.
+func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelIntent, error) {
 	loc, err := i.registry.Resolve(locale)
 	if err != nil {
 		return alexa.ModelIntent{}, err
@@ -252,7 +309,8 @@ func (i *ModelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelInte
 	return mi, nil
 }
 
-func (i *ModelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogIntent, error) {
+// BuildDialogIntent generates a DialogIntent for the locale.
+func (i *modelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogIntent, error) {
 	di := alexa.DialogIntent{
 		Name: i.name,
 		// TODO: Confirmation, Delegation, ...
@@ -271,8 +329,7 @@ func (i *ModelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogInten
 
 ////////////////////////////////////
 
-// ModelSlotBuilder
-type ModelSlotBuilder struct {
+type modelSlotBuilder struct {
 	registry           l10n.LocaleRegistry
 	intent             string
 	name               string
@@ -284,8 +341,9 @@ type ModelSlotBuilder struct {
 	confirmationPrompt string
 }
 
-func NewModelSlotBuilder(intent string, name string, typeName string) *ModelSlotBuilder {
-	return &ModelSlotBuilder{
+// NewModelSlotBuilder returns an initialized modelSlotBuilder.
+func NewModelSlotBuilder(intent string, name string, typeName string) *modelSlotBuilder {
+	return &modelSlotBuilder{
 		registry:    l10n.NewRegistry(),
 		intent:      intent,
 		name:        name,
@@ -294,16 +352,20 @@ func NewModelSlotBuilder(intent string, name string, typeName string) *ModelSlot
 	}
 }
 
-func (s *ModelSlotBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *ModelSlotBuilder {
+// WithLocaleRegistry passes a locale registry.
+func (s *modelSlotBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *modelSlotBuilder {
 	s.registry = registry
 	return s
 }
 
-func (s *ModelSlotBuilder) WithSamples(samplesName string) *ModelSlotBuilder {
+// WithSamples set the lookup key for the slot samples.
+func (s *modelSlotBuilder) WithSamples(samplesName string) *modelSlotBuilder {
 	s.samplesName = samplesName
 	return s
 }
-func (s *ModelSlotBuilder) WithLocaleSamples(locale string, samples []string) *ModelSlotBuilder {
+
+// WithLocaleSamples sets the translated slot samples for the locale.
+func (s *modelSlotBuilder) WithLocaleSamples(locale string, samples []string) *modelSlotBuilder {
 	loc, err := s.registry.Resolve(locale)
 	if err != nil {
 		return s
@@ -312,24 +374,28 @@ func (s *ModelSlotBuilder) WithLocaleSamples(locale string, samples []string) *M
 	return s
 }
 
-func (s *ModelSlotBuilder) WithConfirmationPrompt(id string) *ModelSlotBuilder {
+// WithConfirmationPrompt requires confirmation and links to the prompt id.
+func (s *modelSlotBuilder) WithConfirmationPrompt(id string) *modelSlotBuilder {
 	s.withConfirmation = true
 	s.confirmationPrompt = id
 	return s
 }
 
-func (s *ModelSlotBuilder) WithElicitationPrompt(id string) *ModelSlotBuilder {
+// WithElicitationPrompt requires elicitation and links to the prompt id.
+func (s *modelSlotBuilder) WithElicitationPrompt(id string) *modelSlotBuilder {
 	s.withElicitation = true
 	s.elicitationPrompt = id
 	return s
 }
 
-func (s *ModelSlotBuilder) WithIntentConfirmationPrompt(prompt string) *ModelSlotBuilder {
+// WithIntentConfirmationPrompt does nothing.
+func (s *modelSlotBuilder) WithIntentConfirmationPrompt(prompt string) *modelSlotBuilder {
 	// TODO: WithIntentConfirmationPrompt - https://developer.amazon.com/docs/custom-skills/define-the-dialog-to-collect-and-confirm-required-information.html#intent-confirmation
 	return s
 }
 
-func (s *ModelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, error) {
+// BuildIntentSlot generates a ModelSlot for the locale.
+func (s *modelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, error) {
 	l, err := s.registry.Resolve(locale)
 	if err != nil {
 		return alexa.ModelSlot{}, err
@@ -342,7 +408,8 @@ func (s *ModelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, erro
 	return ms, nil
 }
 
-func (s *ModelSlotBuilder) BuildDialogSlot(locale string) (alexa.DialogIntentSlot, error) {
+// BuildDialogSlot generates a DialogIntentSlot for the locale.
+func (s *modelSlotBuilder) BuildDialogSlot(locale string) (alexa.DialogIntentSlot, error) {
 	if _, err := s.registry.Resolve(locale); err != nil {
 		return alexa.DialogIntentSlot{}, err
 	}
@@ -363,32 +430,36 @@ func (s *ModelSlotBuilder) BuildDialogSlot(locale string) (alexa.DialogIntentSlo
 
 /////////////////////////////////////////////
 
-// ModelTypeBuilder
-type ModelTypeBuilder struct {
+// modelTypeBuilder
+type modelTypeBuilder struct {
 	registry   l10n.LocaleRegistry
 	name       string
 	valuesName string
 }
 
-func NewModelTypeBuilder(name string) *ModelTypeBuilder {
-	return &ModelTypeBuilder{
+// NewModelTypeBuilder returns an initialized modelTypeBuilder.
+func NewModelTypeBuilder(name string) *modelTypeBuilder {
+	return &modelTypeBuilder{
 		registry:   l10n.NewRegistry(),
 		name:       name,
 		valuesName: name + l10n.KeyPostfixValues,
 	}
 }
 
-func (t *ModelTypeBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *ModelTypeBuilder {
+// WithLocaleRegistry passes a locale registry.
+func (t *modelTypeBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *modelTypeBuilder {
 	t.registry = registry
 	return t
 }
 
-func (t *ModelTypeBuilder) WithValues(valuesName string) *ModelTypeBuilder {
+// WithValues sets the lookup key for the type values.
+func (t *modelTypeBuilder) WithValues(valuesName string) *modelTypeBuilder {
 	t.valuesName = valuesName
 	return t
 }
 
-func (t *ModelTypeBuilder) WithLocaleValues(locale string, values []string) *ModelTypeBuilder {
+// WithLocaleValues sets the translated values for the type.
+func (t *modelTypeBuilder) WithLocaleValues(locale string, values []string) *modelTypeBuilder {
 	loc, err := t.registry.Resolve(locale)
 	if err != nil {
 		return t
@@ -397,63 +468,76 @@ func (t *ModelTypeBuilder) WithLocaleValues(locale string, values []string) *Mod
 	return t
 }
 
-func (t *ModelTypeBuilder) Build(locale string) (alexa.ModelType, error) {
+// Build generates a ModelType.
+func (t *modelTypeBuilder) Build(locale string) (alexa.ModelType, error) {
 	loc, err := t.registry.Resolve(locale)
 	if err != nil {
 		return alexa.ModelType{}, err
 	}
-	var tv []alexa.TypeValue
+	var tvs []alexa.TypeValue
 	for _, v := range loc.GetAll(t.valuesName) {
-		tv = append(tv, alexa.TypeValue{Name: alexa.NameValue{Value: v}})
+		tvs = append(tvs, alexa.TypeValue{Name: alexa.NameValue{Value: v}})
 	}
-	return alexa.ModelType{Name: t.name, Values: tv}, nil
+	return alexa.ModelType{Name: t.name, Values: tvs}, nil
 
 }
 
 ////////////////////////////////////////
 
-type ModelPromptBuilder struct {
+type modelPromptBuilder struct {
 	registry   l10n.LocaleRegistry
 	intent     string
 	slot       string
 	promptType string
 	id         string
-	variations []*PromptVariationsBuilder
+	variations map[string]*promptVariationsBuilder
 }
 
-func NewElicitationPromptBuilder(intent string, slot string) *ModelPromptBuilder {
-	return &ModelPromptBuilder{
+// NewElicitationPromptBuilder returns an initialized modelPromptBuilder for Elicitation.
+func NewElicitationPromptBuilder(intent string, slot string) *modelPromptBuilder {
+	return &modelPromptBuilder{
 		registry:   l10n.NewRegistry(),
 		intent:     intent,
 		slot:       slot,
 		promptType: "Elicit",
 		id:         fmt.Sprintf("Elicit.Intent-%s.IntentSlot-%s", intent, slot),
+		variations: map[string]*promptVariationsBuilder{},
 	}
 }
 
-func NewConfirmationPromptBuilder(intent string, slot string) *ModelPromptBuilder {
-	return &ModelPromptBuilder{
+// NewConfirmationPromptBuilder returns an initialized modelPromptBuilder for Confirmation.
+func NewConfirmationPromptBuilder(intent string, slot string) *modelPromptBuilder {
+	return &modelPromptBuilder{
 		registry:   l10n.NewRegistry(),
 		intent:     intent,
 		slot:       slot,
 		promptType: "Confirm",
 		id:         fmt.Sprintf("Confirm.Intent-%s.IntentSlot-%s", intent, slot),
+		variations: map[string]*promptVariationsBuilder{},
 	}
 }
 
-func (p *ModelPromptBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *ModelPromptBuilder {
+// WithLocaleRegistry passes a locale registry.
+func (p *modelPromptBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *modelPromptBuilder {
 	p.registry = registry
 	return p
 }
 
-func (p *ModelPromptBuilder) AddVariation(varType string) *PromptVariationsBuilder {
+// WithVariation creates and sets variations for the varType.
+func (p *modelPromptBuilder) WithVariation(varType string) *modelPromptBuilder {
 	v := NewPromptVariations(p.intent, p.slot, p.promptType, varType).
 		WithLocaleRegistry(p.registry)
-	p.variations = append(p.variations, v)
-	return v
+	p.variations[varType] = v
+	return p
 }
 
-func (p *ModelPromptBuilder) BuildLocale(locale string) (alexa.ModelPrompt, error) {
+// Variation returns the variations for the varType.
+func (p *modelPromptBuilder) Variation(varType string) *promptVariationsBuilder {
+	return p.variations[varType]
+}
+
+// BuildLocale generates a ModelPrompt for the locale.
+func (p *modelPromptBuilder) BuildLocale(locale string) (alexa.ModelPrompt, error) {
 	if len(p.variations) == 0 {
 		return alexa.ModelPrompt{}, fmt.Errorf(
 			"prompt '%s' requires variations (%s)",
@@ -468,28 +552,29 @@ func (p *ModelPromptBuilder) BuildLocale(locale string) (alexa.ModelPrompt, erro
 		if err != nil {
 			return alexa.ModelPrompt{}, err
 		}
-		mp.Variations = pv
+		mp.Variations = append(mp.Variations, pv...)
 	}
 	return mp, nil
 }
 
 ///////////////////////////////////////
 
-// PromptVariationsBuilder builds a list of variations for a specific prompt.
-type PromptVariationsBuilder struct {
+type promptVariationsBuilder struct {
 	registry   l10n.LocaleRegistry
 	intent     string
 	slot       string
 	promptType string
 	vars       map[string]string
+	error      error
 }
 
-func NewPromptVariations(intent string, slot string, promptType string, varType string) *PromptVariationsBuilder {
+// NewPromptVariations returns an initialized builder with lookup key "$intent_$slot_$promptType_(Text|SSML)".
+func NewPromptVariations(intent string, slot string, promptType string, varType string) *promptVariationsBuilder {
 	t := l10n.KeyPostfixSSML
 	if varType == "PlainText" {
 		t = l10n.KeyPostfixText
 	}
-	return &PromptVariationsBuilder{
+	return &promptVariationsBuilder{
 		registry:   l10n.NewRegistry(),
 		intent:     intent,
 		slot:       slot,
@@ -498,12 +583,14 @@ func NewPromptVariations(intent string, slot string, promptType string, varType 
 	}
 }
 
-func (v *PromptVariationsBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *PromptVariationsBuilder {
+// WithLocaleRegistry passes a locale registry.
+func (v *promptVariationsBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *promptVariationsBuilder {
 	v.registry = registry
 	return v
 }
 
-func (v *PromptVariationsBuilder) AddVariation(varType string) *PromptVariationsBuilder {
+// WithVariation sets the lookup key for the varType.
+func (v *promptVariationsBuilder) WithVariation(varType string) *promptVariationsBuilder {
 	t := l10n.KeyPostfixSSML
 	if varType == "PlainText" {
 		t = l10n.KeyPostfixText
@@ -512,26 +599,34 @@ func (v *PromptVariationsBuilder) AddVariation(varType string) *PromptVariations
 	return v
 }
 
-func (v *PromptVariationsBuilder) WithTypeValue(varType string, valueName string) *PromptVariationsBuilder {
+// WithTypeValue sets valueName as the lookup key for the varType.
+func (v *promptVariationsBuilder) WithTypeValue(varType string, valueName string) *promptVariationsBuilder {
 	v.vars[varType] = valueName
 	return v
 }
-func (v *PromptVariationsBuilder) WithLocaleTypeValue(locale string, varType string, values []string) *PromptVariationsBuilder {
+
+// WithLocaleTypeValue sets the values for the type of the locale.
+func (v *promptVariationsBuilder) WithLocaleTypeValue(locale string, varType string, values []string) *promptVariationsBuilder {
 	loc, err := v.registry.Resolve(locale)
 	if err != nil {
+		v.error = err
 		return v
 	}
 	loc.Set(v.vars[varType], values)
 	return v
 }
 
-func (v *PromptVariationsBuilder) BuildLocale(locale string) ([]alexa.PromptVariation, error) {
+// BuildLocale generates a PromptVariation for the locale.
+func (v *promptVariationsBuilder) BuildLocale(locale string) ([]alexa.PromptVariation, error) {
 	var vs []alexa.PromptVariation
+	if v.error != nil {
+		return vs, v.error
+	}
 	loc, err := v.registry.Resolve(locale)
 	if err != nil {
 		return vs, err
 	}
-	// only useful with content, can never happen if ppl. use NewPromptVariationsBuilder :)
+	// only useful with content, can never happen as you must use NewPromptVariationsBuilder.
 	if len(v.vars) == 0 {
 		return []alexa.PromptVariation{}, fmt.Errorf(
 			"prompt requires variations (%s: %s-%s-%s)",
