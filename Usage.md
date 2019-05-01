@@ -133,10 +133,11 @@ mb := gen.NewModelBuilder().
 // add intents, types, slots, prompts, ...
 mb.AddType("MyType") // looks up "MyType_Values
 mb.AddIntent("MyIntent") // looks up "MyIntent_Samples"
-mb.AddIntent("SlotIntent"). // looks up "SlotIntent_Samples"
+mb.Intent("SlotIntent"). // looks up "SlotIntent_Samples"
     AddSlot("SlotName", "MyType") // looks up "SlotIntent_SlotName_Samples"
 
-mb.AddElicitationSlotPrompt("SlotIntent", "SlotName").
+mb.AddElicitationSlotPrompt("SlotIntent", "SlotName")
+mb.ElicitationPrompt("SlotIntent", "SlotName").
     AddVariation("PlainText").
     AddVariation("SSML")
 
@@ -154,6 +155,137 @@ https://github.com/DrPsychick/alexa-go-cloudformation-demo/blob/master/pkg/alexa
 
 # how to use `alexa` package to build lambda
 
+Application: defines the flow
+```go
+[...]
+func (a *Application) Stop(locale l10n.LocaleInstance) (ApplicationResponse, error) {
+	return &ApplicationResponse{
+		Title:  locale.GetAny(loca.StopTitle),
+		Text:   locale.GetAny(loca.StopText),
+		Speech: locale.GetAny(loca.StopSpeech),
+		// Image: "https://some/url/with/size_placeholder/image_%s.png", // "small|large"
+		End:    true,
+	}
+}
+
+func (a *Application) ConvertTime(locale l10n.LocaleInstance) (ApplicationResponse, error) {
+	// understand the request, based on input
+	
+	// trigger actions
+	result, err := call.MyAPI(ctx)
+	if err != nil {
+		return NewResponse(), fmt.Errorf("api call failed...")
+	}
+	imgs := redis.GetKey() // fetch images
+	
+	// define some response
+	r := NewResponse().
+	    WithTitle(loca.GenericTitle).
+	    WithText(loca.MyIntentText).
+	    WithoutSpeech()
+	
+	if result == "fine" {
+		r.WithTitle(loca.MyIntentFineTitle).
+		    WithText(loca.MyIntentFineText)
+		if len(imgs) > 0 {
+		    r.WithImages(imgs)
+        }
+	}
+	
+	return r, nil
+}
+```
+
+Lambda: registers handlers and builds the response
+```go
+func NewMux(app Application) alexa.Handler {
+    mux := alexa.NewServerMux()
+
+    mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
+    mux.HandleRequestTypeFunc(alexa.TypeCanFulfillIntentRequest, handleCanFulfillIntent)
+
+    mux.HandleIntent(alexa.HelpIntent, handleHelp(app))
+    mux.HandleIntent(alexa.CancelIntent, handleStop(app))
+    mux.HandleIntent(alexa.StopIntent, handleStop(app))
+
+    mux.HandleIntent(loca.MyIntent, handleMyIntent(app))
+
+    return mux
+}
+func localeDefaults(locale l10n.LocaleInstance) {
+	if l.Get(l10n.ErrorTitle) == "" { l.Set(l10n.ErrorTitle, []string{"Error"})}
+	if l.Get(l10n.ErrorText) == "" { l.Set(l10n.ErrorText, []string{"The app returned an error:\n%s"})}
+	if l.Get(l10n.ErrorMissingPlaceholder) == "" { l.Set(l10n.ErrorMissingPlaceholder, []string{"the string is missing a placeholder %%s: '%s'"})}
+}
+func handleError(b *alexa.ResponseBuilder, loc l10n.LocaleInstance, error error) {
+    if loc == nil {
+        localeDefaults(l)
+    }
+    
+    b.WithSimpleCard(l.GetAny(l10n.ErrorTitle),	l.GetAny(l10n.ErrorText, error))
+}
+[...]
+func handleConvertTime(app Application) alexa.Handler {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		// we must resolve the locale per request
+		l, err := l10n.Resolve(r.Locale)
+		if err != nil {
+			handleError(b, l, err)
+			return
+		}
+		
+		context := r.Context
+		session := r.Session
+
+		response, err := app.ConvertTime(l)
+		if err != nil {
+			handleError(b, l, err)
+			return
+		}
+
+        // the following is quite generic: 
+        // `handleResponse(b *alexa.ResponseBuilder, r *ApplicationResponse)`
+		if s := response.GetSpeech(); s != "" {
+			b.WithSpeech(s)
+		}
+
+        img := response.GetImage()
+        if img == "" {
+            b.WithSimpleCard(response.GetTitle(), response.GetText())
+            return
+		}
+        if not strings.Contains(img, "%s") {
+        	handleError(b, l, fmt.Errorf(l10n.ErrorMissingPlaceholder, img))
+        	return
+        }
+        
+        b.WithStandardCard(response.GetTitle(), response.GetText(), alexa.Image{
+            SmallImageURL: fmt.Sprintf(img), "small"),
+            LargeImageURL: fmt.Sprintf(img, "large"),
+        })
+	})
+}
+```
+
+**wrong**: model should come from lambda, not the other way around
+```go
+// create and define locales
+registry := l10n.NewRegistry()
+[...]
+// create a server mux
+mux := lambda.NewMux(app, registry)
+// define the model
+mb := gen.NewModelBuilder().WithLocaleRegistry(registry)
+[...]
+// register launch handler
+mb.RegisterLaunchHandler(mux, app.Launch())
+// register handlers with intents
+mb.Intent("MyIntent").
+    RegisterHandler(mux, app.MyIntent()) // ModelIntentBuilder calls `mux.HandleIntent(...)`
+mb.Intent("MyIntent").Handler().
+	CallAHandlerFunc(...)
+	
+```
 
 
 # Make it simple!

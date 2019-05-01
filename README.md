@@ -95,7 +95,7 @@ ask validate -s amzn1.ask.skill.xxx -l en-US > result_en-US.json
 Before first "release"
 * [x] simplify skill and models definition with helper functions -> `gen` package
     * [x] basic structure refactoring + documentation
-* [ ] Integrate intent definition and locale with lambda (simplify app/lambda)
+* [ ] Integrate intent definition and locale with lambda (simplify app/lambda) [Issue #36](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/36)
 * [x] add documentation and examples
     * [x] use case examples (see [Usage](Usage.md))
     * [ ] simple app example explanation in docs
