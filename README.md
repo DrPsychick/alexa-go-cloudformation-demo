@@ -18,6 +18,8 @@ Demo alexa skill using a go lambda function, deployed with cloudformation
 # How to use it
 See [Usage](Usage.md)
 
+For `l10n`, see [README.md](pkg/alexa/l10n/README.md)
+
 
 ## code structure
 * `/cmd/alfalfa` -> `./deploy/app` is the default command (for lambda)
