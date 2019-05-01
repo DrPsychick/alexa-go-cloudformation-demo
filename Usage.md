@@ -3,79 +3,104 @@
 ## Simple case, Skill with only one language
 Building the skill
 ```go
-sb := gen.NewSkillBuilder().
-    WithCategory(alexa.CategoryCommunication).
-    AddCountry("US")
+package demo
+import (
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+    "encoding/json"
+    "fmt"
+)
 
-sb.AddLocale("en-US").
-    WithLocaleName("my name").
-    WithLocaleDescription("my description").
-    WithLocaleSummary("my summary").
-    WithLocaleKeywords([]string{"word1", "word2"}).
-    WithLocaleExamples([]string{"make an example", "give an example"}).
-    WithLocaleSmallIcon("https://small.icon").
-    WithLocaleLargeIcon("https://large.icon").
-    WithLocalePrivacyURL("https://privacy.url/en-US/")
+func demo() {
+	var sb *gen.SkillBuilder
+    sb = gen.NewSkillBuilder().
+        WithCategory(alexa.CategoryCommunication).
+        AddCountry("US")
+    
+    sb.AddLocale("en-US").Locale("en-US").
+        WithLocaleName("my name").
+        WithLocaleDescription("my description").
+        WithLocaleSummary("my summary").
+        WithLocaleKeywords([]string{"word1", "word2"}).
+        WithLocaleExamples([]string{"make an example", "give an example"}).
+        WithLocaleSmallIcon("https://small.icon").
+        WithLocaleLargeIcon("https://large.icon").
+        WithLocalePrivacyURL("https://privacy.url/en-US/")
 
-// must be used *after* adding a locale
-err = sb.SetDefaultLocaleTestingInstructions("Foo bar")
-[...]
-// *alexa.Skill
-sk, err := sb.Build()
-[...]
-res, err := json.MarshalIndent(sk, "", "  ")
-[...]
+    // must be used *after* adding a locale
+    sb.WithDefaultLocaleTestingInstructions("Foo bar")
+    
+    sk, err := sb.Build()
+    if err != nil { return }
+
+    res, err := json.MarshalIndent(sk, "", "  ")
+    if err != nil { return }
+    fmt.Printf("%s\n", string(res))
+}
 ```
 
 Building the model
 ```go
-// you can still use l10n.LocaleRegistry to resolve translations if you wish
-registry := l10n.NewRegistry()
-err := registry.Register(l10n.NewLocale("en-US"))
-[...]
-loc, err := registry.Resolve("en-US")
-loc.Set("MyIntent_Samples", []string{"sample one", "sample two"})
-[...]
-// or: gen.NewModelBuilder()
-mb := sb.AddModel().
-    WithDelegationStrategy(alexa.DelegationSkillResponse).
-    AddLocale("en-US", "my skill").
-    AddLocale("de-DE", "mein skill")
-
-mb.AddType("TypeSlotOne").
-    WithLocaleValues("en-US", []string{"One"}).
-    WithLocaleValues("de-DE", []string{"Eins"})
-
-mb.AddIntent("MyIntent").
-    WithLocaleSamples(loc.GetName(), loc.GetAll("MyIntent_Samples")).
-    WithLocaleSamples("de-DE", []string{"sample eins", "sample zwei"}).
-    AddSlot("SlotName", "TypeSlotOne").
-    WithLocaleSamples(loc.GetName(), []string{"of {Slot}"}).
-    WithLocaleSamples("de-DE", []string{"von {Slot}"})
-
-mb.AddElicitationSlotPrompt("MyIntent", "SlotName").
-    AddVariation("PlainText").
-    WithLocaleValue("de-DE", "PlainText", []string{"Was?", "Wie bitte?"}).
-    WithLocaleValue(loc.GetName(), "PlainText", []string{"What?"})
-
-mb.AddConfirmationSlotPrompt("MyIntent", "SlotName").
-    AddVariation("PlainText").
-    WithLocaleValue(loc.GetName(), "PlainText", []string{"Sure?"}).
-    WithLocaleValue("de-DE", "PlainText", []string{"Sicher?"})
-
-// *alexa.Model
-m, err := mb.BuildLocale("en_US")
-[...]
-res, err := json.MarshalIndent(m, "", "  ")
-[...]
-
-// map[locale]*alexa.Model of models
-ms, err := mb.Build()
+package demo
+import (
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+)
+func demo() {
+    // you can still use l10n.LocaleRegistry to resolve translations if you wish
+    registry := l10n.NewRegistry()
+    err := registry.Register(l10n.NewLocale("en-US"))
+    if err != nil { return }
+    
+    loc, err := registry.Resolve("en-US")
+    loc.Set("MyIntent_Samples", []string{"sample one", "sample two"})
+    
+    // or: gen.NewModelBuilder()
+    sb := gen.NewSkillBuilder()
+    mb := sb.WithModel().Model().
+        WithDelegationStrategy(alexa.DelegationSkillResponse).
+        WithLocale("en-US", "my skill").
+        WithLocale("de-DE", "mein skill")
+    
+    mb.WithType("TypeSlotOne").Type("TypeSlotOne").
+        WithLocaleValues("en-US", []string{"One"}).
+        WithLocaleValues("de-DE", []string{"Eins"})
+    
+    mb.WithIntent("MyIntent").Intent("MyIntent").
+        WithLocaleSamples(loc.GetName(), loc.GetAll("MyIntent_Samples")).
+        WithLocaleSamples("de-DE", []string{"sample eins", "sample zwei"}).
+        WithSlot("SlotName", "TypeSlotOne").Slot("SlotName").
+            WithLocaleSamples(loc.GetName(), []string{"of {Slot}"}).
+            WithLocaleSamples("de-DE", []string{"von {Slot}"})
+    
+    mb.WithElicitationSlotPrompt("MyIntent", "SlotName").
+        ElicitationPrompt("MyIntent", "SlotName").
+            WithVariation("PlainText").Variation("PlainText").
+                WithLocaleTypeValue("de-DE", "PlainText", []string{"Was?", "Wie bitte?"}).
+                WithLocaleTypeValue(loc.GetName(), "PlainText", []string{"What?"})
+        
+    mb.WithConfirmationSlotPrompt("MyIntent", "SlotName").
+    	ConfirmationPrompt("MyIntent", "SlotName").
+            WithVariation("PlainText").Variation("PlainText").
+                WithLocaleTypeValue(loc.GetName(), "PlainText", []string{"Sure?"}).
+                WithLocaleTypeValue("de-DE", "PlainText", []string{"Sicher?"})
+    
+    // *alexa.Model
+    m, err := mb.BuildLocale("en_US")
+    
+    // map[locale]*alexa.Model of models
+    ms, err := mb.Build()
+}
 ```
 
 ## International case, multiple languages
 Definining locales
 ```go
+package demo
+import (
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"	
+)
 var enUS = &l10n.Locale{
     Name: "en-US",
     TextSnippets: map[string][]string{
@@ -88,7 +113,7 @@ var enUS = &l10n.Locale{
         l10n.KeySkillSmallIconURI:        []string{"https://small"},
         l10n.KeySkillLargeIconURI:        []string{"https://large"},
         l10n.KeySkillPrivacyPolicyURL:    []string{"https://policy"},
-        l10n.KeySkillTermsOfUse:          []string{"https://toc"},
+        l10n.KeySkillTermsOfUseURL:       []string{"https://toc"},
         l10n.KeySkillInvocation:          []string{"call me"},
         l10n.KeySkillTestingInstructions: []string{"Initial instructions"},
         // My Intent
@@ -105,50 +130,70 @@ var enUS = &l10n.Locale{
         "SlotIntent_SlotName_Elicit_SSML": []string{l10n.Speak("I'm sorry, which slot did you mean?")},
         // Types
         "MyType_Values":                   []string{"Value 1", "Value 2"},
+    },
 }
-//var deDE = &l10n.Locale{...}
 ```
 Building the skill
 ```go
-// register the locales... first one automatically is default
-registry := l10n.NewRegistry()
-// there are multiple ways to set the default explicitly
-registry.Register(enUS, l10n.AsDefault())
-registry.SetDefault("en-US")
+package demo
+import (
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"	
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"	
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"	
+)
+var enUS = &l10n.Locale{}
+func demo() {
+    // register the locales... first one automatically is default
+    registry := l10n.NewRegistry()
+    // there are multiple ways to set the default explicitly
+    registry.Register(enUS, l10n.AsDefault())
+    registry.SetDefault("en-US")
+    
+    // pass the registry
+    sb := gen.NewSkillBuilder().
+        WithLocaleRegistry(registry).
+        WithCategory(alexa.CategoryFashionAndStyle)
 
-// pass the registry
-sb := gen.NewSkillBuilder().
-    WithLocaleRegistry(registry).
-    WithCategory(alexa.CategoryFashionAndStyle)
-[...]
-// *alexa.Skill
-s, err := sb.Build()
+    // *alexa.Skill
+    s, err := sb.Build()
+}   
 ```
 Building the models
 ```go
-// pass the registry
-mb := gen.NewModelBuilder().
-    WithLocaleRegistry(registry).
-    WithDelegationStrategy(alexa.DelegationSkillResponse)
-// add intents, types, slots, prompts, ...
-mb.AddType("MyType") // looks up "MyType_Values
-mb.AddIntent("MyIntent") // looks up "MyIntent_Samples"
-mb.Intent("SlotIntent"). // looks up "SlotIntent_Samples"
-    AddSlot("SlotName", "MyType") // looks up "SlotIntent_SlotName_Samples"
-
-mb.AddElicitationSlotPrompt("SlotIntent", "SlotName")
-mb.ElicitationPrompt("SlotIntent", "SlotName").
-    AddVariation("PlainText").
-    AddVariation("SSML")
-
-ms, err := mb.Build()
+package demo
+import (
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"	
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"	
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"	
+)
+var registry = &l10n.Registry{}
+func demo() {
+    // pass the registry
+    mb := gen.NewModelBuilder().
+        WithLocaleRegistry(registry).
+        WithDelegationStrategy(alexa.DelegationSkillResponse)
+    // add intents, types, slots, prompts, ...
+    mb.WithType("MyType") // looks up "MyType_Values
+    mb.WithIntent("MyIntent") // looks up "MyIntent_Samples"
+    mb.Intent("SlotIntent"). // looks up "SlotIntent_Samples"
+        WithSlot("SlotName", "MyType") // looks up "SlotIntent_SlotName_Samples"
+    
+    mb.WithElicitationSlotPrompt("SlotIntent", "SlotName")
+    mb.ElicitationPrompt("SlotIntent", "SlotName").
+        WithVariation("PlainText").
+        WithVariation("SSML")
+    
+    ms, err := mb.Build()
+}
 ```
 
 ## Expert case (build your own)
 Simply build your own JSON
 ```go
-var skill = &alexa.Skill{...}
-var modelEnUs = &alexa.Model{...}
+package demo
+import ("github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa")
+var skill = &alexa.Skill{}
+var modelEnUs = &alexa.Model{}
 ```
 As you're an expert, you can easily figure out how to do that in detail by looking at the tests: 
 https://github.com/DrPsychick/alexa-go-cloudformation-demo/blob/master/pkg/alexa/skill_test.go
@@ -288,7 +333,6 @@ import (
 type Application interface {
 	log.Loggable
 	stats.Statable
-	
 	Intents()  map[string]IntentFunc
 }
 // interface to the application response
@@ -307,7 +351,7 @@ func NewMux(app Application) alexa.Handler {
     mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
     mux.HandleRequestTypeFunc(alexa.TypeCanFulfillIntentRequest, handleCanFulfillIntent)
     
-    // register intent handlers
+    // register intent handlers from the app
     for n, h := range app.Intents() {
         mux.HandleIntent(n, handleResponse(h))
     }
@@ -345,7 +389,6 @@ func handleResponse(ifunc IntentFunc) alexa.Handler {
             SmallImageURL: fmt.Sprintf(resp.Image(), "small"),
             LargeImageURL: fmt.Sprintf(resp.Image(), "large"),
         })
-
     })
 }
 
@@ -364,33 +407,17 @@ func handleError(b *alexa.ResponseBuilder, r *alexa.Request, err error) {
     l := localeDefaults(r.Locale)
     b.WithSimpleCard(l.GetAny(l10n.KeyErrorTitle), l.GetAny(l10n.KeyErrorText, err))
 }
-[...]
 ```
 
-**wrong**: model should come from lambda, not the other way around
-```go
-// create and define locales
-registry := l10n.NewRegistry()
-[...]
-// create a server mux
-mux := lambda.NewMux(app, registry)
-// define the model
-mb := gen.NewModelBuilder().WithLocaleRegistry(registry)
-[...]
-// register launch handler
-mb.RegisterLaunchHandler(mux, app.Launch())
-// register handlers with intents
-mb.Intent("MyIntent").
-    RegisterHandler(mux, app.MyIntent()) // ModelIntentBuilder calls `mux.HandleIntent(...)`
-mb.Intent("MyIntent").Handler().
-    CallAHandlerFunc(...)
-    
-```
 
 
 # Make it simple!
 Simple `key -> []value` lookups
 ```go
+package demo
+import (    
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+)
 // de-DE.go
 // only key -> value. Convention defines the structure
 var deDE = &l10n.Locale{
@@ -402,18 +429,18 @@ var deDE = &l10n.Locale{
             "Text",
         },
         MyIntentSSML: []string{
-            "<speak>Text</speak>"
+            "<speak>Text</speak>",
         },
         // you can fallback to a different locale
         MyKey:        enUS.GetAll(MyKey),
     },
 }
-[...]
 ```
 
 We have to define somewhere in code how it will react, so why not keep the link to loca keys?
 ```go
 // app.go
+package demo
 // Links intent to response (flow)
 func (a *Application) handleMyIntent(l l10n.LocaleInstance) (string, string, string) {
     return l.GetSnippet(MyIntentTitle), l.GetSnippet(MyIntentText), l.GetSnippet(MyIntentSSML)
@@ -431,12 +458,13 @@ func (a *Application) handleComplexIntent(l l10n.LocaleInstance, s Slots, ...) (
 Still TODO: we define Intents and Slots for the model and I would like to use this definition for lambda
 ```go
 // app.go
+package demo
 func (a *Application) initialize() { // or in NewApplication
     // define the skill
     skill := alexa.NewSkill(Type)
     // add general elements which are part of the skill
-    skill.AddIntents(...)
-    skill.AddSlots(...)
+    skill.AddIntents()
+    skill.AddSlots()
     
     // loop over locales and add them
     for _, l := range locales {
@@ -444,5 +472,4 @@ func (a *Application) initialize() { // or in NewApplication
         // AddLocale can loop over intents etc. and fetch locale for each element
     }
 }
-[...]
 ```
