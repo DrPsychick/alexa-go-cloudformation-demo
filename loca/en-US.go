@@ -7,58 +7,58 @@ import (
 var enUS = &l10n.Locale{
 	Name: "en-US",
 	TextSnippets: map[string][]string{
-		l10n.KeySkillName:        []string{"Demo Skill"},
-		l10n.KeySkillDescription: []string{"Demo for the golang meetup"},
-		l10n.KeySkillSummary: []string{
+		l10n.KeySkillName:        {"Demo Skill"},
+		l10n.KeySkillDescription: {"Demo for the golang meetup"},
+		l10n.KeySkillSummary: {
 			"This skill demonstrates what you can do with the alexa package and cloudformation",
 		},
-		l10n.KeySkillSmallIconURI: []string{
+		l10n.KeySkillSmallIconURI: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_small.png",
 		},
-		l10n.KeySkillLargeIconURI: []string{
+		l10n.KeySkillLargeIconURI: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_large.png",
 		},
-		l10n.KeySkillInvocation: []string{"demo skill"},
-		l10n.KeySkillTestingInstructions: []string{
+		l10n.KeySkillInvocation: {"demo skill"},
+		l10n.KeySkillTestingInstructions: {
 			"Alexa, open demo skill. Yes? Go ahead.",
 		},
-		l10n.KeySkillPrivacyPolicyURL: []string{
+		l10n.KeySkillPrivacyPolicyURL: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		},
 		// Error: privacyAndCompliance.locales.en-US - object instance has properties which are not allowed by the schema: ["termsOfUse"]
 		//l10n.KeySkillTermsOfUse: []string{
 		//	"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		//},
-		l10n.KeySkillExamplePhrases: []string{
+		l10n.KeySkillExamplePhrases: {
 			"Alexa, start demo skill and go ahead",
 			"Here we go",
 			"How is AWS",
 		},
-		l10n.KeySkillKeywords: []string{
+		l10n.KeySkillKeywords: {
 			"demo", "test", "SSML",
 		},
 		// Type values
-		TypeAreaValues:   []string{"Europe", "North America", "Asia Pacific", "South America"},
-		TypeRegionValues: []string{"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
+		TypeAreaValues:   {"Europe", "North America", "Asia Pacific", "South America"},
+		TypeRegionValues: {"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
 
 		// Launch request
-		LaunchTitle: []string{
+		LaunchTitle: {
 			"Greeting",
 		},
-		LaunchText: []string{
+		LaunchText: {
 			"Hello!",
 			"Hi!",
 		},
-		LaunchSSML: []string{
+		LaunchSSML: {
 			"<speak><voice name=\"Marlene\">Hello!</voice></speak>",
 			"<speak><emphasis level=\"strong\">Hi!</emphasis></speak>",
 		},
 
 		// Intent: "DemoIntent"
-		DemoIntentSamples: []string{"here we go", "go ahead"},
-		DemoIntentTitle:   []string{"Demo"},
-		DemoIntentText:    []string{"PACE is geil", "you're right"},
-		DemoIntentSSML: []string{
+		DemoIntentSamples: {"here we go", "go ahead"},
+		DemoIntentTitle:   {"Demo"},
+		DemoIntentText:    {"PACE is geil", "you're right"},
+		DemoIntentSSML: {
 			l10n.Speak(
 				l10n.UseVoiceLang("Joanna", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
 					l10n.UseVoiceLang("Kendra", "en-US", "is <emphasis level=\"strong\">geil!</emphasis>"),
@@ -66,15 +66,15 @@ var enUS = &l10n.Locale{
 			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
 		},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:          []string{"how is A.W.S."},
-		AWSStatusTitle:            []string{"AWS Status"},
-		AWSStatusText:             []string{"AWS Status in {Region}"},
-		AWSStatusAreaSamples:      []string{"in {Area}", "of {Area}"},
-		AWSStatusRegionSamples:    []string{"in {Region}", "of {Region}"},
-		AWSStatusRegionElicitText: []string{"In which region?", "Where again?"},
-		AWSStatusRegionElicitSSML: []string{
+		AWSStatusSamples:          {"how is A.W.S."},
+		AWSStatusTitle:            {"AWS Status"},
+		AWSStatusText:             {"AWS Status in {Region}"},
+		AWSStatusAreaSamples:      {"in {Area}", "of {Area}"},
+		AWSStatusRegionSamples:    {"in {Region}", "of {Region}"},
+		AWSStatusRegionElicitText: {"In which region?", "Where again?"},
+		AWSStatusRegionElicitSSML: {
 			l10n.Speak("In which Region?"), l10n.Speak("Sorry, where?")},
-		AWSStatusAreaConfirmSSML: []string{
+		AWSStatusAreaConfirmSSML: {
 			l10n.Speak("Are you sure?"),
 		},
 	},

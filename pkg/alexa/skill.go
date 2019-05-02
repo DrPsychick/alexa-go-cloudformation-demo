@@ -347,7 +347,7 @@ type Privacy struct {
 
 // PrivacyLocaleDef defines
 type PrivacyLocaleDef struct {
-	PrivacyPolicyURL string `json:"privacyPolicyUrl"`
+	PrivacyPolicyURL string `json:"privacyPolicyUrl,omitempty"`
 	// Error: privacyAndCompliance.locales.en-US - object instance has properties which are not allowed by the schema: ["termsOfUse"]
 	TermsOfUse string `json:"termsOfUse,omitempty"`
 }

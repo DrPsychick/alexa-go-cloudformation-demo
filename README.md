@@ -15,17 +15,21 @@ Demo alexa skill using a go lambda function, deployed with cloudformation
 * demonstrate good code design: keeping it simple and separated
 * demonstrate good integration with travis and coveralls
 
-## I18N / L10N
-https://phraseapp.com/blog/posts/internationalization-i18n-go/
+# How to use it
+See [Usage](Usage.md)
+
+For `l10n`, see [README.md](pkg/alexa/l10n/README.md)
+
 
 ## code structure
-* `/cmd/alfalfa` -> `alfalfa` is the default command (for lambda)
-* `queryaws generate` is the command to generate the Alexa skill json files
+* `/cmd/alfalfa` -> `./deploy/app` is the default command (for lambda)
+* `app make --skill` is the command to generate the Alexa skill json file
+* `app make --models` is the command to generate the Alexa model json files
 
 ## golang context
 * don't "misuse" context to pass logger etc. instead make the application satisfy the required interfaces
 
-# Tools
+# Setup/Tools
 ## Install `ask cli` on macOS
 requires Homebrew
 ```
@@ -71,15 +75,13 @@ export ASKVendorId=<VendorId>
 
 ```export $(grep -v '^#' .env | xargs)```
 
-### Build and Run `deploy.sh`
-* build
-
-```go build -a -o ./deploy/app ./cmd/alfalfa```
-
+### Run `deploy.sh`
 * run `deploy.sh`
     * generates `skill.json` and `<locale>.json` files for Alexa and uploads to S3
-    * packages lambda function and uploads to S3
-    * deploys via cloudformation
+    * deploys via cloudformation (staging or production)
+        * packages lambda function and uploads to S3
+    * deletes the cloudformation stack after **staging** deploy (unless you set `KEEP_STACK=1`)
+    * you **can** set a different `CF_STACK_NAME`, but `deploy.sh` will still append `-staging`...
 
 ```bash ./cloudformation/deploy.sh```
 
@@ -89,22 +91,27 @@ ask validate -s amzn1.ask.skill.xxx -l en-US > result_en-US.json
 # output is long, search for "FAIL"
 ```
 
-
 # TODOs
 Before first "release"
-* [ ] simplify skill and models definition with helper functions
-    * [ ] basic structure refactoring + documentation
-* [ ] add documentation and examples
+* [x] simplify skill and models definition with helper functions -> `gen` package
+    * [x] basic structure refactoring + documentation
+* [ ] Integrate intent definition and locale with lambda (simplify app/lambda)
+* [x] add documentation and examples
+    * [x] use case examples (see [Usage](Usage.md))
     * [ ] simple app example explanation in docs
-* [ ] implement and integrate `l10n` package
-    * [ ] support SSML output
+* [ ] add test cases for lambda (request/response)
+    * [ ] [Issue #25](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/25)
+* [x] Add staging deploy (validation) [Issue #30](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/30)
+    * [x] **decide**: staging deploy -> review+fix **or** try to validate as much as possible before deploying (see [Issue #17](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/17))
+* [x] implement and integrate `l10n` package
+    * [x] support SSML output
+        * [ ] [Issue #29](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/29)
         * [ ] support phoneme https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#phoneme
     * [ ] test coverage of package
-    * [ ] externalize and make package public
+    * [ ] externalize and make package public (as part of `alexa`)
 * [ ] complete (defined portions) of `alexa` package (enums, consts, ...)
     * [ ] test coverage of package
     * [ ] externalize and make package public
-
 
 # Links/References
 ## Cloudformation
