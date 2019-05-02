@@ -2,16 +2,14 @@
 
 
 # check for required variables
-if [ -z "$ASKS3Bucket" \
-    -o -z "$ASKS3Key" \
-    -o -z "$ASKClientId" \
-    -o -z "$ASKClientSecret" \
-    -o -z "$ASKRefreshToken" \
-    -o -z "$ASKVendorId" \
-    -o -z "$CF_STACK_NAME" \
-   ]; then
-   echo "Missing required variables!"
-   exit 1
+check_env_vars () {
+  for name; do
+    : ${!name:?$name ENV must be set and not empty}
+  done
+}
+
+if ! check_env_vars "ASKS3Key" "ASKClientId" "ASKClientSecret" "ASKRefreshToken" "ASKVendorId" "CF_STACK_NAME"; then
+    exit 1
 fi
 
 # 3 use cases
