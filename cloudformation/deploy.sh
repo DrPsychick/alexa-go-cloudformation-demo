@@ -21,12 +21,15 @@ fi
 # keep (for non-production): set KEEP_STACK=1 if you don't want it to be deleted automatically after creation
 production=0
 keep=0
+
 if [ "master" = "$TRAVIS_BRANCH" ]; then
     production=1
 fi
+
 if [ $production -eq 0 ]; then
     export CF_STACK_NAME="${CF_STACK_NAME}-staging"
 fi
+
 if [ -n "$KEEP_STACK" ]; then
     keep=1
 fi
@@ -43,11 +46,13 @@ mkdir -p ./alexa/interactionModels/custom
 ./alfalfa make --skill
 ./alfalfa make --models
 (cd ./alexa; zip -r $ASKS3Key ./)
+
 aws s3 cp ./alexa/$ASKS3Key s3://$ASKS3Bucket/
 
 [ $production -eq 0 ] && {
     echo "SKILL:"
     cat alexa/skill.json |jq .
+    
     for f in $(ls alexa/interactionModels/custom/*.json); do
         echo "$(basename $f):"
         cat $f |jq .
@@ -75,6 +80,7 @@ ret=$?
 
 failed=$(echo "$res" | grep "Failed")
 echo "exitcode: $ret"
+
 if [ $ret -eq 0 ]; then
     echo "Successful."
     ec=0
@@ -84,10 +90,12 @@ elif [ $ret -eq 255 -a -z "$failed" ]; then
 else
     echo "Deployment failed!"
     ec=1
+    
     # do NOT run this on travis, it exposes ALL parameter values:
     if [ "$TRAVIS" != "true" ]; then
         aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME |grep -v "ResourceProperties" |grep -v "NextToken"
     fi
+    
     # only print FAILed Type, Status, StatusReason (not the "Properties", it may contain secrets!)
     aws cloudformation describe-stack-events --max-items 5 --stack-name $CF_STACK_NAME |grep -C2 FAIL |grep 'Resource\(Type\|Status\|StatusReason\)'
     echo
