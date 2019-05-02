@@ -51,11 +51,11 @@ aws s3 cp ./alexa/$ASKS3Key s3://$ASKS3Bucket/
 
 [ $production -eq 0 ] && {
     echo "SKILL:"
-    cat alexa/skill.json |jq .
+    cat alexa/skill.json | jq .
     
     for f in $(ls alexa/interactionModels/custom/*.json); do
         echo "$(basename $f):"
-        cat $f |jq .
+        cat $f | jq .
     done
 }
 
@@ -93,11 +93,11 @@ else
     
     # do NOT run this on travis, it exposes ALL parameter values:
     if [ "$TRAVIS" != "true" ]; then
-        aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME |grep -v "ResourceProperties" |grep -v "NextToken"
+        aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME | grep -v "ResourceProperties" | grep -v "NextToken"
     fi
     
     # only print FAILed Type, Status, StatusReason (not the "Properties", it may contain secrets!)
-    aws cloudformation describe-stack-events --max-items 5 --stack-name $CF_STACK_NAME |grep -C2 FAIL |grep 'Resource\(Type\|Status\|StatusReason\)'
+    aws cloudformation describe-stack-events --max-items 5 --stack-name $CF_STACK_NAME | grep -C2 FAIL | grep 'Resource\(Type\|Status\|StatusReason\)'
     echo
     echo "If 'AlexaSkill' failed to update and your stack is in 'UPDATE_ROLLBACK_FAILED' state, try the following:"
     echo "aws cloudformation continue-update-rollback --stack-name $CF_STACK_NAME --resources-to-skip $CF_STACK_NAME.AlexaSkill"
