@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestMakeSkill(t *testing.T) {
-	sb, err := createSkill(l10n.DefaultRegistry)
+	sb, err := createSkill(loca.Registry)
 	assert.NoError(t, err)
 
 	s, err := sb.Build()
@@ -22,7 +22,7 @@ func TestMakeSkill(t *testing.T) {
 }
 
 func TestMakeModels(t *testing.T) {
-	sb, err := createSkill(l10n.DefaultRegistry)
+	sb, err := createSkill(loca.Registry)
 	assert.NoError(t, err)
 
 	ms, err := createModels(sb)

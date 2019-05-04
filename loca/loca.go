@@ -50,13 +50,15 @@ const (
 	TypeRegionSamples string = "AWSRegion_Samples"
 )
 
+var Registry = l10n.NewRegistry()
+
 func init() {
 	// default first
 	var locales = []*l10n.Locale{
 		enUS, deDE, //frFR,
 	}
 	for _, l := range locales {
-		if err := l10n.Register(l); err != nil {
+		if err := Registry.Register(l); err != nil {
 			panic("registration of locale failed")
 		}
 	}

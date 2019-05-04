@@ -13,7 +13,7 @@ import (
 
 func runMake(c *cli.Context) error {
 	// build skill and models
-	sk, err := createSkill(l10n.DefaultRegistry)
+	sk, err := createSkill(loca.Registry)
 	if err != nil {
 		return err
 	}

@@ -1,11 +1,11 @@
 package lambda
 
 import (
+	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
-
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 )
 
 const (
@@ -59,7 +59,7 @@ func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.Request) {
 
 func handleLaunch(app Application) alexa.HandlerFunc {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(r.Locale)
+		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
 			return
 		}
@@ -81,7 +81,7 @@ func handleHelp(app Application) alexa.Handler {
 
 func handleStop(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(r.Locale)
+		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
 			// TODO: maybe say something here
 			return
@@ -96,7 +96,7 @@ func handleStop(app Application) alexa.Handler {
 
 func handleSSMLResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(r.Locale)
+		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
 			// TODO: maybe say something here
 			return
@@ -111,7 +111,7 @@ func handleSSMLResponse(app Application) alexa.Handler {
 
 func handleSaySomethingResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(r.Locale)
+		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
 			return
 		}
@@ -125,7 +125,7 @@ func handleSaySomethingResponse(app Application) alexa.Handler {
 
 func handleDemo(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		l, err := l10n.Resolve(r.Locale)
+		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
 			return
 		}

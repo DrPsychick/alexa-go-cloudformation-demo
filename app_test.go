@@ -1,8 +1,7 @@
 package alfalfa
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
-
+	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -11,7 +10,7 @@ func TestApplicationHelp(t *testing.T) {
 	a := NewApplication(nil, nil)
 	title, text := a.Help()
 
-	l, err := l10n.Resolve("de-DE")
+	l, err := loca.Registry.Resolve("de-DE")
 	assert.Nil(t, err, "could not resolve locale 'de-DE'!")
 	assert.Equal(t, "de-DE", l.GetName())
 

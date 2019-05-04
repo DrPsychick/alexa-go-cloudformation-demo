@@ -206,52 +206,28 @@ package alfalfa
 
 import (
     "github.com/drpsychick/alexa-go-cloudformation-demo/loca"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
     "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
-    "log"
     "github.com/hamba/pkg/log"
     "github.com/hamba/pkg/stats"
+    "log"
+    "fmt"
 )
 
+// The Applications reponsibility is to execute different functions for the skill,
+// but it does not know about intents/the skill, it could be used as well without alexa.
+// Our application purpose will be to return simple responses, playing with Alexas voices and languages.
 type Application struct {
     logger  log.Logger
     statter stats.Statter
-    intents map[string]IntentFunc
-    Skill   *gen.SkillBuilder
 }
 func NewApplication(l log.Logger, s stats.Statter) *Application {
     return &Application{
         logger:  l,
         statter: s,
-        intents: map[string]IntentFunc{},
     }
 }
-// kinda required, like 'init()'...
-// define skill and model + assign app functions to intents
-func (a *Application) CreateSkill() {
-    a.Skill = gen.NewSkillBuilder().
-        WithLocaleRegistry(l10n.DefaultRegistry).
-        WithCategory(alexa.CategoryOrganizersAndAssistants).
-        WithPrivacyFlag(gen.FlagIsExportCompliant, true)
-    
-    a.Skill.WithModel()
-    m := a.Skill.Model()
-    
-    // add intents
-    m.WithIntent(alexa.StopIntent).
-        WithIntent(alexa.CancelIntent)
-    m.WithIntent("MyIntent")
-    
-    // link functions to intents
-    a.intents[alexa.StopIntent] = a.StopFunc()
-    a.intents[alexa.CancelIntent] = a.StopFunc()
-    a.intents["MyIntent"] = a.ConvertTimeFunc()   
-}
-func (a *Application) Intents() map[string]IntentFunc {
-	return a.intents
-}
 
+// ApplicationResponse 
 type ApplicationResponse struct {
     Title  string
     Text   string
@@ -263,58 +239,133 @@ func NewApplicationResponse() *ApplicationResponse {
 	return &ApplicationResponse{}
 }
 
-type IntentFunc func(locale l10n.LocaleInstance) ApplicationResponse
+type Config struct {
+	context string
+	user    string
+	session string
+	time    string
+}
 
-func (a *Application) StopFunc() IntentFunc {
-    return IntentFunc(func(locale l10n.LocaleInstance) ApplicationResponse {
+type ResponseFunc func(cfg *Config)
+
+// WithContext|User|Session|Time|...
+func WithUser(user string) ResponseFunc {
+	return func(cfg *Config) {
+		cfg.user = user
+	}
+}
+
+type AppResponse func(locale l10n.LocaleInstance, opts... ResponseFunc) (ApplicationResponse, error)
+
+// SaySomething responds with a random sentence.
+// should this use translations? yes!
+// the application binds function with l10n key and handles errors/default
+func (a *Application) SaySomething() AppResponse {
+	return AppResponse(func(loc l10n.LocaleInstance, opts... ResponseFunc) (ApplicationResponse, error) {
+        // run all ResponseFuncs
+        cfg := &Config{}
+        for _, opt := range opts {
+            opt(cfg)
+        }
+        
+        tit := ""
+        msg := ""
+        msgSSML := ""
+        if cfg.user != "" {
+        	// personalized response
+        	tit = loc.GetAny("SaySomething_UserTitle", cfg.user)
+        	msg = loc.GetAny("SaySomething_UserResponse", cfg.user)
+            msgSSML = loc.GetAny("SaySomething_UserResponse"+l10n.KeyPostfixSSML, cfg.user)        	
+        } else {
+        	tit = loc.GetAny("SaySomething_Title")
+            msg = loc.GetAny("SaySomething_Response")
+            msgSSML = loc.GetAny("SaySomething_Response"+l10n.KeyPostfixSSML)
+    	}
+        
+    	if msg == "" {
+    		return ApplicationResponse{}, fmt.Errorf("Error_NoTranslation")
+    	}
+	
+		return ApplicationResponse{
+			Title: tit,
+			Text: msg,
+			Speech: msgSSML,
+			End: true,
+		}, nil
+    })
+}
+// ShowSomething responds with an image and a sentence.
+func (a *Application) ShowSomething() AppResponse {
+    return AppResponse(func(loc l10n.LocaleInstance, opts... ResponseFunc) (ApplicationResponse, error) {
+	    // similar to above, but returns an image URL which lambda can render into a card.
+	    return ApplicationResponse{
+	    	Text: "text", 
+	    	Speech: "<speak>text</speak", 
+	    	Image: "https://myimage.url/img_%s.png",
+	    	End: true,
+	    }, nil
+	})
+}
+
+func (a *Application) StopFunc() AppResponse {
+    return AppResponse(func(locale l10n.LocaleInstance, opts... ResponseFunc) (ApplicationResponse, error) {
         return ApplicationResponse{
             Title:  locale.GetAny(l10n.KeyStopTitle),
             Text:   locale.GetAny(l10n.KeyStopText),
             Speech: locale.GetAny(l10n.KeyStopSSML),
             End:    true,
-        }
+        }, nil
     })
 }
 
-func (a *Application) ErrorFunc(err error) IntentFunc {
-	return IntentFunc(func(locale l10n.LocaleInstance) ApplicationResponse {
+func (a *Application) ErrorFunc(err error) AppResponse {
+	return AppResponse(func(locale l10n.LocaleInstance, opts... ResponseFunc) (ApplicationResponse, error) {
 		return ApplicationResponse{
 			Title:  locale.GetAny(l10n.KeyErrorTitle),
 			Text:   locale.GetAny(l10n.KeyErrorText, err),
 			Speech: locale.GetAny(l10n.KeyErrorSSML),
 			End:    true,
-		}
+		}, nil
 	})
 }
 
-func (a *Application) ConvertTimeFunc() IntentFunc {
-	return IntentFunc(func(locale l10n.LocaleInstance) ApplicationResponse {
-    // understand the request, based on input
-    
-    // trigger actions
-    result, err := call.MyAPI(a)
-    if err != nil {
-        return a.ErrorFunc(err)
-    }
-    img := redis.GetKey() // fetch images
-    
-    // define standard response
-    r := NewApplicationResponse().
-        WithTitle(loca.GenericTitle).
-        WithText(loca.ConvertTimeText).
-        WithoutSpeech()
-    
-    // api call was fine
-    if result == "fine" {
-        r.WithTitle(loca.ConvertTimeFineTitle).
-            WithText(loca.ConvertTimeFineText)
-        if img != "" {
-            r.WithImage(img)
+func (a *Application) ConvertTimeFunc() AppResponse {
+	return AppResponse(func(locale l10n.LocaleInstance, opts... ResponseFunc) (ApplicationResponse, error) {
+        // run all ResponseFuncs
+        cfg := &Config{}
+        for _, opt := range opts {
+            opt(cfg)
         }
-        r.WithEnd()
-    }
+        
+        if cfg.time == "" {
+        	return ApplicationResponse{}, fmt.Errorf("Error_NoTimeProvided")
+        }
+        // TODO: implement time conversion
     
-    return r
+        // trigger actions
+        result, err := call.MyAPI(a)
+        if err != nil {
+            return ApplicationResponse{}, fmt.Errorf("Error_APICallFailed")
+        }
+        img := redis.GetKey() // fetch images
+        
+        // define standard response
+        r := ApplicationResponse{
+            Title:  locale.GetAny(loca.GenericTitle),
+            Text:   locale.GetAny(loca.ConvertTimeText),
+        }
+        
+        // api call was fine
+        if result == "fine" {
+            r.Title = locale.GetAny(loca.ConvertTimeFineTitle)
+            r.Text = locale.GetAny(loca.ConvertTimeFineText)
+            if img != "" {
+                r.Image = img
+            }
+            r.End = true
+        }
+        
+        return r, nil
     })
 }
 ```
@@ -324,16 +375,19 @@ Lambda: registers handlers and builds the response
 package lambda
 
 import (
+    "github.com/drpsychick/alexa-go-cloudformation-demo/loca"
     "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
     "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
     "strings"
     "fmt"
 )
 
 type Application interface {
-	log.Loggable
-	stats.Statable
-	Intents()  map[string]IntentFunc
+	Stop()          AppResponse
+	SaySomething()  AppResponse
+	ShowSomething() AppResponse
+	WithUser(user string)
 }
 // interface to the application response
 type ApplicationResponse interface {
@@ -341,62 +395,147 @@ type ApplicationResponse interface {
 	Text()   string
 	Speech() string
 	Image()  string
+	End()    bool
 }
-type IntentFunc func(locale l10n.LocaleInstance) ApplicationResponse
 
-func NewMux(app Application) alexa.Handler {
+type Config struct {
+	context string
+	user    string
+	session string
+	time    string
+}
+
+type ResponseFunc func(cfg *Config)
+
+// WithContext|User|Session|Time|...
+func WithUser(user string) ResponseFunc {
+	return func(cfg *Config) {
+		cfg.user = user
+	}
+}
+
+type AppResponse func(locale l10n.LocaleInstance, opts... ResponseFunc) (ApplicationResponse, error)
+
+// requires loca.Registry and a gen.SkillBuilder
+func NewMux(app Application, sk gen.SkillBuilder) alexa.Handler {
+	sk.WithModel()
+		
     mux := alexa.NewServerMux()
 
     // special requests that always exist
     mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
     mux.HandleRequestTypeFunc(alexa.TypeCanFulfillIntentRequest, handleCanFulfillIntent)
     
-    // register intent handlers from the app
-    for n, h := range app.Intents() {
-        mux.HandleIntent(n, handleResponse(h))
-    }
+    // needs: mux, intent name, app function, skill/model
+    registerSimpleIntent(mux, alexa.StopIntent, app.Stop(), sk)
+    registerSimpleIntent(mux, "SaySomething", app.SaySomething(), sk)
+    registerStandardIntent(mux, "ShowSomething", app.ShowSomething(), sk)
 
     return mux
 }
 
-func handleResponse(ifunc IntentFunc) alexa.Handler {
+func registerSimpleIntent(mux *alexa.ServeMux, intent string, f AppResponse, sk gen.SkillBuilder) {
+	// register intent
+	mux.HandleIntent(intent, handleSimpleIntent(f))
+	sk.Model().WithIntent(intent)
+}
+
+func registerStandardIntent(mux *alexa.ServeMux, intent string, f AppResponse, sk gen.SkillBuilder) {
+	mux.HandleIntent(intent, handleStandardIntent(f))
+	sk.Model().WithIntent(intent)
+}
+
+func handleSimpleIntent(f AppResponse) alexa.Handler {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+        // resolve locale
+        def := loca.Registry.GetDefault()
+        if def == nil {
+        	handleError(b, r, fmt.Errorf("no default locale registered"))
+        	return
+        }
+        loc, err := loca.Registry.Resolve(r.Locale)
+        if err != nil {
+        	handleError(b, r, err)
+        	return
+        }
+		
+		// run func
+		resp, err := f(loc, WithUser(r.Request.Session.User.UserID))
+		
+		if err != nil {
+			title := loc.Get(l10n.KeyMissingTranslation_Title)
+			text := loc.Get(l10n.KeyMissingTranslation, err)
+			if text == "" {
+				title = reg.GetDefault().Get(l10n.KeyMissingTranslation_Title)
+				text = reg.GetDefault().Get(l10n.KeyMissingTranslation, err)
+			}
+			b.WithSimpleCard(title, text)
+		}
+		
+		// configure response
+		if resp.Speech() != "" {
+			b.WithSpeech(resp.Speech())
+		}
+		b.WithSimpleCard(resp.Title(), resp.Text())
+		if resp.End() {
+			b.WithShouldEndSession(true)
+		}
+	})
+}
+
+func handleStandardIntent(f AppResponse) alexa.Handler {
     return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-        loc, err := l10n.Resolve(r.Locale)
+        // resolve locale
+        def := loca.Registry.GetDefault()
+        if def == nil {
+        	handleError(b, r, fmt.Errorf("no default locale registered"))
+        	return
+        }
+        loc, err := loca.Registry.Resolve(r.Locale)
         if err != nil {
         	handleError(b, r, err)
         	return
         }
         
-        // handle session and context by default?
-        //ctx := NewRequestContext(r.Context)
-        //ctx.Session := NewRequestSession(r.Session)
+        // run func
+        resp, err := f(loc, WithUser(r.Request.Session.User.UserID))
         
-        // how can we access info from the request?
-        resp := ifunc(loc)
+        if err != nil {
+            title := loc.Get(l10n.KeyMissingTranslation_Title)
+            text := loc.Get(l10n.KeyMissingTranslation, err)
+            img := loc.Get(l10n.KeyMissingTranslationImage)
+            if text == "" {
+                title = def.Get(l10n.KeyMissingTranslation_Title)
+                text = def.Get(l10n.KeyMissingTranslation, err)
+                img = def.Get(l10n.KeyMissingTranslationImage)
+            }
+            b.WithStandardCard(title, text, &alexa.Image{
+                SmallImageURL: fmt.Sprintf(img, "small"),
+                LargeImageURL: fmt.Sprintf(img, "large"),
+            })
+            b.WithShouldEndSession(true)
+            return
+        }
         
+        // configure response
         if resp.Speech() != "" {
-        	b.WithSpeech(resp.Speech())
+            b.WithSpeech(resp.Speech())
         }
-        if resp.Image() == "" {
-            b.WithSimpleCard(resp.Title(), resp.Text())
-            return
-        }
-        if !strings.Contains(resp.Image(), "%s") {
-            handleError(b, l, fmt.Errorf(l10n.ErrorMissingPlaceholder, img))
-            return
-        }
-        b.WithStandardCard(resp.Title(), resp.Text(), alexa.Image{
+        b.WithStandardCard(resp.Title(), resp.Text(), &alexa.Image{
             SmallImageURL: fmt.Sprintf(resp.Image(), "small"),
             LargeImageURL: fmt.Sprintf(resp.Image(), "large"),
         })
+        if resp.End() {
+            b.WithShouldEndSession(true)
+        }
     })
 }
 
 func localeDefaults(locale string) l10n.LocaleInstance {
-	l, err := l10n.Resolve(locale)
+	l, err := loca.Registry.Resolve(locale)
 	if err != nil {
 		l = l10n.NewLocale(locale)
-	    l10n.Register(l)
+	    loca.Registry.Register(l)
 	}
     if l.Get(l10n.KeyErrorTitle) == "" { l.Set(l10n.KeyErrorTitle, []string{"Error"})}
     if l.Get(l10n.KeyErrorText) == "" { l.Set(l10n.KeyErrorText, []string{"The app returned an error:\n%s"})}
