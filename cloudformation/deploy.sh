@@ -8,7 +8,7 @@ check_env_vars () {
   done
 }
 
-if ! check_env_vars "ASKS3Key" "ASKClientId" "ASKClientSecret" "ASKRefreshToken" "ASKVendorId" "CF_STACK_NAME"; then
+if ! check_env_vars "ASKS3Bucket" "ASKS3Key" "ASKClientId" "ASKClientSecret" "ASKRefreshToken" "ASKVendorId" "CF_STACK_NAME"; then
     exit 1
 fi
 
@@ -74,7 +74,7 @@ res=$(aws cloudformation deploy \
         ASKS3Key=$ASKS3Key \
         ASKSkillTestingInstructions="$ASKSkillTestingInstructions" 2>&1)
 ret=$?
-[ $production -eq 0 ] && echo "$res"
+echo "$res"
 
 failed=$(echo "$res" | grep "Failed")
 echo "exitcode: $ret"
