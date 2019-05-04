@@ -8,7 +8,7 @@ check_env_vars () {
   done
 }
 
-if ! check_env_vars "ASKS3Key" "ASKClientId" "ASKClientSecret" "ASKRefreshToken" "ASKVendorId" "CF_STACK_NAME"; then
+if ! check_env_vars "ASKS3Bucket" "ASKS3Key" "ASKClientId" "ASKClientSecret" "ASKRefreshToken" "ASKVendorId" "CF_STACK_NAME"; then
     exit 1
 fi
 
@@ -50,7 +50,7 @@ aws s3 cp ./alexa/$ASKS3Key s3://$ASKS3Bucket/
 [ $production -eq 0 ] && {
     echo "SKILL:"
     cat alexa/skill.json | jq .
-    
+
     for f in $(ls alexa/interactionModels/custom/*.json); do
         echo "$(basename $f):"
         cat $f | jq .
@@ -74,7 +74,7 @@ res=$(aws cloudformation deploy \
         ASKS3Key=$ASKS3Key \
         ASKSkillTestingInstructions="$ASKSkillTestingInstructions" 2>&1)
 ret=$?
-[ $production -eq 0 ] && echo "$res"
+echo "$res"
 
 failed=$(echo "$res" | grep "Failed")
 echo "exitcode: $ret"
@@ -88,12 +88,12 @@ elif [ $ret -eq 255 -a -z "$failed" ]; then
 else
     echo "Deployment failed!"
     ec=1
-    
+
     # do NOT run this on travis, it exposes ALL parameter values:
     if [ "$TRAVIS" != "true" ]; then
         aws cloudformation describe-stack-events --stack-name $CF_STACK_NAME | grep -v "ResourceProperties" | grep -v "NextToken"
     fi
-    
+
     # only print FAILed Type, Status, StatusReason (not the "Properties", it may contain secrets!)
     aws cloudformation describe-stack-events --max-items 5 --stack-name $CF_STACK_NAME | grep -C2 FAIL | grep 'Resource\(Type\|Status\|StatusReason\)'
     echo
