@@ -1,10 +1,15 @@
 package alfalfa
 
 import (
+	"errors"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
+)
+
+var (
+	ErrorNoTranslation = errors.New("no '%s' translation for %s")
 )
 
 // Application defines the base application
@@ -19,6 +24,41 @@ func NewApplication(l log.Logger, s stats.Statter) *Application {
 		logger:  l,
 		statter: s,
 	}
+}
+
+func (a *Application) SaySomething2() AppResponseFunc {
+	return AppResponseFunc(func(loc l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error) {
+		// run all ResponseFuncs
+		cfg := &Config{}
+		for _, opt := range opts {
+			opt(cfg)
+		}
+
+		tit := ""
+		msg := ""
+		msgSSML := ""
+		if cfg.user != "" {
+			// personalized response
+			tit = loc.GetAny("SaySomething_UserTitle", cfg.user)
+			msg = loc.GetAny("SaySomething_UserResponse", cfg.user)
+			msgSSML = loc.GetAny("SaySomething_UserResponse"+l10n.KeyPostfixSSML, cfg.user)
+		} else {
+			tit = loc.GetAny(loca.SaySomethingTitle)
+			msg = loc.GetAny(loca.SaySomethingText)
+			msgSSML = loc.GetAny(loca.SaySomethingSSML)
+		}
+
+		if msg == "" {
+			return ApplicationResponse{}, ErrorNoTranslation
+		}
+
+		return ApplicationResponse{
+			Title:  tit,
+			Text:   msg,
+			Speech: msgSSML,
+			End:    true,
+		}, nil
+	})
 }
 
 // Launch is the response to the launch request.
@@ -60,3 +100,16 @@ func (a *Application) Logger() log.Logger {
 func (a *Application) Statter() stats.Statter {
 	return a.statter
 }
+
+type ApplicationResponse struct {
+	Title  string
+	Text   string
+	Speech string
+	Image  string
+	End    bool
+}
+type Config struct {
+	user string
+}
+type ResponseFunc func(cfg *Config)
+type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)

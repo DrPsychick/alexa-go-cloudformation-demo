@@ -23,6 +23,10 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillPrivacyPolicyURL: enUS.GetAll(l10n.KeySkillPrivacyPolicyURL),
 		//l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
 		l10n.KeySkillTestingInstructions: enUS.GetAll(l10n.KeySkillTestingInstructions),
+		l10n.KeyErrorTitle:               {"Fehler"},
+		l10n.KeyErrorText:                {"Es ist folgender Fehler aufgetreten:\n%s"},
+		l10n.KeyErrorSSML:                {"<speak>Es ist ein Fehler aufgetreten.</speak>"},
+		l10n.KeyErrorNoTranslationText:   {"Keine Übersetzung für '%s' gefunden!"},
 
 		// Type values
 		TypeAreaValues:   {"Europa", "Nordamerika", "Südamerika", "Asien"},
