@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrorNoTranslation = errors.New("no '%s' translation for %s")
+	ErrorNoTranslation = errors.New("translation missing")
 )
 
 // Application defines the base application
@@ -26,39 +26,21 @@ func NewApplication(l log.Logger, s stats.Statter) *Application {
 	}
 }
 
-func (a *Application) SaySomething2() AppResponseFunc {
-	return AppResponseFunc(func(loc l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error) {
-		// run all ResponseFuncs
-		cfg := &Config{}
-		for _, opt := range opts {
-			opt(cfg)
-		}
+func (a *Application) AWSStatus(loc l10n.LocaleInstance, area string, region string) (ApplicationResponse, error) {
+	title := loc.GetAny(loca.AWSStatusTitle)
+	msg := loc.GetAny(loca.AWSStatusText, area, region)
+	msgSSML := loc.GetAny(loca.AWSStatusSSML)
 
-		tit := ""
-		msg := ""
-		msgSSML := ""
-		if cfg.user != "" {
-			// personalized response
-			tit = loc.GetAny("SaySomething_UserTitle", cfg.user)
-			msg = loc.GetAny("SaySomething_UserResponse", cfg.user)
-			msgSSML = loc.GetAny("SaySomething_UserResponse"+l10n.KeyPostfixSSML, cfg.user)
-		} else {
-			tit = loc.GetAny(loca.SaySomethingTitle)
-			msg = loc.GetAny(loca.SaySomethingText)
-			msgSSML = loc.GetAny(loca.SaySomethingSSML)
-		}
+	if title == "" || msg == "" || msgSSML == "" {
+		return ApplicationResponse{}, ErrorNoTranslation
+	}
 
-		if msg == "" {
-			return ApplicationResponse{}, ErrorNoTranslation
-		}
-
-		return ApplicationResponse{
-			Title:  tit,
-			Text:   msg,
-			Speech: msgSSML,
-			End:    true,
-		}, nil
-	})
+	return ApplicationResponse{
+		Title:  title,
+		Text:   msg,
+		Speech: msgSSML,
+		End:    true,
+	}, nil
 }
 
 // Launch is the response to the launch request.
@@ -77,8 +59,39 @@ func (a *Application) Stop(l l10n.LocaleInstance) (string, string, string) {
 }
 
 // SimpleResponse handles simple title + text response.
-func (a *Application) SaySomething(l l10n.LocaleInstance) (string, string, string) {
-	return l.GetAny(loca.SaySomethingTitle), l.GetAny(loca.SaySomethingText), l.GetAny(loca.SaySomethingSSML)
+func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error) {
+	// run all ResponseFuncs
+	cfg := &Config{}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	//stats.Inc(a, "SaySomething", 1, 1.0)
+	//stats.Timing(a,"SaySomething", 1.0, 1.0)
+
+	tit := ""
+	msg := ""
+	msgSSML := ""
+	if cfg.user != "" {
+		// personalized response
+		tit = loc.GetAny(loca.SaySomethingUserTitle, cfg.user)
+		msg = loc.GetAny(loca.SaySomethingUserText, cfg.user)
+		msgSSML = loc.GetAny(loca.SaySomethingUserSSML, cfg.user)
+	} else {
+		tit = loc.GetAny(loca.SaySomethingTitle)
+		msg = loc.GetAny(loca.SaySomethingText)
+		msgSSML = loc.GetAny(loca.SaySomethingSSML)
+	}
+
+	if msg == "" {
+		return ApplicationResponse{}, ErrorNoTranslation
+	}
+
+	return ApplicationResponse{
+		Title:  tit,
+		Text:   msg,
+		Speech: msgSSML,
+		End:    true,
+	}, nil
 }
 
 // SSMLDemo is the intent to demonstrate SSML output with Alexa.
@@ -113,3 +126,9 @@ type Config struct {
 }
 type ResponseFunc func(cfg *Config)
 type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
+
+func WithUser(user string) ResponseFunc {
+	return func(cfg *Config) {
+		cfg.user = user
+	}
+}

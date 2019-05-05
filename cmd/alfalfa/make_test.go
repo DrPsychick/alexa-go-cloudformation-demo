@@ -3,14 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
+	"github.com/drpsychick/alexa-go-cloudformation-demo"
+	"github.com/hamba/logger"
+	"github.com/hamba/statter/l2met"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
 func TestMakeSkill(t *testing.T) {
-	sb, err := createSkill(loca.Registry)
-	assert.NoError(t, err)
+	sb := newSkill()
 
 	s, err := sb.Build()
 	assert.NoError(t, err)
@@ -22,8 +24,13 @@ func TestMakeSkill(t *testing.T) {
 }
 
 func TestMakeModels(t *testing.T) {
-	sb, err := createSkill(loca.Registry)
-	assert.NoError(t, err)
+	l := logger.New(logger.StreamHandler(os.Stdout, logger.LogfmtFormat()))
+	app := alfalfa.NewApplication(
+		l,
+		l2met.New(l, ""),
+	)
+	sb := newSkill()
+	newLambda(app, sb)
 
 	ms, err := createModels(sb)
 	assert.NoError(t, err)

@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
-
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/json-iterator/go"
+	"sync"
 )
 
 // Handler represents an alexa request handler.
@@ -35,6 +34,7 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	// TODO: panics when we get a wrong request
 	req.Request.Context = req.Context
 	req.Request.Session = req.Session
 

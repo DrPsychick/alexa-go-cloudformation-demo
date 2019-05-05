@@ -42,6 +42,27 @@ ask init
 # follow instructions, link ask to an aws account (required for cloudformation Alexa skill to assume S3 role)
 ```
 
+## Test lambda locally
+### Using aws cli tools
+Install prerequisites:
+```
+pip install --user --upgrade awscli aws-sam-cli
+docker pull lambci/lambda:go1.x
+```
+
+`sam` requires a zip file
+```
+(cd deploy; zip deploy.zip app)
+sed -e 's#../deploy#./deploy.zip#' cloudformation/cloudformation.yml > deploy/template.yml
+# now we have a template that points to our zip file
+# did not work for me, but apparently should (some problem launching the docker?):
+#sam local invoke --debug -t deploy/template.yml "LambdaFunction"
+
+# this works:
+(GOARCH=amd64 GOOS=linux go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa)
+(cd deploy; docker run --rm -v "$PWD":/var/task lambci/lambda:go1.x app "$(cat ../test/lambda_intent_request.json)")
+```
+
 ## Test cloudformation locally
 * you need to setup AWS credentials which can be used to execute cloudformation (see `~/.aws/credentials`)
 * this cloudformation user needs permissions for

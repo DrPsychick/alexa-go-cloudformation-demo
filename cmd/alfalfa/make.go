@@ -5,18 +5,37 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/hamba/cmd"
+	"github.com/hamba/logger"
+	"github.com/hamba/pkg/log"
 	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
-	"log"
+	"os"
 )
 
 func runMake(c *cli.Context) error {
-	// build skill and models
-	sk, err := createSkill(loca.Registry)
+	ctx, err := cmd.NewContext(c)
 	if err != nil {
 		return err
 	}
+
+	// attach a unbuffered logger:
+	lg := logger.New(logger.StreamHandler(os.Stdout, logger.LogfmtFormat()))
+	ctx.AttachLogger(func(l log.Logger) log.Logger {
+		return lg
+	})
+
+	app, err := newApplication(ctx)
+	if err != nil {
+		log.Fatal(ctx, err.Error())
+	}
+
+	// build skill and models
+	sk := newSkill()
+
+	// lambda injects supported intents, slots, types
+	newLambda(app, sk)
+
 	ms, err := createModels(sk)
 	if err != nil {
 		return err
@@ -26,11 +45,11 @@ func runMake(c *cli.Context) error {
 	if c.Bool("skill") {
 		s, err := sk.Build()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(ctx, err)
 		}
 		res, _ := json.MarshalIndent(s, "", "  ")
 		if err := ioutil.WriteFile("./alexa/skill.json", res, 0644); err != nil {
-			log.Fatal(err)
+			log.Fatal(ctx, err)
 		}
 	}
 
@@ -40,7 +59,7 @@ func runMake(c *cli.Context) error {
 
 			res, _ := json.MarshalIndent(m, "", "  ")
 			if err := ioutil.WriteFile(filename, res, 0644); err != nil {
-				log.Fatal(err)
+				log.Fatal(ctx, err)
 			}
 		}
 	}
@@ -48,32 +67,15 @@ func runMake(c *cli.Context) error {
 	return nil
 }
 
-// createSkill generates and returns a SkillBuilder.
-func createSkill(r l10n.LocaleRegistry) (*gen.SkillBuilder, error) {
-	skill := gen.NewSkillBuilder().
-		WithLocaleRegistry(r).
-		WithCategory(alexa.CategoryOrganizersAndAssistants).
-		WithPrivacyFlag(gen.FlagIsExportCompliant, true)
-
-	return skill, nil
-}
-
 // createModels generates and returns a list of Models.
 func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
-	m := s.WithModel().Model().
+	m := s.Model().
 		WithDelegationStrategy(alexa.DelegationSkillResponse)
 
-	m.WithType(loca.TypeArea)
-	m.WithType(loca.TypeRegion)
+	// we define intents, slots, types in lambda,
+	// that's why `newLambda` must be called before this, if not it will panic.
 
-	m.WithIntent(loca.DemoIntent)
-	m.WithIntent(loca.SaySomething)
-	m.WithIntent(loca.AWSStatus)
-
-	m.Intent(loca.AWSStatus).
-		WithSlot(loca.TypeAreaName, loca.TypeArea).
-		WithSlot(loca.TypeRegionName, loca.TypeRegion)
-
+	// Prompts are part of the Alexa dialog, so independent of lambda.
 	m.WithElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
 	m.ElicitationPrompt(loca.AWSStatus, loca.TypeRegionName).
 		WithVariation("PlainText").
