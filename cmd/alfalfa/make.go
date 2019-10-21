@@ -70,6 +70,11 @@ func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	m.WithIntent(loca.SaySomething)
 	m.WithIntent(loca.AWSStatus)
 
+	// requires
+	m.WithIntent(alexa.HelpIntent)
+	m.WithIntent(alexa.CancelIntent)
+	m.WithIntent(alexa.StopIntent)
+
 	m.Intent(loca.AWSStatus).
 		WithSlot(loca.TypeAreaName, loca.TypeArea).
 		WithSlot(loca.TypeRegionName, loca.TypeRegion)

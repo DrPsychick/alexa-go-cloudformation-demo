@@ -40,6 +40,11 @@ Setup ask-cli
 ```
 ask init
 # follow instructions, link ask to an aws account (required for cloudformation Alexa skill to assume S3 role)
+# visit https://developer.amazon.com/settings/console/securityprofile/web-settings/view.html for the `ASKClientId` and `ASKClientSecret`
+
+ask util generate-lwa-tokens --no-browser
+# redirects you to the browser to authenticate, will output `access_token` and `refresh_token`
+# take the `refresh_token` for `ASKRefreshToken` below
 ```
 
 ## Test cloudformation locally
