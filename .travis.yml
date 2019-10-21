@@ -27,7 +27,7 @@ script:
   - goveralls -coverprofile=profile.cov -service=travis-ci
 
 before_deploy:
-  - pip3 install --upgrade --user awscli
+  - pip3 install --upgrade --user setuptools awscli
   - mkdir ./deploy
   - go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa
 
