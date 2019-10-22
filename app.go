@@ -12,6 +12,28 @@ var (
 	ErrorNoTranslation = errors.New("translation missing")
 )
 
+type Config struct {
+	user string
+}
+
+//type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
+
+type ResponseFunc func(cfg *Config)
+
+func WithUser(user string) ResponseFunc {
+	return func(cfg *Config) {
+		cfg.user = user
+	}
+}
+
+type ApplicationResponse struct {
+	Title  string
+	Text   string
+	Speech string
+	Image  string
+	End    bool
+}
+
 // Application defines the base application
 type Application struct {
 	logger  log.Logger
@@ -39,6 +61,7 @@ func (a *Application) AWSStatus(loc l10n.LocaleInstance, area string, region str
 		Title:  title,
 		Text:   msg,
 		Speech: msgSSML,
+		Image:  "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_%s.png",
 		End:    true,
 	}, nil
 }
@@ -90,7 +113,7 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 		Title:  tit,
 		Text:   msg,
 		Speech: msgSSML,
-		End:    true,
+		End:    false,
 	}, nil
 }
 
@@ -112,23 +135,4 @@ func (a *Application) Logger() log.Logger {
 // Statter returns the application statter.
 func (a *Application) Statter() stats.Statter {
 	return a.statter
-}
-
-type ApplicationResponse struct {
-	Title  string
-	Text   string
-	Speech string
-	Image  string
-	End    bool
-}
-type Config struct {
-	user string
-}
-type ResponseFunc func(cfg *Config)
-type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
-
-func WithUser(user string) ResponseFunc {
-	return func(cfg *Config) {
-		cfg.user = user
-	}
 }

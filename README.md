@@ -22,9 +22,14 @@ For `l10n`, see [README.md](pkg/alexa/l10n/README.md)
 
 
 ## code structure
+### commands
 * `/cmd/alfalfa` -> `./deploy/app` is the default command (for lambda)
 * `app make --skill` is the command to generate the Alexa skill json file
 * `app make --models` is the command to generate the Alexa model json files
+* `app` just runs the lambda function, waiting for a request
+
+## what goes where?
+* [ ] link to markdown file, explaining code structure, separation of concerns, interfaces, ... 
 
 ## golang context
 * don't "misuse" context to pass logger etc. instead make the application satisfy the required interfaces
@@ -33,20 +38,32 @@ For `l10n`, see [README.md](pkg/alexa/l10n/README.md)
 ## Install `ask cli` on macOS
 requires Homebrew
 ```
+brew install ask-cli
+# alternatively via npm:
 brew install npm
 npm install -g ask-cli
 ```
+
 Setup ask-cli
 ```
 ask init
 # follow instructions, link ask to an aws account (required for cloudformation Alexa skill to assume S3 role)
+# visit https://developer.amazon.com/settings/console/securityprofile/web-settings/view.html for the `ASKClientId` and `ASKClientSecret`
+
+ask util generate-lwa-tokens --no-browser
+# redirects you to the browser to authenticate, will output `access_token` and `refresh_token`
+# take the `refresh_token` for `ASKRefreshToken` below
 ```
 
 ## Test lambda locally
+Why? 
+* Run tests (alexa requests) against your code before you commit or merge with master.
+* Add tests to build pipeline to ensure correct functionality.
+
 ### Using aws cli tools
 Install prerequisites:
 ```
-pip install --user --upgrade awscli aws-sam-cli
+pip install --user --upgrade awscli # aws-sam-cli : did not work for me, see below
 docker pull lambci/lambda:go1.x
 ```
 
@@ -60,11 +77,20 @@ sed -e 's#../deploy#./deploy.zip#' cloudformation/cloudformation.yml > deploy/te
 
 # this works:
 (GOARCH=amd64 GOOS=linux go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa)
-(cd deploy; docker run --rm -v "$PWD":/var/task lambci/lambda:go1.x app "$(cat ../test/lambda_intent_request.json)")
+(cd deploy; 
+cat ../test/lambda_intent_request.json | 
+docker run --rm -i -v "$PWD":/var/task lambci/lambda:go1.x -e DOCKER_LAMBDA_USE_STDIN=1 app
+)
 ```
 
 ## Test cloudformation locally
-* you need to setup AWS credentials which can be used to execute cloudformation (see `~/.aws/credentials`)
+Why?
+* run the cloudformation template regularly while you develop and add to it
+* run the cloudformation template from your local machine to test
+* ensure that the aws user has all the permissions needed to create the resources in the stack
+
+What you need:
+* setup AWS credentials which can be used to execute cloudformation (see `~/.aws/credentials`)
 * this cloudformation user needs permissions for
   * `cloudformation`
   * `lambda`
@@ -96,13 +122,25 @@ export ASKVendorId=<VendorId>
 
 ```export $(grep -v '^#' .env | xargs)```
 
+### Build the lambda function
+* build for `GOOS=Linux` and `GOARCH=amd64` (see above)
+* save it as `./deploy/app` (referenced in the cloudformation template)
+```
+make build
+mkdir deploy
+mv ./alfalfa ./deploy/app
+```
+
 ### Run `deploy.sh`
 * run `deploy.sh`
     * generates `skill.json` and `<locale>.json` files for Alexa and uploads to S3
-    * deploys via cloudformation (staging or production)
-        * packages lambda function and uploads to S3
-    * deletes the cloudformation stack after **staging** deploy (unless you set `KEEP_STACK=1`)
-    * you **can** set a different `CF_STACK_NAME`, but `deploy.sh` will still append `-staging`...
+    * deploys via cloudformation (branch `master` -> production, else staging)
+        * staging: append `-staging` to cloudformation stack name
+        * packages Alexa skill and uploads it to S3
+        * cloudformation packages `deploy/app` and uploads it to S3
+    * if staging: (branch != `master`) 
+      * deletes the cloudformation stack 10 seconds after deploy (unless you set `KEEP_STACK=1`)
+      * you **can** set a different `CF_STACK_NAME`, but `deploy.sh` will still append `-staging`...
 
 ```bash ./cloudformation/deploy.sh```
 

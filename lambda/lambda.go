@@ -54,7 +54,7 @@ func NewMux(app Application, sb *gen.SkillBuilder) alexa.Handler {
 
 	// new approach:
 	mux.HandleIntent(loca.SaySomething, handleSaySomethingResponse(app, sb))
-	mux.HandleIntent(loca.AWSStatus, handleAWSStatus(app, sb))
+	mux.HandleIntent(loca.AWSStatus, handleAWSStatus(app, sb)) //, WithSlot(loca.TypeArea))
 
 	return mux
 }
@@ -77,6 +77,8 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
+			b.WithSpeech("bye").
+				WithSimpleCard("stop", "never mind")
 			return
 		}
 		title, text := app.Launch(l)
@@ -99,10 +101,8 @@ func handleStop(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
-			// TODO: maybe say something here
 			return
 		}
-
 		title, text, _ := app.Stop(l)
 
 		b.WithSpeech(text).
@@ -163,6 +163,7 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 }
 
 func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
+	// TODO: the mux should know about slots and "pass" it to the handler via request
 	// register intent, slots, types with the model
 	sb.Model().WithIntent(loca.AWSStatus)
 	sb.Model().
@@ -214,6 +215,12 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		}
 
 		b.WithSimpleCard(resp.Title, resp.Text)
+		if resp.Image != "" {
+			b.WithStandardCard(resp.Title, resp.Text, &alexa.Image{
+				SmallImageURL: fmt.Sprintf(resp.Image, "small"),
+				LargeImageURL: fmt.Sprintf(resp.Image, "large"),
+			})
+		}
 
 		if resp.Speech != "" {
 			b.WithSpeech(resp.Speech)
