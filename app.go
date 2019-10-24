@@ -27,8 +27,8 @@ func (a *Application) Launch(l l10n.LocaleInstance) (string, string) {
 }
 
 // Help is the response to a help request.
-func (a *Application) Help() (string, string) {
-	return "Help", "No help available!"
+func (a *Application) Help(l l10n.LocaleInstance) (string, string, string) {
+	return l.GetAny(loca.HelpTitle), l.GetAny(loca.Help), ""
 }
 
 // Stop is the response to stop the skill.
@@ -48,7 +48,7 @@ func (a *Application) SSMLDemo(l l10n.LocaleInstance) (string, string, string) {
 
 // Demo is a simple demo response.
 func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
-	return l.Get(loca.GenericTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
+	return l.Get(loca.DemoIntentTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
 }
 
 // Logger returns the application logger.

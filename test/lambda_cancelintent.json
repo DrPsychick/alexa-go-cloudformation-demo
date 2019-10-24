@@ -35,7 +35,7 @@
     "timestamp": "2016-10-27T21:06:28Z",
     "locale": "de-DE",
     "intent": {
-      "name": "DemoIntent"
+      "name": "AMAZON.CancelIntent"
     }
   }
 }
