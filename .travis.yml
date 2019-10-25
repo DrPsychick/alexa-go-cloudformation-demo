@@ -14,17 +14,25 @@ addons:
   apt:
     packages:
       - python3-pip
+services:
+  - docker
 
 before_install:
   - go mod download
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
+  - docker pull lambci/lambda:go1.x
 
 script:
   - golint ./...
   - go vet ./...
   - go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
   - goveralls -coverprofile=profile.cov -service=travis-ci
+  # build and then run lambda tests
+  - (GOARCH=; GOOS=; go build -o ./app ./cmd/alfalfa)
+  - cat test/lambda_helpintent.json | docker run --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x app
+  - cat test/lambda_stopintent.json | docker run --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x app
+  - cat test/lambda_cancelintent.json | docker run --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x app
 
 before_deploy:
   - pip3 install --upgrade --user pip
