@@ -100,6 +100,15 @@ else
     echo "If 'AlexaSkill' failed to update and your stack is in 'UPDATE_ROLLBACK_FAILED' state, try the following:"
     echo "aws cloudformation continue-update-rollback --stack-name $CF_STACK_NAME --resources-to-skip $CF_STACK_NAME.AlexaSkill"
 fi
+
+
+# simulate ASK dialogs to make sure the skill works
+if [ -n "$ASK_ACCESS_TOKEN" ]; then
+    # TODO: requires .ask/cli_config file...
+    ask dialog --profile $ASK_DEFAULT_PROFILE --replay test/ask_de-DE_demointent.replay --output ask-dialog.log
+fi
+
+
 # delete staging stack
 [ $production -eq 0 -a $keep -eq 0 ] && aws cloudformation delete-stack --stack-name $CF_STACK_NAME
 

@@ -91,7 +91,8 @@ func handleHelp(app Application) alexa.Handler {
 		}
 
 		b.WithSpeech(text).
-			WithSimpleCard(title, text)
+			WithSimpleCard(title, text).
+			WithShouldEndSession(true)
 	})
 }
 
@@ -111,7 +112,8 @@ func handleStop(app Application) alexa.Handler {
 		}
 
 		b.WithSpeech(text).
-			WithSimpleCard(title, text)
+			WithSimpleCard(title, text).
+			WithShouldEndSession(true)
 	})
 }
 

@@ -33,9 +33,9 @@
     "type": "IntentRequest",
     "requestId": "amzn1.echo-api.request.1234",
     "timestamp": "2016-10-27T21:06:28Z",
-    "locale": "de-DE",
+    "locale": "LOCALE",
     "intent": {
-      "name": "DemoIntent"
+      "name": "SaySomething"
     }
   }
 }

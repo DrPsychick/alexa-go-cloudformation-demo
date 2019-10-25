@@ -12,22 +12,22 @@ So this should be done automatically at the end of a successful staging deploy, 
 Put some more things into your `.env` file:
 * `ASKSkillId=amzn1.ask.skill.xxxxx` from `ask api list-skills`
 * `ASKLocale=de-DE`
-* `ASKProfile=default`
+* `ASK_DEFAULT_PROFILE=default`
 
 Simulate launch:
 ```bash
-ask simulate --profile $ASKProfile --skill-id $ASKSkillId --locale $ASKLocale \
+ask simulate --skill-id $ASKSkillId --locale $ASKLocale \
   --text "Alexa öffne Demo Skill"
 ```
 
 Record a dialog session:
 ```bash
-ask dialog --profile $ASKProfile --skill-id $ASKSkillId --locale $ASKLocale --output ask-dialog.log
+ask dialog --skill-id $ASKSkillId --locale $ASKLocale --output ask-dialog.log
 # now start with a dialog "alexa open <skill invocation>"
 # at the end write `!record` to save the dialog to a file   
 ```
 
 Replay a dialog session:
 ```bash
-ask dialog --profile $ASKProfile --replay test/ask_de-DE_demointent.replay --output ask-dialog.log
+ask dialog --replay test/ask_de-DE_demointent.replay --output ask-dialog.log
 ```
