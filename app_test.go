@@ -9,9 +9,9 @@ import (
 
 func TestApplicationHelp(t *testing.T) {
 	a := NewApplication(nil, nil)
-	title, text := a.Help()
-
 	l, err := l10n.Resolve("de-DE")
+	title, text, _ := a.Help(l)
+
 	assert.Nil(t, err, "could not resolve locale 'de-DE'!")
 	assert.Equal(t, "de-DE", l.GetName())
 
