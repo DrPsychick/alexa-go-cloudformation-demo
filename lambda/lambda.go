@@ -72,6 +72,7 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 
 		if len(l.GetErrors()) > 0 {
 			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
 			return
 		}
 
@@ -91,6 +92,7 @@ func handleHelp(app Application) alexa.Handler {
 
 		if len(l.GetErrors()) > 0 {
 			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
 			return
 		}
 
@@ -112,6 +114,7 @@ func handleStop(app Application) alexa.Handler {
 
 		if len(l.GetErrors()) > 0 {
 			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
 			return
 		}
 
@@ -133,6 +136,7 @@ func handleSSMLResponse(app Application) alexa.Handler {
 
 		if len(l.GetErrors()) > 0 {
 			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
 			return
 		}
 
@@ -152,6 +156,7 @@ func handleSaySomethingResponse(app Application) alexa.Handler {
 
 		if len(l.GetErrors()) > 0 {
 			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
 			return
 		}
 
@@ -171,11 +176,13 @@ func handleDemo(app Application) alexa.Handler {
 
 		if len(l.GetErrors()) > 0 {
 			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
 			return
 		}
 
 		b.WithSpeech(ssmlText).
-			WithSimpleCard(title, text)
+			WithSimpleCard(title, text).
+			WithShouldEndSession(true)
 	})
 }
 
@@ -188,8 +195,15 @@ func handleAWSStatus(app Application) alexa.Handler {
 
 		title, text, ssmlText := app.AWSStatus(l)
 
+		if len(l.GetErrors()) > 0 {
+			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
+			return
+		}
+
 		b.WithSpeech(ssmlText).
-			WithSimpleCard(title, text)
+			WithSimpleCard(title, text).
+			WithShouldEndSession(true)
 	})
 }
 
