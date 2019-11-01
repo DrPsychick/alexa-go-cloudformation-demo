@@ -31,3 +31,8 @@ Replay a dialog session:
 ```bash
 ask dialog --replay test/ask_de-DE_demointent.replay --output ask-dialog.log
 ```
+
+### Validate Skill
+```bash
+ask validate --skill-id $ASKSkillId --locales en-US,de-DE
+```
