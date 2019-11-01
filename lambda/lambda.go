@@ -2,6 +2,7 @@ package lambda
 
 import (
 	"fmt"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
@@ -25,6 +26,7 @@ type Application interface {
 	SSMLDemo(l l10n.LocaleInstance) (string, string, string)
 	SaySomething(l l10n.LocaleInstance) (string, string, string)
 	Demo(l l10n.LocaleInstance) (string, string, string)
+	AWSStatus(l l10n.LocaleInstance) (string, string, string)
 }
 
 func NewMux(app Application) alexa.Handler {
@@ -40,6 +42,8 @@ func NewMux(app Application) alexa.Handler {
 	mux.HandleIntent(SSMLDemoIntent, handleSSMLResponse(app))
 	mux.HandleIntent(SaySomethingIntent, handleSaySomethingResponse(app))
 	mux.HandleIntent(DemoIntent, handleDemo(app))
+
+	mux.HandleIntent(loca.AWSStatus, handleAWSStatus(app))
 
 	return mux
 }
@@ -169,6 +173,20 @@ func handleDemo(app Application) alexa.Handler {
 			handleLocaleErrors(b, l.GetErrors())
 			return
 		}
+
+		b.WithSpeech(ssmlText).
+			WithSimpleCard(title, text)
+	})
+}
+
+func handleAWSStatus(app Application) alexa.Handler {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		l, err := l10n.Resolve(r.Locale)
+		if err != nil {
+			return
+		}
+
+		title, text, ssmlText := app.AWSStatus(l)
 
 		b.WithSpeech(ssmlText).
 			WithSimpleCard(title, text)

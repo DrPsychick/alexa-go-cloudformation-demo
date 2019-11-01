@@ -147,6 +147,8 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
 	h, err := m.Handler(r)
 	if err != nil {
 		// TODO: Fallback handler
+		b.WithSimpleCard("Fatal error", "error: "+err.Error()).
+			WithShouldEndSession(true)
 		return
 	}
 

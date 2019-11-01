@@ -51,6 +51,14 @@ func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
 	return l.Get(loca.DemoIntentTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
 }
 
+func (a *Application) AWSStatus(l l10n.LocaleInstance) (string, string, string) {
+	// TODO: we need to have access to slot values here!
+	// request (with slot values) status from AWS status provider
+	// decide how to respond based on status results
+	// return response texts
+	return l.GetAny(loca.AWSStatusTitle), l.GetAny(loca.AWSStatusText), l.GetAny(loca.AWSStatusSSML)
+}
+
 // Logger returns the application logger.
 func (a *Application) Logger() log.Logger {
 	return a.logger
