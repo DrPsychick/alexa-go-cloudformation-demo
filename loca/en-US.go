@@ -85,9 +85,12 @@ var enUS = &l10n.Locale{
 		},
 
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:          {"how is A.W.S."},
-		AWSStatusTitle:            {"AWS Status"},
-		AWSStatusText:             {"AWS Status in {Region}"},
+		AWSStatusSamples: {"how is A.W.S."},
+		AWSStatusTitle:   {"AWS Status"},
+		AWSStatusText:    {"AWS Status in {Region}"},
+		AWSStatusSSML: {
+			l10n.Speak("AWS status in region X"),
+		},
 		AWSStatusAreaSamples:      {"in {Area}", "of {Area}"},
 		AWSStatusRegionSamples:    {"in {Region}", "of {Region}"},
 		AWSStatusRegionElicitText: {"In which region?", "Where again?"},

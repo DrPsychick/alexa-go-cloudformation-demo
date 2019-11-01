@@ -76,9 +76,12 @@ var deDE = &l10n.Locale{
 			"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
 		},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:          {"wie geht's A.W.S."},
-		AWSStatusTitle:            {"AWS Status"},
-		AWSStatusText:             {"AWS Status in {Region}"},
+		AWSStatusSamples: {"wie geht's A.W.S."},
+		AWSStatusTitle:   {"AWS Status"},
+		AWSStatusText:    {"AWS Status in {Region}"},
+		AWSStatusSSML: {
+			l10n.Speak("AWS Status in Region X"),
+		},
 		AWSStatusAreaSamples:      {"in {Area}", "von {Area}"},
 		AWSStatusRegionSamples:    {"in {Region}", "der {Region}"},
 		AWSStatusRegionElicitText: {"In welcher Region?", "Wo nochmal?"},
