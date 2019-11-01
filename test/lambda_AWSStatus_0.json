@@ -35,11 +35,15 @@
     "timestamp": "2016-10-27T21:06:28Z",
     "locale": "de-DE",
     "intent": {
-      "name": "CustomIntent",
+      "name": "AWSStatus",
       "slots": {
-        "Item": {
-          "name": "Country",
-          "value": "Deutschland"
+        "AWSRegion": {
+          "name": "AWSRegion",
+          "value": "Frankfurt"
+        },
+        "AWSArea": {
+          "name": "AWSArea",
+          "value": "Europe"
         }
       }
     }
