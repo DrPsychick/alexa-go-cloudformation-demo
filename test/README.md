@@ -29,7 +29,10 @@ ask dialog --skill-id $ASKSkillId --locale $ASKLocale --output ask-dialog.log
 
 Replay a dialog session:
 ```bash
-ask dialog --replay test/ask_de-DE_demointent.replay --output ask-dialog.log
+ask dialog --replay test/ask_de-DE_demointent.replay --output test/ask_de-DE-demointent.log
+ask dialog --replay test/ask_de-DE_awsstatus.replay --output test/ask_de-DE-awsstatus.log
+ask dialog --replay test/ask_en-US_awsstatus.replay --output test/ask_en-US-awsstatus.log
+
 ```
 
 ### Validate Skill

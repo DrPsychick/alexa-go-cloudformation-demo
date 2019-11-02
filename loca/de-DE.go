@@ -79,19 +79,25 @@ var deDE = &l10n.Locale{
 			"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
 		},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples: {"wie geht's A.W.S."},
+		AWSStatusSamples: {"wie geht's A.W.S.", "A.W.S. Status in {Region}", "A.W.S. Status in {Area}"},
 		AWSStatusTitle:   {"AWS Status"},
-		AWSStatusText:    {"AWS Status in {Region}"},
+		AWSStatusText:    {"AWS Status in %s: alles bestens"},
 		AWSStatusSSML: {
-			l10n.Speak("AWS Status in Region X"),
+			l10n.Speak("A.W.S. Status in Region %s: SNAFU"),
+			l10n.Speak("A.W.S. Status in %s: alles bestens"),
 		},
-		AWSStatusAreaSamples:      {"in {Area}", "von {Area}"},
-		AWSStatusRegionSamples:    {"in {Region}", "der {Region}"},
-		AWSStatusRegionElicitText: {"In welcher Region?", "Wo nochmal?"},
-		AWSStatusRegionElicitSSML: {
-			l10n.Speak("In welcher Region?"), l10n.Speak("Wo bitte?")},
+		AWSStatusAreaSamples: {"in {Area}", "von {Area}"},
 		AWSStatusAreaConfirmSSML: {
-			l10n.Speak("Sicher in Region?"),
+			l10n.Speak("Sicher in {Area}?"),
+		},
+		AWSStatusRegionSamples: {"in {Region}", "der {Region}"},
+		AWSStatusRegionElicitText: {
+			"In welcher Region? (Europa, Nordamerika, ...)",
+			"Zu welcher Region möchtest du den Status wissen? (Europa, Nordamerika, ...)",
+		},
+		AWSStatusRegionElicitSSML: {
+			l10n.Speak("In welcher Region?"),
+			l10n.Speak("Zu welcher Region möchtest du den Status wissen?"),
 		},
 
 		// Intent "AMAZON.StopIntent"

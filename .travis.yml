@@ -12,6 +12,7 @@ env:
     - GOOS=linux
 addons:
   apt:
+    update: true
     packages:
       - python3-pip
 services:
@@ -36,7 +37,6 @@ before_deploy:
   - pip3 install --upgrade --user setuptools awscli
   - mkdir ./deploy
   - go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa
-  - echo "branch: $TRAVIS_BRANCH secure env: $TRAVIS_SECURE_ENV_VARS pr: $TRAVIS_PULL_REQUEST"
 
 # Needs $CF_TEMPLATE_OUT, $CF_STACKNAME
 deploy:

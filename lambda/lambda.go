@@ -26,7 +26,7 @@ type Application interface {
 	SSMLDemo(l l10n.LocaleInstance) (string, string, string)
 	SaySomething(l l10n.LocaleInstance) (string, string, string)
 	Demo(l l10n.LocaleInstance) (string, string, string)
-	AWSStatus(l l10n.LocaleInstance) (string, string, string)
+	AWSStatus(l l10n.LocaleInstance, r string) (string, string, string)
 }
 
 func NewMux(app Application) alexa.Handler {
@@ -197,7 +197,17 @@ func handleAWSStatus(app Application) alexa.Handler {
 			return
 		}
 
-		title, text, ssmlText := app.AWSStatus(l)
+		region := "not resolved"
+		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
+		if rs, ok := r.Intent.Slots["Region"]; ok {
+			if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
+				if rsav := rsa[0].Values; len(rsav) > 0 {
+					region = rsav[0].Value.Name
+				}
+			}
+		}
+
+		title, text, ssmlText := app.AWSStatus(l, region)
 
 		if len(l.GetErrors()) > 0 {
 			handleLocaleErrors(b, l.GetErrors())

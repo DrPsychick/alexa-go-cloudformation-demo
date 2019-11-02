@@ -37,13 +37,15 @@
     "intent": {
       "name": "AWSStatus",
       "slots": {
-        "AWSRegion": {
-          "name": "AWSRegion",
-          "value": "Frankfurt"
+        "Region": {
+          "name": "Region",
+          "confirmationStatus": "NONE",
+          "source": "USER"
         },
-        "AWSArea": {
-          "name": "AWSArea",
-          "value": "Europe"
+        "Area": {
+          "name": "Area",
+          "confirmationStatus": "NONE",
+          "source": "USER"
         }
       }
     }

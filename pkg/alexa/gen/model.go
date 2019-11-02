@@ -231,20 +231,24 @@ func (m *modelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 ///////////////////////////////////////////////////////
 
 type modelIntentBuilder struct {
-	registry    l10n.LocaleRegistry
-	name        string
-	samplesName string
-	slots       map[string]*modelSlotBuilder
-	error       error
+	registry     l10n.LocaleRegistry
+	name         string
+	samplesName  string
+	delegation   string
+	confirmation bool
+	slots        map[string]*modelSlotBuilder
+	error        error
 }
 
 // NewModelIntentBuilder returns an initialized modelIntentBuilder.
 func NewModelIntentBuilder(name string) *modelIntentBuilder {
 	return &modelIntentBuilder{
-		registry:    l10n.NewRegistry(),
-		name:        name,
-		samplesName: name + l10n.KeyPostfixSamples,
-		slots:       map[string]*modelSlotBuilder{},
+		registry:     l10n.NewRegistry(),
+		name:         name,
+		samplesName:  name + l10n.KeyPostfixSamples,
+		delegation:   alexa.DelegationAlways, // lets alexa or lambda handle the dialog for intent slots
+		confirmation: false,                  // should alexa ask to confirm the intent?
+		slots:        map[string]*modelSlotBuilder{},
 	}
 }
 
@@ -284,6 +288,22 @@ func (i *modelIntentBuilder) Slot(name string) *modelSlotBuilder {
 	return i.slots[name]
 }
 
+// WithDelegation sets the dialog delegation for the intent
+func (i *modelIntentBuilder) WithDelegation(d string) *modelIntentBuilder {
+	if d != alexa.DelegationAlways && d != alexa.DelegationSkillResponse {
+		i.error = fmt.Errorf("Unsupported 'delegation': %s", d)
+		return i
+	}
+	i.delegation = d
+	return i
+}
+
+// WithConfirmation sets the dialog confirmation for the intent
+func (i *modelIntentBuilder) WithConfirmation(c bool) *modelIntentBuilder {
+	i.confirmation = c
+	return i
+}
+
 // BuildLanguageIntent generates a ModelIntent for the locale.
 func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelIntent, error) {
 	loc, err := i.registry.Resolve(locale)
@@ -312,8 +332,9 @@ func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelInte
 // BuildDialogIntent generates a DialogIntent for the locale.
 func (i *modelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogIntent, error) {
 	di := alexa.DialogIntent{
-		Name: i.name,
-		// TODO: Confirmation, Delegation, ...
+		Name:         i.name,
+		Delegation:   i.delegation,
+		Confirmation: i.confirmation,
 	}
 	var dis []alexa.DialogIntentSlot
 	for _, s := range i.slots {
