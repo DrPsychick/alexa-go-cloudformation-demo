@@ -47,7 +47,7 @@ deploy:
   on:
     go: "1.12.x"
     all_branches: true
-    condition: $TRAVIS_BRANCH = ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
+    condition: $TRAVIS_BRANCH =~ ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
 
 notifications:
   email:
