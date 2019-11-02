@@ -14,7 +14,7 @@ fi
 
 # 3 use cases
 # 1. run within travis on master branch
-# 2. run within travis on develop branch
+# 2. run within travis on development branch
 # 3. run locally (no branch) -> choose to deploy production explicitly (by setting TRAVIS_BRANCH="master")
 # keep (for non-production): set KEEP_STACK=1 if you don't want it to be deleted automatically after creation
 production=0

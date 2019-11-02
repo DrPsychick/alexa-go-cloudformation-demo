@@ -12,6 +12,7 @@ env:
     - GOOS=linux
 addons:
   apt:
+    update: true
     packages:
       - python3-pip
 services:
@@ -31,6 +32,7 @@ script:
   # build and then run lambda tests
   - ./test/tests.sh
 
+# is NOT executed on pull requests!
 before_deploy:
   - pip3 install --upgrade --user pip
   - pip3 install --upgrade --user setuptools awscli
@@ -43,10 +45,9 @@ deploy:
   provider: script
   script: bash cloudformation/deploy.sh
   on:
-    #tags: true
     go: "1.12.x"
     all_branches: true
-    condition: $TRAVIS_BRANCH =~ ^development|master$
+    condition: $TRAVIS_BRANCH =~ ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
 
 notifications:
   email:

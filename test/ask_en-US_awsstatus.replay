@@ -1,12 +1,11 @@
 {
   "skillId": "amzn1.ask.skill.8f065707-2c82-49b4-a78f-6a1fba6c8bae",
-  "locale": "de-DE",
+  "locale": "en-US",
   "type": "text",
   "userInput": [
-    "Alexa öffne voice demo",
-    "hop hop",
-    "schiess los",
-    "auf geths",
+    "Alexa open voice demo",
+    "how is A.W.S.",
+    "in Frankfurt",
     "tschüss",
     "!quit"
   ]

@@ -61,7 +61,7 @@ func createSkill(r l10n.LocaleRegistry) (*gen.SkillBuilder, error) {
 // createModels generates and returns a list of Models.
 func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	m := s.WithModel().Model().
-		WithDelegationStrategy(alexa.DelegationSkillResponse)
+		WithDelegationStrategy(alexa.DelegationSkillResponse) // general delegation to lambda
 
 	m.WithType(loca.TypeArea)
 	m.WithType(loca.TypeRegion)
@@ -77,7 +77,8 @@ func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 
 	m.Intent(loca.AWSStatus).
 		WithSlot(loca.TypeAreaName, loca.TypeArea).
-		WithSlot(loca.TypeRegionName, loca.TypeRegion)
+		WithSlot(loca.TypeRegionName, loca.TypeRegion).
+		WithDelegation(alexa.DelegationAlways) // ALWAYS = delegate specific intent dialog to alexa
 
 	m.WithElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
 	m.ElicitationPrompt(loca.AWSStatus, loca.TypeRegionName).
