@@ -66,6 +66,7 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 		title, text := app.Launch(l)
@@ -81,11 +82,12 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 	})
 }
 
+// handleHelp calls the app help method, it does not close the session
 func handleHelp(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
-			// TODO: maybe say something here
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 		title, text, _ := app.Help(l)
@@ -97,8 +99,7 @@ func handleHelp(app Application) alexa.Handler {
 		}
 
 		b.WithSpeech(text).
-			WithSimpleCard(title, text).
-			WithShouldEndSession(true)
+			WithSimpleCard(title, text)
 	})
 }
 
@@ -106,7 +107,7 @@ func handleStop(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
-			// TODO: maybe say something here
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 
@@ -128,7 +129,7 @@ func handleSSMLResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
-			// TODO: maybe say something here
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 
@@ -149,6 +150,7 @@ func handleSaySomethingResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 
@@ -169,6 +171,7 @@ func handleDemo(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 
@@ -190,6 +193,7 @@ func handleAWSStatus(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 
@@ -207,6 +211,13 @@ func handleAWSStatus(app Application) alexa.Handler {
 	})
 }
 
+// handleMissingLocale makes Alexa respond with a "local not supported" error
+func handleMissingLocale(b *alexa.ResponseBuilder, locale string) {
+	b.WithSimpleCard("error", fmt.Sprintf("Locale '%s' is not supported!", locale)).
+		WithSpeech(l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "Your language is not supported")))
+}
+
+// handleLocaleErrors makes Alexa show the last error on the screen
 func handleLocaleErrors(b *alexa.ResponseBuilder, errs []error) {
 	b.WithSimpleCard("error", fmt.Sprintf("last error: %s", errs[len(errs)-1].Error())).
 		WithSpeech(l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "An error occurred")))

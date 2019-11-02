@@ -7,12 +7,12 @@ import (
 var deDE = &l10n.Locale{
 	Name: "de-DE",
 	TextSnippets: map[string][]string{
-		l10n.KeySkillName:        {"Demo Skill"},
+		l10n.KeySkillName:        {"Voice control demo"},
 		l10n.KeySkillDescription: {"Demonstrationsskill für das Meetup"},
 		l10n.KeySkillSummary:     {"Dieser Skill demonstriert was man mit dem DrPsychick/alexa package machen kann"},
-		l10n.KeySkillInvocation:  {"demo skill"},
+		l10n.KeySkillInvocation:  {"voice demo"},
 		l10n.KeySkillExamplePhrases: {
-			"Alexa, starte demo skill und sag etwas",
+			"Alexa, starte voice demo und sag etwas",
 			"schiess los",
 			"hop hop",
 		},
@@ -31,14 +31,17 @@ var deDE = &l10n.Locale{
 		// Launch request
 		LaunchTitle: {
 			"Begrüßung",
+			"Willkommen",
 		},
 		LaunchText: {
 			"Hallo!",
 			"Guten Tag!",
+			"Willkommen bei der Voice Demo!",
 		},
 		LaunchSSML: {
-			"<speak><voice name=\"Marlene\">Hallo!</voice></speak>",
-			"<speak>Guten <emphasis level=\"strong\">Tag!</emphasis></speak>",
+			l10n.Speak(l10n.UseVoice("Marlene", "Hallo!")),
+			l10n.Speak("Guten <emphasis level=\"strong\">Tag!</emphasis>"),
+			l10n.Speak(l10n.UseVoice("Marlene", "Willkommen bei der <emphasis level=\"strong\">Voice</emphasis> Demo!")),
 		},
 
 		// Intent: "DemoIntent"
