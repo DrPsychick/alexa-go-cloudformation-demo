@@ -22,6 +22,7 @@ func NewModelBuilder() *modelBuilder {
 	return &modelBuilder{
 		registry:   l10n.NewRegistry(),
 		invocation: l10n.KeySkillInvocation,
+		delegation: alexa.DelegationAlways,
 		intents:    map[string]*modelIntentBuilder{},
 		types:      map[string]*modelTypeBuilder{},
 		prompts:    map[string]*modelPromptBuilder{},
@@ -42,6 +43,10 @@ func (m *modelBuilder) WithInvocation(invocation string) *modelBuilder {
 
 // WithDelegationStrategy sets the model delegation strategy.
 func (m *modelBuilder) WithDelegationStrategy(strategy string) *modelBuilder {
+	if strategy != alexa.DelegationAlways && strategy != alexa.DelegationSkillResponse {
+		m.error = fmt.Errorf("Unsupported 'delegation': %s", strategy)
+		return m
+	}
 	m.delegation = strategy
 	return m
 }
