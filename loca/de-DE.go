@@ -50,7 +50,7 @@ var deDE = &l10n.Locale{
 		},
 		DemoIntentSSML: {
 			l10n.Speak(
-				l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
+				l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">pace</emphasis> ") +
 					l10n.UseVoice("Marlene", "iss <emphasis level=\"strong\">geil!</emphasis>"),
 			),
 			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
@@ -76,9 +76,12 @@ var deDE = &l10n.Locale{
 			"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
 		},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:          {"wie geht's A.W.S."},
-		AWSStatusTitle:            {"AWS Status"},
-		AWSStatusText:             {"AWS Status in {Region}"},
+		AWSStatusSamples: {"wie geht's A.W.S."},
+		AWSStatusTitle:   {"AWS Status"},
+		AWSStatusText:    {"AWS Status in {Region}"},
+		AWSStatusSSML: {
+			l10n.Speak("AWS Status in Region X"),
+		},
 		AWSStatusAreaSamples:      {"in {Area}", "von {Area}"},
 		AWSStatusRegionSamples:    {"in {Region}", "der {Region}"},
 		AWSStatusRegionElicitText: {"In welcher Region?", "Wo nochmal?"},
@@ -87,5 +90,11 @@ var deDE = &l10n.Locale{
 		AWSStatusAreaConfirmSSML: {
 			l10n.Speak("Sicher in Region?"),
 		},
+
+		// Intent "AMAZON.StopIntent"
+		StopTitle: {"Ende Gelände"},
+		Stop:      {"Ende."},
+		HelpTitle: {"Hilfe"},
+		Help:      {"Probier mal 'Hop hop' oder 'sag etwas' oder 'erzähl mir was'"},
 	},
 }

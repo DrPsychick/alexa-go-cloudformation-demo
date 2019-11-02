@@ -7,6 +7,8 @@ import (
 // keys of the project
 const (
 	ByeBye       string = "byebye"
+	HelpTitle    string = "help_title"
+	Help         string = "help"
 	StopTitle    string = "stop_title"
 	Stop         string = "stop"
 	GenericTitle string = "Alexa"

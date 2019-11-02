@@ -6,3 +6,4 @@
 /alexa/alexa-demo.zip
 /deploy
 /cloudformation/*-package.yml
+/test/app

@@ -14,17 +14,22 @@ addons:
   apt:
     packages:
       - python3-pip
+services:
+  - docker
 
 before_install:
   - go mod download
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
+  - docker pull lambci/lambda:go1.x
 
 script:
   - golint ./...
   - go vet ./...
   - go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
   - goveralls -coverprofile=profile.cov -service=travis-ci
+  # build and then run lambda tests
+  - ./test/tests.sh
 
 before_deploy:
   - pip3 install --upgrade --user pip

@@ -54,6 +54,12 @@ var enUS = &l10n.Locale{
 			"<speak><emphasis level=\"strong\">Hi!</emphasis></speak>",
 		},
 
+		// default intents
+		StopTitle: {"Ending"},
+		Stop:      {"End."},
+		HelpTitle: {"Help"},
+		Help:      {"Try saying 'here we go' or 'go ahead'"},
+
 		// Intent: "DemoIntent"
 		DemoIntentSamples: {"here we go", "go ahead"},
 		DemoIntentTitle:   {"Demo"},
@@ -61,14 +67,30 @@ var enUS = &l10n.Locale{
 		DemoIntentSSML: {
 			l10n.Speak(
 				l10n.UseVoiceLang("Joanna", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
-					l10n.UseVoiceLang("Kendra", "en-US", "is <emphasis level=\"strong\">geil!</emphasis>"),
+					l10n.UseVoiceLang("Kendra", "en-US", " is <emphasis level=\"strong\">geil!</emphasis>"),
 			),
 			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
 		},
+
+		// Intent: "SaySomething"
+		SaySomethingSamples: {"say something", "tell me a story"},
+		SaySomethingTitle:   {"Get this", "Listen up"},
+		SaySomethingText: {
+			"Some german words sound nice in english...",
+		},
+		SaySomethingSSML: {
+			l10n.Speak(
+				l10n.UseVoiceLang("Kendra", "en-US", "I like the Autobahn, it's so geil"),
+			),
+		},
+
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:          {"how is A.W.S."},
-		AWSStatusTitle:            {"AWS Status"},
-		AWSStatusText:             {"AWS Status in {Region}"},
+		AWSStatusSamples: {"how is A.W.S."},
+		AWSStatusTitle:   {"AWS Status"},
+		AWSStatusText:    {"AWS Status in {Region}"},
+		AWSStatusSSML: {
+			l10n.Speak("AWS status in region X"),
+		},
 		AWSStatusAreaSamples:      {"in {Area}", "of {Area}"},
 		AWSStatusRegionSamples:    {"in {Region}", "of {Region}"},
 		AWSStatusRegionElicitText: {"In which region?", "Where again?"},
