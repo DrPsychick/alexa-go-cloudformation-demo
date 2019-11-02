@@ -43,10 +43,9 @@ deploy:
   provider: script
   script: bash cloudformation/deploy.sh
   on:
-    #tags: true
     go: "1.12.x"
     all_branches: true
-    condition: $TRAVIS_BRANCH =~ ^development|master$
+    condition: $TRAVIS_BRANCH = "master" AND $TRAVIS_SECURE_ENV_VARS = "true" # master push or PR (but only from own repo)
 
 notifications:
   email:
