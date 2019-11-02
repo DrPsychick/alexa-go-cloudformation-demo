@@ -31,8 +31,8 @@ script:
   - goveralls -coverprofile=profile.cov -service=travis-ci
   # build and then run lambda tests
   - ./test/tests.sh
-  - echo "branch: $TRAVIS_BRANCH secure: $TRAVIS_SECURE_ENV_VARS pr: $TRAVIS_PULL_REQUEST"
 
+# is NOT executed on pull requests!
 before_deploy:
   - pip3 install --upgrade --user pip
   - pip3 install --upgrade --user setuptools awscli
@@ -47,7 +47,7 @@ deploy:
   on:
     go: "1.12.x"
     all_branches: true
-    condition: $TRAVIS_BRANCH = "master" && $TRAVIS_SECURE_ENV_VARS = "true" # master push or PR (but only from own repo)
+    condition: $TRAVIS_BRANCH = ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
 
 notifications:
   email:
