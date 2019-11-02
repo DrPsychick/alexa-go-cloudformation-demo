@@ -2,6 +2,7 @@
 
 # build for lambda, then send json requests to the lambda function in docker
 
+request=$1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # build for lambda linux
@@ -11,6 +12,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # or is this needed at all? it helps identify missing localization...
 (cd $DIR;
 for t in helpintent cancelintent stopintent demointent saysomething AWSStatus_0 AWSStatus_1; do
+    if [ -n "$request" -a "$request" != "$t" ]; then
+        continue
+    fi
     cat lambda_${t}.json |grep -A10 '"request"'
     for l in de-DE en-US; do
         result=$(sed -e "s/LOCALE/${l}/" lambda_${t}.json | docker run --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x app)

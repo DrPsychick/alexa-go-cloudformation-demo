@@ -197,7 +197,7 @@ func handleAWSStatus(app Application) alexa.Handler {
 			return
 		}
 
-		region := "not resolved"
+		region := "unknown"
 		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
 		if rs, ok := r.Intent.Slots["Region"]; ok {
 			if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {

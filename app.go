@@ -56,7 +56,13 @@ func (a *Application) AWSStatus(l l10n.LocaleInstance, region string) (string, s
 	// request (with slot values) status from AWS status provider
 	// decide how to respond based on status results
 	// return response texts
-	return l.GetAny(loca.AWSStatusTitle), l.GetAny(loca.AWSStatusText, region), l.GetAny(loca.AWSStatusSSML, region)
+	text := loca.AWSStatusText
+	ssml := loca.AWSStatusSSML
+	if region == "Frankfurt" {
+		text = loca.AWSStatusTextGood
+		ssml = loca.AWSStatusSSMLGood
+	}
+	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text, region), l.GetAny(ssml, region)
 }
 
 // Logger returns the application logger.

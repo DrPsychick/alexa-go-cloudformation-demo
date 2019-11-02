@@ -80,7 +80,7 @@
     "type": "IntentRequest",
     "requestId": "amzn1.echo-api.request.b8683011-7bde-4ad3-bdb0-3814764e2dff",
     "timestamp": "2019-11-02T20:52:38Z",
-    "locale": "de-DE",
+    "locale": "LOCALE",
     "intent": {
       "name": "AWSStatus",
       "confirmationStatus": "NONE",
