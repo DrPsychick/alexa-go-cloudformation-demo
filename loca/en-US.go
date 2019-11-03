@@ -86,7 +86,7 @@ var enUS = &l10n.Locale{
 		},
 
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples: {"how is A.W.S.", "A.W.S. status in {Region}"},
+		AWSStatusSamples: {"how is A.W.S.", "A.W.S. status in {Region}", "about A.W.S."},
 		AWSStatusTitle:   {"AWS Status"},
 		AWSStatusText:    {"AWS Status in region %s: okay"},
 		AWSStatusSSML: {
@@ -106,11 +106,11 @@ var enUS = &l10n.Locale{
 		},
 		AWSStatusRegionSamples: {"in {Region}", "of {Region}"},
 		AWSStatusRegionElicitText: {
-			"In which region? (Europe, North America, ...)",
-			"What region are you interested in? (Europe, North America, ...)",
+			"In which region? (Frankfurt, North Virginia, ...)",
+			"What region are you interested in? (Ireland, Frankfurt, ...)",
 		},
 		AWSStatusRegionElicitSSML: {
-			l10n.Speak("In which Region?"),
+			l10n.Speak("In which Region?"), // not working?
 			l10n.Speak("About which region do you want to know the status?"),
 		},
 	},

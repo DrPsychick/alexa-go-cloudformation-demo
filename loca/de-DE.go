@@ -26,7 +26,7 @@ var deDE = &l10n.Locale{
 
 		// Type values
 		TypeAreaValues:   {"Europa", "Nordamerika", "Südamerika", "Asien"},
-		TypeRegionValues: {"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nordvirginia"},
+		TypeRegionValues: {"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nord Virginia"},
 
 		// Launch request
 		LaunchTitle: {
@@ -100,11 +100,11 @@ var deDE = &l10n.Locale{
 		},
 		AWSStatusRegionSamples: {"in {Region}", "der {Region}"},
 		AWSStatusRegionElicitText: {
-			"In welcher Region? (Europa, Nordamerika, ...)",
-			"Zu welcher Region möchtest du den Status wissen? (Europa, Nordamerika, ...)",
+			"In welcher Region? (Frankfurt, Irland, ...)",
+			"Zu welcher Region möchtest du den Status wissen? (Frankfurt, Nord Virginia, ...)",
 		},
 		AWSStatusRegionElicitSSML: {
-			l10n.Speak("In welcher Region?"),
+			l10n.Speak("In welcher Region?"), // not working?
 			l10n.Speak("Zu welcher Region möchtest du den Status wissen?"),
 		},
 
