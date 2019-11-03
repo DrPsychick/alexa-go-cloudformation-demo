@@ -7,8 +7,8 @@ import (
 var enUS = &l10n.Locale{
 	Name: "en-US",
 	TextSnippets: map[string][]string{
-		l10n.KeySkillName:        {"Demo Skill"},
-		l10n.KeySkillDescription: {"Demo for the golang meetup"},
+		l10n.KeySkillName:        {"Voice control demo"},
+		l10n.KeySkillDescription: {"Voice demo for the golang meetup"},
 		l10n.KeySkillSummary: {
 			"This skill demonstrates what you can do with the alexa package and cloudformation",
 		},
@@ -18,9 +18,9 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillLargeIconURI: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_large.png",
 		},
-		l10n.KeySkillInvocation: {"demo skill"},
+		l10n.KeySkillInvocation: {"voice demo"},
 		l10n.KeySkillTestingInstructions: {
-			"Alexa, open demo skill. Yes? Go ahead.",
+			"Alexa, open voice demo. Yes? Go ahead.",
 		},
 		l10n.KeySkillPrivacyPolicyURL: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
@@ -30,9 +30,9 @@ var enUS = &l10n.Locale{
 		//	"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		//},
 		l10n.KeySkillExamplePhrases: {
-			"Alexa, start demo skill and go ahead",
-			"Here we go",
-			"How is AWS",
+			"Alexa, start voice demo and go ahead",
+			"How is A.W.S.",
+			"Say something",
 		},
 		l10n.KeySkillKeywords: {
 			"demo", "test", "SSML",
@@ -49,11 +49,18 @@ var enUS = &l10n.Locale{
 		LaunchText: {
 			"Hello!",
 			"Hi!",
+			"Yes?",
 		},
 		LaunchSSML: {
-			"<speak><voice name=\"Marlene\">Hello!</voice></speak>",
-			"<speak><emphasis level=\"strong\">Hi!</emphasis></speak>",
+			l10n.Speak("<voice name=\"Marlene\">Hello!</voice>"),
+			l10n.Speak("<emphasis level=\"strong\">Hi!</emphasis>"),
 		},
+
+		// default intents
+		StopTitle: {"Ending"},
+		Stop:      {"End."},
+		HelpTitle: {"Help"},
+		Help:      {"Try saying 'here we go' or 'go ahead'"},
 
 		// Intent: "DemoIntent"
 		DemoIntentSamples: {"here we go", "go ahead"},
@@ -62,21 +69,53 @@ var enUS = &l10n.Locale{
 		DemoIntentSSML: {
 			l10n.Speak(
 				l10n.UseVoiceLang("Joanna", "en-US", "<emphasis level=\"strong\">pace</emphasis>") +
-					l10n.UseVoiceLang("Kendra", "en-US", "is <emphasis level=\"strong\">geil!</emphasis>"),
+					l10n.UseVoiceLang("Kendra", "en-US", " is <emphasis level=\"strong\">geil!</emphasis>"),
 			),
 			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
 		},
+
+		// Intent: "SaySomething"
+		SaySomethingSamples: {"say something", "tell me a story"},
+		SaySomethingTitle:   {"Get this", "Listen up"},
+		SaySomethingText: {
+			"Some german words sound nice in english...",
+		},
+		SaySomethingSSML: {
+			l10n.Speak(
+				l10n.UseVoiceLang("Kendra", "en-US", "I like the Autobahn, it's so geil"),
+			),
+		},
+
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples:          {"how is A.W.S."},
-		AWSStatusTitle:            {"AWS Status"},
-		AWSStatusText:             {"AWS Status in {Region}"},
-		AWSStatusAreaSamples:      {"in {Area}", "of {Area}"},
-		AWSStatusRegionSamples:    {"in {Region}", "of {Region}"},
-		AWSStatusRegionElicitText: {"In which region?", "Where again?"},
-		AWSStatusRegionElicitSSML: {
-			l10n.Speak("In which Region?"), l10n.Speak("Sorry, where?")},
+		AWSStatusSamples: {"how is A.W.S.", "A.W.S. status in {Region}", "about A.W.S."},
+		AWSStatusTitle:   {"AWS Status"},
+		AWSStatusText:    {"AWS Status in region %s: okay"},
+		AWSStatusSSML: {
+			l10n.Speak("A.W.S. status in %s: all okay"),
+		},
+		AWSStatusTextGood: {
+			"AWS Status in %s: all good",
+			"In %s everything's up and running",
+		},
+		AWSStatusSSMLGood: {
+			l10n.Speak("A.W.S. status in %s: everything <emphasis level=\"strong\">perfect</emphasis>"),
+			l10n.Speak("In %s everything's running smoothly"),
+		},
+		AWSStatusAreaSamples: {"in {Area}", "of {Area}"},
 		AWSStatusAreaConfirmSSML: {
-			l10n.Speak("Are you sure?"),
+			l10n.Speak("Are you sure about area {Area}?"),
+		},
+		AWSStatusRegionSamples: {"in {Region}", "of {Region}"},
+		AWSStatusRegionElicitText: {
+			"In which region? (Frankfurt, North Virginia, ...)",
+			"What region are you interested in? (Ireland, Frankfurt, ...)",
+		},
+		AWSStatusRegionElicitSSML: {
+			l10n.Speak("In which Region?"), // not working?
+			l10n.Speak("About which region do you want to know the status?"),
+		},
+		RegionValidateText: {
+			"Please choose a valid region like Frankfurt, Ireland, North Virginia.",
 		},
 	},
 	//IntentResponses: l10n.IntentResponses{

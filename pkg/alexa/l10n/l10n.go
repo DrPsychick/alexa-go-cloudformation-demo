@@ -58,6 +58,7 @@ type LocaleInstance interface {
 	GetAny(key string, args ...interface{}) string
 	GetAll(key string, args ...interface{}) []string
 	GetErrors() []error
+	ResetErrors()
 }
 
 // TODO: move to `ssml` package
@@ -242,6 +243,11 @@ func (l *Locale) GetAll(key string, args ...interface{}) []string {
 // GetErrors returns key lookup errors that occurred.
 func (l *Locale) GetErrors() []error {
 	return l.errors
+}
+
+// ResetErrors resets existing errors
+func (l *Locale) ResetErrors() {
+	l.errors = nil
 }
 
 func (l *Locale) appendErrorMissingParam(key string, texts []string) {

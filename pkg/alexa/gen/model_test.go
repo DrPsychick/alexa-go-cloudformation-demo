@@ -42,15 +42,16 @@ func TestModelBuilder_WithDelegationStrategy(t *testing.T) {
 	mb := gen.NewModelBuilder().
 		WithLocaleRegistry(registry)
 
-	mb.WithDelegationStrategy("foo")
-	ms1, err1 := mb.Build()
 	mb.WithDelegationStrategy(alexa.DelegationSkillResponse)
 	ms2, err2 := mb.Build()
 
-	assert.NoError(t, err1)
-	assert.Equal(t, "foo", ms1["en-US"].Model.Dialog.Delegation)
 	assert.NoError(t, err2)
 	assert.Equal(t, alexa.DelegationSkillResponse, ms2["en-US"].Model.Dialog.Delegation)
+
+	mb.WithDelegationStrategy("foo")
+	_, err1 := mb.Build()
+	assert.Error(t, err1)
+
 }
 
 // modelBuilder with locale is covered.
@@ -376,6 +377,8 @@ func TestModelSlotBuilder_WithIntentConfirmationPrompt(t *testing.T) {
 
 	assert.Equal(t, msb, msb2)
 }
+
+// TODO: test modelValidationRulesBuilder
 
 // modelSlotBuilder errors if no locale is covered.
 func TestModelSlotBuilder_ErrorsIfNoLocale(t *testing.T) {

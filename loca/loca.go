@@ -7,6 +7,8 @@ import (
 // keys of the project
 const (
 	ByeBye       string = "byebye"
+	HelpTitle    string = "help_title"
+	Help         string = "help"
 	StopTitle    string = "stop_title"
 	Stop         string = "stop"
 	GenericTitle string = "Alexa"
@@ -35,11 +37,14 @@ const (
 	AWSStatusTitle            string = "AWSStatus_Title"
 	AWSStatusText             string = "AWSStatus_Text"
 	AWSStatusSSML             string = "AWSStatus_SSML"
+	AWSStatusTextGood         string = "AWSStatus_Text_Good"
+	AWSStatusSSMLGood         string = "AWSStatus_SSML_Good"
 	AWSStatusAreaSamples      string = "AWSStatus_Area_Samples"
 	AWSStatusRegionSamples    string = "AWSStatus_Region_Samples"
 	AWSStatusRegionElicitText string = "AWSStatus_Region_Elicit_Text"
 	AWSStatusRegionElicitSSML string = "AWSStatus_Region_Elicit_SSML"
 	AWSStatusAreaConfirmSSML  string = "AWSStatus_Area_Confirm_SSML"
+	RegionValidateText        string = "_Region_Validate_Text"
 
 	// Types
 	TypeArea        string = "AWSArea"

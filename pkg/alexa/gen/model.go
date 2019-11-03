@@ -22,6 +22,7 @@ func NewModelBuilder() *modelBuilder {
 	return &modelBuilder{
 		registry:   l10n.NewRegistry(),
 		invocation: l10n.KeySkillInvocation,
+		delegation: alexa.DelegationAlways,
 		intents:    map[string]*modelIntentBuilder{},
 		types:      map[string]*modelTypeBuilder{},
 		prompts:    map[string]*modelPromptBuilder{},
@@ -42,6 +43,10 @@ func (m *modelBuilder) WithInvocation(invocation string) *modelBuilder {
 
 // WithDelegationStrategy sets the model delegation strategy.
 func (m *modelBuilder) WithDelegationStrategy(strategy string) *modelBuilder {
+	if strategy != alexa.DelegationAlways && strategy != alexa.DelegationSkillResponse {
+		m.error = fmt.Errorf("Unsupported 'delegation': %s", strategy)
+		return m
+	}
 	m.delegation = strategy
 	return m
 }
@@ -112,6 +117,7 @@ func (m *modelBuilder) WithConfirmationSlotPrompt(intent string, slot string) *m
 		}
 	}
 	if sl == nil {
+		m.error = fmt.Errorf("no matching intent slot: %s-%s", intent, slot)
 		return nil
 	}
 
@@ -121,6 +127,32 @@ func (m *modelBuilder) WithConfirmationSlotPrompt(intent string, slot string) *m
 
 	// link slot to prompt
 	sl.WithConfirmationPrompt(p.id)
+	return m
+}
+
+// WithValidationSlotPrompt creates and sets a validation prompt for a slot dialog
+func (m *modelBuilder) WithValidationSlotPrompt(slot string, t string, valuesKey ...string) *modelBuilder {
+	// slot must exist!
+	var sl *modelSlotBuilder
+	for _, i := range m.intents {
+		for _, s := range i.slots {
+			if s.name == slot {
+				sl = s
+				break
+			}
+		}
+	}
+	if sl == nil {
+		m.error = fmt.Errorf("no matching intent slot: %s", slot)
+		return nil
+	}
+
+	p := NewValidationPromptBuilder(slot, t).
+		WithLocaleRegistry(m.registry)
+	m.prompts[p.id] = p
+
+	// link slot to prompt
+	sl.WithValidationRule(t, p.id, valuesKey...)
 	return m
 }
 
@@ -143,6 +175,13 @@ func (m *modelBuilder) ElicitationPrompt(intent string, slot string) *modelPromp
 // ConfirmationPrompt returns the confirmation prompt for the intent-slot.
 func (m *modelBuilder) ConfirmationPrompt(intent string, slot string) *modelPromptBuilder {
 	pb := NewConfirmationPromptBuilder(intent, slot)
+	return m.prompts[pb.id]
+}
+
+// TODO: a slot can have multiple validation prompts! ID is not unique!
+// ValidationPrompt returns the validation prompt for the intent-slot
+func (m *modelBuilder) ValidationPrompt(intent string, slot string) *modelPromptBuilder {
+	pb := NewValidationPromptBuilder(intent, slot)
 	return m.prompts[pb.id]
 }
 
@@ -231,20 +270,24 @@ func (m *modelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 ///////////////////////////////////////////////////////
 
 type modelIntentBuilder struct {
-	registry    l10n.LocaleRegistry
-	name        string
-	samplesName string
-	slots       map[string]*modelSlotBuilder
-	error       error
+	registry     l10n.LocaleRegistry
+	name         string
+	samplesName  string
+	delegation   string
+	confirmation bool
+	slots        map[string]*modelSlotBuilder
+	error        error
 }
 
 // NewModelIntentBuilder returns an initialized modelIntentBuilder.
 func NewModelIntentBuilder(name string) *modelIntentBuilder {
 	return &modelIntentBuilder{
-		registry:    l10n.NewRegistry(),
-		name:        name,
-		samplesName: name + l10n.KeyPostfixSamples,
-		slots:       map[string]*modelSlotBuilder{},
+		registry:     l10n.NewRegistry(),
+		name:         name,
+		samplesName:  name + l10n.KeyPostfixSamples,
+		delegation:   alexa.DelegationAlways, // lets alexa or lambda handle the dialog for intent slots
+		confirmation: false,                  // should alexa ask to confirm the intent?
+		slots:        map[string]*modelSlotBuilder{},
 	}
 }
 
@@ -284,6 +327,22 @@ func (i *modelIntentBuilder) Slot(name string) *modelSlotBuilder {
 	return i.slots[name]
 }
 
+// WithDelegation sets the dialog delegation for the intent
+func (i *modelIntentBuilder) WithDelegation(d string) *modelIntentBuilder {
+	if d != alexa.DelegationAlways && d != alexa.DelegationSkillResponse {
+		i.error = fmt.Errorf("Unsupported 'delegation': %s", d)
+		return i
+	}
+	i.delegation = d
+	return i
+}
+
+// WithConfirmation sets the dialog confirmation for the intent
+func (i *modelIntentBuilder) WithConfirmation(c bool) *modelIntentBuilder {
+	i.confirmation = c
+	return i
+}
+
 // BuildLanguageIntent generates a ModelIntent for the locale.
 func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelIntent, error) {
 	loc, err := i.registry.Resolve(locale)
@@ -312,8 +371,9 @@ func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelInte
 // BuildDialogIntent generates a DialogIntent for the locale.
 func (i *modelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogIntent, error) {
 	di := alexa.DialogIntent{
-		Name: i.name,
-		// TODO: Confirmation, Delegation, ...
+		Name:         i.name,
+		Delegation:   i.delegation,
+		Confirmation: i.confirmation,
 	}
 	var dis []alexa.DialogIntentSlot
 	for _, s := range i.slots {
@@ -339,6 +399,7 @@ type modelSlotBuilder struct {
 	withElicitation    bool
 	elicitationPrompt  string
 	confirmationPrompt string
+	validationRules    *modelValidationRulesBuilder
 }
 
 // NewModelSlotBuilder returns an initialized modelSlotBuilder.
@@ -394,6 +455,16 @@ func (s *modelSlotBuilder) WithIntentConfirmationPrompt(prompt string) *modelSlo
 	return s
 }
 
+// WithValidationRule adds a validation rule to the slot
+func (s *modelSlotBuilder) WithValidationRule(t string, prompt string, valuesKey ...string) *modelSlotBuilder {
+	if nil == s.validationRules {
+		s.validationRules = NewModelValidationRulesBuilder().
+			WithLocaleRegistry(s.registry)
+	}
+	s.validationRules.WithRule(t, prompt, valuesKey...)
+	return s
+}
+
 // BuildIntentSlot generates a ModelSlot for the locale.
 func (s *modelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, error) {
 	l, err := s.registry.Resolve(locale)
@@ -424,6 +495,13 @@ func (s *modelSlotBuilder) BuildDialogSlot(locale string) (alexa.DialogIntentSlo
 	}
 	if s.elicitationPrompt != "" {
 		ds.Prompts.Elicitation = s.elicitationPrompt
+	}
+	if s.validationRules != nil {
+		vs, err := s.validationRules.BuildRules(locale)
+		if err != nil {
+			return ds, err
+		}
+		ds.Validations = vs
 	}
 	return ds, nil
 }
@@ -484,6 +562,76 @@ func (t *modelTypeBuilder) Build(locale string) (alexa.ModelType, error) {
 
 ////////////////////////////////////////
 
+type modelValidationRulesBuilder struct {
+	registry l10n.LocaleRegistry
+	rules    []modelValidationRule
+}
+
+type modelValidationRule struct {
+	validationType string
+	prompt         string
+	valuesKey      string
+}
+
+// NewModelValidationBuilder returns an initialized modelValidationBuilder
+func NewModelValidationRulesBuilder() *modelValidationRulesBuilder {
+	return &modelValidationRulesBuilder{
+		registry: l10n.NewRegistry(),
+		rules:    []modelValidationRule{},
+	}
+}
+
+// WithLocaleRegistry passes a locale registry.
+func (v *modelValidationRulesBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *modelValidationRulesBuilder {
+	v.registry = registry
+	return v
+}
+
+// WithRule adds a validation rule
+func (v *modelValidationRulesBuilder) WithRule(t string, p string, valuesKey ...string) *modelValidationRulesBuilder {
+	vr := modelValidationRule{
+		validationType: t,
+		prompt:         p,
+	}
+	if len(valuesKey) > 0 {
+		vr.valuesKey = valuesKey[0]
+	}
+	v.rules = append(v.rules, vr)
+	return v
+}
+
+func (v *modelValidationRulesBuilder) BuildRules(locale string) ([]alexa.SlotValidation, error) {
+	var sv []alexa.SlotValidation
+	loc, err := v.registry.Resolve(locale)
+	if err != nil {
+		return sv, err
+	}
+
+	// create and append SlotValidations
+	for _, r := range v.rules {
+		val := alexa.SlotValidation{
+			Type:   r.validationType,
+			Prompt: r.prompt,
+		}
+
+		if vals := loc.GetAll(r.valuesKey); r.valuesKey != "" && len(vals) > 0 {
+			val.Values = vals
+		}
+
+		// TODO: implement value: https://developer.amazon.com/docs/smapi/interaction-model-schema.html#dialog_slot_validations
+		// types isInSet/isNotInSet/... require values
+		if (val.Type == alexa.ValidationTypeInSet || val.Type == alexa.ValidationTypeNotInSet) &&
+			(val.Values == nil || len(val.Values) == 0) {
+			return sv, fmt.Errorf("validation type requires values (%s: %s)", locale, val.Prompt)
+		}
+
+		sv = append(sv, val)
+	}
+	return sv, nil
+}
+
+////////////////////////////////////////
+
 type modelPromptBuilder struct {
 	registry   l10n.LocaleRegistry
 	intent     string
@@ -513,6 +661,16 @@ func NewConfirmationPromptBuilder(intent string, slot string) *modelPromptBuilde
 		slot:       slot,
 		promptType: "Confirm",
 		id:         fmt.Sprintf("Confirm.Intent-%s.IntentSlot-%s", intent, slot),
+		variations: map[string]*promptVariationsBuilder{},
+	}
+}
+
+func NewValidationPromptBuilder(slot string, t string) *modelPromptBuilder {
+	return &modelPromptBuilder{
+		registry:   l10n.NewRegistry(),
+		slot:       slot,
+		promptType: "Validate",
+		id:         fmt.Sprintf("Validate.Slot-%s.Type-%s", slot, t),
 		variations: map[string]*promptVariationsBuilder{},
 	}
 }
@@ -579,7 +737,8 @@ func NewPromptVariations(intent string, slot string, promptType string, varType 
 		intent:     intent,
 		slot:       slot,
 		promptType: promptType,
-		vars:       map[string]string{varType: fmt.Sprintf("%s_%s_%s%s", intent, slot, promptType, t)},
+		// TODO: l10n key structure should depend on prompt type (without intent for validation prompts)
+		vars: map[string]string{varType: fmt.Sprintf("%s_%s_%s%s", intent, slot, promptType, t)},
 	}
 }
 

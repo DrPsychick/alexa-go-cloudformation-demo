@@ -12,20 +12,27 @@ env:
     - GOOS=linux
 addons:
   apt:
+    update: true
     packages:
       - python3-pip
+services:
+  - docker
 
 before_install:
   - go mod download
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
+  - docker pull lambci/lambda:go1.x
 
 script:
   - golint ./...
   - go vet ./...
   - go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
   - goveralls -coverprofile=profile.cov -service=travis-ci
+  # build and then run lambda tests
+  - ./test/tests.sh
 
+# is NOT executed on pull requests!
 before_deploy:
   - pip3 install --upgrade --user pip
   - pip3 install --upgrade --user setuptools awscli
@@ -38,10 +45,9 @@ deploy:
   provider: script
   script: bash cloudformation/deploy.sh
   on:
-    #tags: true
     go: "1.12.x"
     all_branches: true
-    condition: $TRAVIS_BRANCH =~ ^development|master$
+    condition: $TRAVIS_BRANCH =~ ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
 
 notifications:
   email:

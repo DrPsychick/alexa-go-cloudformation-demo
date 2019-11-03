@@ -27,11 +27,11 @@ const (
 
 // Directive represents a response directive.
 type Directive struct {
-	Type          DirectiveType  `json:"type,omitempty"`
-	SlotToElicit  string         `json:"slotToElicit,omitempty"`
-	UpdatedIntent *UpdatedIntent `json:"UpdatedIntent,omitempty"`
-	PlayBehavior  string         `json:"playBehavior,omitempty"`
-	AudioItem     AudioItem      `json:"audioItem,omitempty"`
+	Type          DirectiveType `json:"type,omitempty"`
+	SlotToElicit  string        `json:"slotToElicit,omitempty"`
+	UpdatedIntent *Intent       `json:"UpdatedIntent,omitempty"`
+	PlayBehavior  string        `json:"playBehavior,omitempty"`
+	AudioItem     *AudioItem    `json:"audioItem,omitempty"`
 }
 
 // OutputSpeech represents a speech response.
@@ -88,8 +88,8 @@ type Response struct {
 	Card             *Card             `json:"card,omitempty"`
 	Reprompt         *Reprompt         `json:"reprompt,omitempty"`
 	Directives       []*Directive      `json:"directives,omitempty"`
-	ShouldEndSession bool              `json:"shouldEndSession"`
-	CanFulfillIntent *CanFulfillIntent `json:"canFulfillIntent"`
+	ShouldEndSession bool              `json:"shouldEndSession,omitempty"`
+	CanFulfillIntent *CanFulfillIntent `json:"canFulfillIntent,omitempty"`
 }
 
 // ResponseBuilder builds a response.
@@ -175,6 +175,7 @@ func (b *ResponseBuilder) AddDirective(directive *Directive) *ResponseBuilder {
 
 // Build builds the response from the given information.
 func (b *ResponseBuilder) Build() *ResponseEnvelope {
+	// TODO: empty response with directive(s), like Dialog:Delegate
 	return &ResponseEnvelope{
 		Version:           "1.0",
 		SessionAttributes: b.sessionAttr,

@@ -69,17 +69,36 @@ type IntentPrompt struct {
 }
 
 type DialogIntentSlot struct {
-	Name         string      `json:"name"`
-	Type         string      `json:"type"`
-	Confirmation bool        `json:"confirmationRequired"`
-	Elicitation  bool        `json:"elicitationRequired"`
-	Prompts      SlotPrompts `json:"prompts,omitempty"`
-	// TODO: Validations SlotValidations...
+	Name         string           `json:"name"`
+	Type         string           `json:"type"`
+	Confirmation bool             `json:"confirmationRequired"`
+	Elicitation  bool             `json:"elicitationRequired"`
+	Prompts      SlotPrompts      `json:"prompts,omitempty"`
+	Validations  []SlotValidation `json:"validations,omitempty"`
 }
 
 type SlotPrompts struct {
 	Elicitation  string `json:"elicitation,omitempty"`
 	Confirmation string `json:"confirmation,omitempty"`
+}
+
+// see https://developer.amazon.com/docs/custom-skills/validate-slot-values.html#validation-rules
+const (
+	ValidationTypeHasMatch      string = "hasEntityResolutionMatch"
+	ValidationTypeInSet         string = "isInSet"
+	ValidationTypeNotInSet      string = "isNotInSet"
+	ValidationTypeGreaterThan   string = "isGreaterThan"
+	ValidationTypeGreaterEqal   string = "isGreaterThanOrEqualTo"
+	ValidationTypeLessThan      string = "isLessThan"
+	ValidationTypeLessEqual     string = "isLessThanOrEqualTo"
+	ValidationTypeInDuration    string = "isInDuration"
+	ValidationTypeNotInDuration string = "isNotInDuration"
+)
+
+type SlotValidation struct {
+	Type   string   `json:"type"`   // see https://developer.amazon.com/docs/custom-skills/validate-slot-values.html#validation-rules
+	Prompt string   `json:"prompt"` //
+	Values []string `json:"values,omitempty"`
 }
 
 type ModelPrompt struct {

@@ -48,32 +48,14 @@ func NewApplication(l log.Logger, s stats.Statter) *Application {
 	}
 }
 
-func (a *Application) AWSStatus(loc l10n.LocaleInstance, area string, region string) (ApplicationResponse, error) {
-	title := loc.GetAny(loca.AWSStatusTitle)
-	msg := loc.GetAny(loca.AWSStatusText, area, region)
-	msgSSML := loc.GetAny(loca.AWSStatusSSML)
-
-	if title == "" || msg == "" || msgSSML == "" {
-		return ApplicationResponse{}, ErrorNoTranslation
-	}
-
-	return ApplicationResponse{
-		Title:  title,
-		Text:   msg,
-		Speech: msgSSML,
-		Image:  "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_%s.png",
-		End:    true,
-	}, nil
-}
-
 // Launch is the response to the launch request.
 func (a *Application) Launch(l l10n.LocaleInstance) (string, string) {
 	return l.Get(loca.LaunchTitle), l.GetAny(loca.LaunchText)
 }
 
 // Help is the response to a help request.
-func (a *Application) Help() (string, string) {
-	return "Help", "No help available!"
+func (a *Application) Help(l l10n.LocaleInstance) (string, string, string) {
+	return l.GetAny(loca.HelpTitle), l.GetAny(loca.Help), ""
 }
 
 // Stop is the response to stop the skill.
@@ -124,8 +106,40 @@ func (a *Application) SSMLDemo(l l10n.LocaleInstance) (string, string, string) {
 
 // Demo is a simple demo response.
 func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
-	return l.Get(loca.GenericTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
+	return l.Get(loca.DemoIntentTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
 }
+
+func (a *Application) AWSStatus(loc l10n.LocaleInstance, area string, region string) (ApplicationResponse, error) {
+	title := loc.GetAny(loca.AWSStatusTitle)
+	msg := loc.GetAny(loca.AWSStatusText, area, region)
+	msgSSML := loc.GetAny(loca.AWSStatusSSML)
+
+	if title == "" || msg == "" || msgSSML == "" {
+		return ApplicationResponse{}, ErrorNoTranslation
+	}
+
+	return ApplicationResponse{
+		Title:  title,
+		Text:   msg,
+		Speech: msgSSML,
+		Image:  "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_%s.png",
+		End:    true,
+	}, nil
+}
+
+//func (a *Application) AWSStatus(l l10n.LocaleInstance, region string) (string, string, string) {
+//	// TODO: we need to have access to slot values here!
+//	// request (with slot values) status from AWS status provider
+//	// decide how to respond based on status results
+//	// return response texts
+//	text := loca.AWSStatusText
+//	ssml := loca.AWSStatusSSML
+//	if region == "Frankfurt" {
+//		text = loca.AWSStatusTextGood
+//		ssml = loca.AWSStatusSSMLGood
+//	}
+//	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text, region), l.GetAny(ssml, region)
+//}
 
 // Logger returns the application logger.
 func (a *Application) Logger() log.Logger {

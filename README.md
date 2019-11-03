@@ -132,6 +132,9 @@ mv ./alfalfa ./deploy/app
 ```
 
 ### Run `deploy.sh`
+(same as in `.travis.yml`)
+* make deploy directory
+* build lambda for cloudformation 
 * run `deploy.sh`
     * generates `skill.json` and `<locale>.json` files for Alexa and uploads to S3
     * deploys via cloudformation (branch `master` -> production, else staging)
@@ -142,7 +145,11 @@ mv ./alfalfa ./deploy/app
       * deletes the cloudformation stack 10 seconds after deploy (unless you set `KEEP_STACK=1`)
       * you **can** set a different `CF_STACK_NAME`, but `deploy.sh` will still append `-staging`...
 
-```bash ./cloudformation/deploy.sh```
+```bash
+mkdir deploy
+go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa
+bash ./cloudformation/deploy.sh
+```
 
 ### Validate the Skill witk `ask`
 ```

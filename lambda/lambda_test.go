@@ -63,8 +63,8 @@ func TestLambda_HandleSaySomething2_ErrorNoLocale(t *testing.T) {
 	m.Serve(b, r)
 	resp := b.Build()
 
-	assert.Equal(t, "Error", resp.Response.Card.Title)
-	assert.Contains(t, resp.Response.Card.Content, "locale en-US not found")
+	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.Contains(t, resp.Response.Card.Content, "Locale 'en-US' is not supported!")
 }
 
 func TestLambda_HandleSaySomething2_ErrorNoTranslation(t *testing.T) {

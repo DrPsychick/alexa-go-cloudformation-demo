@@ -26,11 +26,10 @@ type Application interface {
 	stats.Statable
 
 	Launch(l l10n.LocaleInstance) (string, string)
-	Help() (string, string)
+	Help(l l10n.LocaleInstance) (string, string, string)
 	Stop(l l10n.LocaleInstance) (string, string, string)
 	SSMLDemo(l l10n.LocaleInstance) (string, string, string)
 	Demo(l l10n.LocaleInstance) (string, string, string)
-
 	SaySomething(l l10n.LocaleInstance, opts ...alfalfa.ResponseFunc) (alfalfa.ApplicationResponse, error)
 	AWSStatus(l l10n.LocaleInstance, area string, region string) (alfalfa.ApplicationResponse, error)
 }
@@ -77,20 +76,37 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
-			b.WithSpeech("bye").
-				WithSimpleCard("stop", "never mind")
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 		title, text := app.Launch(l)
+
+		if len(l.GetErrors()) > 0 {
+			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
+			return
+		}
 
 		b.WithSpeech(text).
 			WithSimpleCard(title, text)
 	})
 }
 
+// handleHelp calls the app help method, it does not close the session
 func handleHelp(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		title, text := app.Help()
+		l, err := l10n.Resolve(r.Locale)
+		if err != nil {
+			handleMissingLocale(b, r.Locale)
+			return
+		}
+		title, text, _ := app.Help(l)
+
+		if len(l.GetErrors()) > 0 {
+			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
+			return
+		}
 
 		b.WithSpeech(text).
 			WithSimpleCard(title, text)
@@ -101,12 +117,20 @@ func handleStop(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 		title, text, _ := app.Stop(l)
 
+		if len(l.GetErrors()) > 0 {
+			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
+			return
+		}
+
 		b.WithSpeech(text).
-			WithSimpleCard(title, text)
+			WithSimpleCard(title, text).
+			WithShouldEndSession(true)
 	})
 }
 
@@ -114,11 +138,17 @@ func handleSSMLResponse(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
-			// TODO: maybe say something here
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 
 		title, text, ssmlText := app.SSMLDemo(l)
+
+		if len(l.GetErrors()) > 0 {
+			handleLocaleErrors(b, l.GetErrors())
+			l.ResetErrors()
+			return
+		}
 
 		b.WithSpeech(ssmlText).
 			WithSimpleCard(title, text)
@@ -132,7 +162,7 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		loc, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
-			handleError(b, r, err)
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 
@@ -148,6 +178,11 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 				resp.Speech = loc.GetAny(l10n.KeyErrorNoTranslationSSML)
 				resp.End = true
 			}
+		}
+		if len(loc.GetErrors()) > 0 {
+			handleLocaleErrors(b, loc.GetErrors())
+			loc.ResetErrors()
+			return
 		}
 
 		b.WithSimpleCard(resp.Title, resp.Text)
@@ -180,7 +215,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		loc, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
 			stats.Inc(app, "handleAWSStatus.error", 1, 1.0, tags...)
-			handleError(b, r, err)
+			handleMissingLocale(b, r.Locale)
 			return
 		}
 		// require slot input
@@ -198,6 +233,30 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			handleError(b, r, fmt.Errorf("region not defined"))
 			return
 		}
+
+//		region := "unknown"
+//		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
+//		if rs, ok := r.Intent.Slots["Region"]; ok {
+//			if rs.Resolutions != nil && rs.Resolutions.PerAuthority != nil {
+//				if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
+//					if rsav := rsa[0].Values; len(rsav) > 0 {
+//						region = rsav[0].Value.Name
+//					}
+//				}
+//			}
+//		}
+//		// TODO: if unknown, respond with Dialog:Delegate
+//		if region == "unknown" {
+//			b.AddDirective(&alexa.Directive{
+//				Type: alexa.DirectiveTypeDialogDelegate,
+//				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
+//				//	Name: loca.AWSStatus,
+//				//	ConfirmationStatus: "NONE",
+//				//	Slots: map[string]Slot,
+//				//},
+//			})
+//			return
+//		}
 
 		resp, err := app.AWSStatus(loc, area.Value, region.Value)
 		if err != nil {
@@ -258,4 +317,16 @@ func localeDefaults(locale string) l10n.LocaleInstance {
 		l.Set(l10n.KeyErrorMissingPlaceholder, []string{"the string is missing a placeholder %%s: '%s'"})
 	}
 	return l
+}
+
+// handleMissingLocale makes Alexa respond with a "local not supported" error
+func handleMissingLocale(b *alexa.ResponseBuilder, locale string) {
+	b.WithSimpleCard("error", fmt.Sprintf("Locale '%s' is not supported!", locale)).
+		WithSpeech(l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "Your language is not supported")))
+}
+
+// handleLocaleErrors makes Alexa show the last error on the screen
+func handleLocaleErrors(b *alexa.ResponseBuilder, errs []error) {
+	b.WithSimpleCard("error", fmt.Sprintf("last error: %s", errs[len(errs)-1].Error())).
+		WithSpeech(l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "An error occurred")))
 }
