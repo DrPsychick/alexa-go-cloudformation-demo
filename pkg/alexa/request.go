@@ -96,11 +96,12 @@ type Resolutions struct {
 }
 
 // UpdatedIntent is to update the Intent.
-type UpdatedIntent struct {
-	Name               string                 `json:"name,omitempty"`
-	ConfirmationStatus ConfirmationStatus     `json:"confirmationStatus,omitempty"`
-	Slots              map[string]interface{} `json:"slots,omitempty"`
-}
+// **same** as Intent, just with a different json key
+//type UpdatedIntent struct {
+//	Name               string             `json:"name,omitempty"`
+//	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus,omitempty"`
+//	Slots              map[string]Slot    `json:"slots,omitempty"`
+//}
 
 // RequestType represents JSON request `request.type`, see https://developer.amazon.com/docs/custom-skills/request-types-reference.html
 type RequestType string

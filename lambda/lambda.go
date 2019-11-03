@@ -200,11 +200,25 @@ func handleAWSStatus(app Application) alexa.Handler {
 		region := "unknown"
 		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
 		if rs, ok := r.Intent.Slots["Region"]; ok {
-			if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
-				if rsav := rsa[0].Values; len(rsav) > 0 {
-					region = rsav[0].Value.Name
+			if rs.Resolutions != nil && rs.Resolutions.PerAuthority != nil {
+				if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
+					if rsav := rsa[0].Values; len(rsav) > 0 {
+						region = rsav[0].Value.Name
+					}
 				}
 			}
+		}
+		// TODO: if unknown, respond with Dialog:Delegate
+		if region == "unknown" {
+			b.AddDirective(&alexa.Directive{
+				Type: alexa.DirectiveTypeDialogDelegate,
+				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
+				//	Name: loca.AWSStatus,
+				//	ConfirmationStatus: "NONE",
+				//	Slots: map[string]Slot,
+				//},
+			})
+			return
 		}
 
 		title, text, ssmlText := app.AWSStatus(l, region)
