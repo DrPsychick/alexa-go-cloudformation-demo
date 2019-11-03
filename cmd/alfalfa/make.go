@@ -80,7 +80,9 @@ func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 		WithSlot(loca.TypeRegionName, loca.TypeRegion).
 		WithDelegation(alexa.DelegationAlways) // ALWAYS = delegate specific intent dialog to alexa
 
+	// make an elicitation prompt and link it to AWSStatus intent, AWSRegion slot
 	m.WithElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
+	// add variations (texts) to the prompt
 	m.ElicitationPrompt(loca.AWSStatus, loca.TypeRegionName).
 		WithVariation("PlainText").
 		WithVariation("SSML")
@@ -88,6 +90,19 @@ func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
 	m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).
 		WithVariation("SSML")
+
+	// create a Validation prompt, connected to type-values
+	m.WithValidationSlotPrompt(loca.TypeRegionName, alexa.ValidationTypeHasMatch)
+	m.ValidationPrompt(loca.TypeRegionName, alexa.ValidationTypeHasMatch).
+		WithVariation("PlainText")
+
+	// ValidationTypeInSet requires values -> we need to pass a key
+	m.WithValidationSlotPrompt(loca.TypeRegionName, alexa.ValidationTypeInSet, loca.TypeRegionValues)
+	m.ValidationPrompt(loca.TypeRegionName, alexa.ValidationTypeInSet).
+		WithVariation("PlainText")
+
+	//m.Intent(loca.AWSStatus).Slot(loca.TypeRegionName).
+	//	WithValidationRule(alexa.ValidationTypeHasMatch)
 
 	return s.BuildModels()
 }

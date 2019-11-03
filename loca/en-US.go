@@ -113,6 +113,9 @@ var enUS = &l10n.Locale{
 			l10n.Speak("In which Region?"), // not working?
 			l10n.Speak("About which region do you want to know the status?"),
 		},
+		RegionValidateText: {
+			"Please choose a valid region like Frankfurt, Ireland, North Virginia.",
+		},
 	},
 	//IntentResponses: l10n.IntentResponses{
 	//	SaySomething: l10n.IntentResponse{

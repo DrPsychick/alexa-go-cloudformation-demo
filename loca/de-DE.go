@@ -14,7 +14,7 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillExamplePhrases: {
 			"Alexa, starte voice demo und sag etwas",
 			"schiess los",
-			"hop hop",
+			"hopp hopp",
 		},
 		// fallback to enUS
 		l10n.KeySkillSmallIconURI:     enUS.GetAll(l10n.KeySkillSmallIconURI),
@@ -44,8 +44,14 @@ var deDE = &l10n.Locale{
 			l10n.Speak(l10n.UseVoice("Marlene", "Willkommen bei der <emphasis level=\"strong\">Voice</emphasis> Demo!")),
 		},
 
+		// Intent "AMAZON.StopIntent"
+		StopTitle: {"Ende Gelände"},
+		Stop:      {"Ende."},
+		HelpTitle: {"Hilfe"},
+		Help:      {"Probier mal 'hopp hopp' oder 'sag etwas' oder 'erzähl mir was'"},
+
 		// Intent: "DemoIntent"
-		DemoIntentSamples: {"schiess' los", "auf geht's", "hop hop"},
+		DemoIntentSamples: {"schiess' los", "auf geht's", "hopp hopp"},
 		DemoIntentTitle:   {"Demo"},
 		DemoIntentText: {
 			"PACE ist geil!",
@@ -107,11 +113,8 @@ var deDE = &l10n.Locale{
 			l10n.Speak("In welcher Region?"), // not working?
 			l10n.Speak("Zu welcher Region möchtest du den Status wissen?"),
 		},
-
-		// Intent "AMAZON.StopIntent"
-		StopTitle: {"Ende Gelände"},
-		Stop:      {"Ende."},
-		HelpTitle: {"Hilfe"},
-		Help:      {"Probier mal 'Hop hop' oder 'sag etwas' oder 'erzähl mir was'"},
+		RegionValidateText: {
+			"Bitte wähle eine gültige Region, zum Beispiel Frankfurt, Irland, Nord Virginia.",
+		},
 	},
 }
