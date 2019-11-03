@@ -41,6 +41,7 @@ const (
 	AWSStatusRegionElicitText string = "AWSStatus_Region_Elicit_Text"
 	AWSStatusRegionElicitSSML string = "AWSStatus_Region_Elicit_SSML"
 	AWSStatusAreaConfirmSSML  string = "AWSStatus_Area_Confirm_SSML"
+	RegionValidateText        string = "_Region_Validate_Text"
 
 	// Types
 	TypeArea        string = "AWSArea"

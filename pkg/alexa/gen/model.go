@@ -117,6 +117,7 @@ func (m *modelBuilder) WithConfirmationSlotPrompt(intent string, slot string) *m
 		}
 	}
 	if sl == nil {
+		m.error = fmt.Errorf("no matching intent slot: %s-%s", intent, slot)
 		return nil
 	}
 
@@ -126,6 +127,32 @@ func (m *modelBuilder) WithConfirmationSlotPrompt(intent string, slot string) *m
 
 	// link slot to prompt
 	sl.WithConfirmationPrompt(p.id)
+	return m
+}
+
+// WithValidationSlotPrompt creates and sets a validation prompt for a slot dialog
+func (m *modelBuilder) WithValidationSlotPrompt(slot string, t string, valuesKey ...string) *modelBuilder {
+	// slot must exist!
+	var sl *modelSlotBuilder
+	for _, i := range m.intents {
+		for _, s := range i.slots {
+			if s.name == slot {
+				sl = s
+				break
+			}
+		}
+	}
+	if sl == nil {
+		m.error = fmt.Errorf("no matching intent slot: %s", slot)
+		return nil
+	}
+
+	p := NewValidationPromptBuilder(slot, t).
+		WithLocaleRegistry(m.registry)
+	m.prompts[p.id] = p
+
+	// link slot to prompt
+	sl.WithValidationRule(t, p.id, valuesKey...)
 	return m
 }
 
@@ -148,6 +175,13 @@ func (m *modelBuilder) ElicitationPrompt(intent string, slot string) *modelPromp
 // ConfirmationPrompt returns the confirmation prompt for the intent-slot.
 func (m *modelBuilder) ConfirmationPrompt(intent string, slot string) *modelPromptBuilder {
 	pb := NewConfirmationPromptBuilder(intent, slot)
+	return m.prompts[pb.id]
+}
+
+// TODO: a slot can have multiple validation prompts! ID is not unique!
+// ValidationPrompt returns the validation prompt for the intent-slot
+func (m *modelBuilder) ValidationPrompt(intent string, slot string) *modelPromptBuilder {
+	pb := NewValidationPromptBuilder(intent, slot)
 	return m.prompts[pb.id]
 }
 
@@ -365,6 +399,7 @@ type modelSlotBuilder struct {
 	withElicitation    bool
 	elicitationPrompt  string
 	confirmationPrompt string
+	validationRules    *modelValidationRulesBuilder
 }
 
 // NewModelSlotBuilder returns an initialized modelSlotBuilder.
@@ -420,6 +455,16 @@ func (s *modelSlotBuilder) WithIntentConfirmationPrompt(prompt string) *modelSlo
 	return s
 }
 
+// WithValidationRule adds a validation rule to the slot
+func (s *modelSlotBuilder) WithValidationRule(t string, prompt string, valuesKey ...string) *modelSlotBuilder {
+	if nil == s.validationRules {
+		s.validationRules = NewModelValidationRulesBuilder().
+			WithLocaleRegistry(s.registry)
+	}
+	s.validationRules.WithRule(t, prompt, valuesKey...)
+	return s
+}
+
 // BuildIntentSlot generates a ModelSlot for the locale.
 func (s *modelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, error) {
 	l, err := s.registry.Resolve(locale)
@@ -450,6 +495,13 @@ func (s *modelSlotBuilder) BuildDialogSlot(locale string) (alexa.DialogIntentSlo
 	}
 	if s.elicitationPrompt != "" {
 		ds.Prompts.Elicitation = s.elicitationPrompt
+	}
+	if s.validationRules != nil {
+		vs, err := s.validationRules.BuildRules(locale)
+		if err != nil {
+			return ds, err
+		}
+		ds.Validations = vs
 	}
 	return ds, nil
 }
@@ -510,6 +562,76 @@ func (t *modelTypeBuilder) Build(locale string) (alexa.ModelType, error) {
 
 ////////////////////////////////////////
 
+type modelValidationRulesBuilder struct {
+	registry l10n.LocaleRegistry
+	rules    []modelValidationRule
+}
+
+type modelValidationRule struct {
+	validationType string
+	prompt         string
+	valuesKey      string
+}
+
+// NewModelValidationBuilder returns an initialized modelValidationBuilder
+func NewModelValidationRulesBuilder() *modelValidationRulesBuilder {
+	return &modelValidationRulesBuilder{
+		registry: l10n.NewRegistry(),
+		rules:    []modelValidationRule{},
+	}
+}
+
+// WithLocaleRegistry passes a locale registry.
+func (v *modelValidationRulesBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *modelValidationRulesBuilder {
+	v.registry = registry
+	return v
+}
+
+// WithRule adds a validation rule
+func (v *modelValidationRulesBuilder) WithRule(t string, p string, valuesKey ...string) *modelValidationRulesBuilder {
+	vr := modelValidationRule{
+		validationType: t,
+		prompt:         p,
+	}
+	if len(valuesKey) > 0 {
+		vr.valuesKey = valuesKey[0]
+	}
+	v.rules = append(v.rules, vr)
+	return v
+}
+
+func (v *modelValidationRulesBuilder) BuildRules(locale string) ([]alexa.SlotValidation, error) {
+	var sv []alexa.SlotValidation
+	loc, err := v.registry.Resolve(locale)
+	if err != nil {
+		return sv, err
+	}
+
+	// create and append SlotValidations
+	for _, r := range v.rules {
+		val := alexa.SlotValidation{
+			Type:   r.validationType,
+			Prompt: r.prompt,
+		}
+
+		if vals := loc.GetAll(r.valuesKey); r.valuesKey != "" && len(vals) > 0 {
+			val.Values = vals
+		}
+
+		// TODO: implement value: https://developer.amazon.com/docs/smapi/interaction-model-schema.html#dialog_slot_validations
+		// types isInSet/isNotInSet/... require values
+		if (val.Type == alexa.ValidationTypeInSet || val.Type == alexa.ValidationTypeNotInSet) &&
+			(val.Values == nil || len(val.Values) == 0) {
+			return sv, fmt.Errorf("validation type requires values (%s: %s)", locale, val.Prompt)
+		}
+
+		sv = append(sv, val)
+	}
+	return sv, nil
+}
+
+////////////////////////////////////////
+
 type modelPromptBuilder struct {
 	registry   l10n.LocaleRegistry
 	intent     string
@@ -539,6 +661,16 @@ func NewConfirmationPromptBuilder(intent string, slot string) *modelPromptBuilde
 		slot:       slot,
 		promptType: "Confirm",
 		id:         fmt.Sprintf("Confirm.Intent-%s.IntentSlot-%s", intent, slot),
+		variations: map[string]*promptVariationsBuilder{},
+	}
+}
+
+func NewValidationPromptBuilder(slot string, t string) *modelPromptBuilder {
+	return &modelPromptBuilder{
+		registry:   l10n.NewRegistry(),
+		slot:       slot,
+		promptType: "Validate",
+		id:         fmt.Sprintf("Validate.Slot-%s.Type-%s", slot, t),
 		variations: map[string]*promptVariationsBuilder{},
 	}
 }
@@ -605,7 +737,8 @@ func NewPromptVariations(intent string, slot string, promptType string, varType 
 		intent:     intent,
 		slot:       slot,
 		promptType: promptType,
-		vars:       map[string]string{varType: fmt.Sprintf("%s_%s_%s%s", intent, slot, promptType, t)},
+		// TODO: l10n key structure should depend on prompt type (without intent for validation prompts)
+		vars: map[string]string{varType: fmt.Sprintf("%s_%s_%s%s", intent, slot, promptType, t)},
 	}
 }
 

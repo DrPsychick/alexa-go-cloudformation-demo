@@ -378,6 +378,8 @@ func TestModelSlotBuilder_WithIntentConfirmationPrompt(t *testing.T) {
 	assert.Equal(t, msb, msb2)
 }
 
+// TODO: test modelValidationRulesBuilder
+
 // modelSlotBuilder errors if no locale is covered.
 func TestModelSlotBuilder_ErrorsIfNoLocale(t *testing.T) {
 	msb := gen.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType")
