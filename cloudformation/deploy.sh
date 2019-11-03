@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # check for required variables
 check_env_vars () {
@@ -26,6 +27,7 @@ fi
 
 if [ $production -eq 0 ]; then
     export CF_STACK_NAME="${CF_STACK_NAME}-staging"
+    export ASKS3Key="${ASKS3Key//.zip/-staging.zip}"
 fi
 
 if [ -n "$KEEP_STACK" ]; then
@@ -43,8 +45,14 @@ export ASKSkillTestingInstructions="Demo Alexa skill... $(date +%Y-%m-%d\ %H:%M)
 mkdir -p ./alexa/interactionModels/custom
 ./alfalfa make --skill
 ./alfalfa make --models
-(cd ./alexa; zip -r $ASKS3Key ./)
+# TODO: rename skill on stage deploy
+if [ $production -eq 0 ]; then
+    sed -e 's#"name": "\(.*\)"#"name": "\1 (stage)"#' -i "" ./alexa/skill.json
+    sed -e 's#"invocationName": "\(.*\)"#"invocationName": "\1 stage"#' -i "" ./alexa/interactionModels/custom/*.json
+fi
 
+# zip and upload it to S3
+(cd ./alexa; zip -r $ASKS3Key ./)
 aws s3 cp ./alexa/$ASKS3Key s3://$ASKS3Bucket/
 
 [ $production -eq 0 ] && {

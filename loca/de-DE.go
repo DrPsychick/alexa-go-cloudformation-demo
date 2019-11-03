@@ -14,7 +14,7 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillExamplePhrases: {
 			"Alexa, starte voice demo und sag etwas",
 			"schiess los",
-			"hop hop",
+			"hopp hopp",
 		},
 		// fallback to enUS
 		l10n.KeySkillSmallIconURI:     enUS.GetAll(l10n.KeySkillSmallIconURI),
@@ -26,7 +26,7 @@ var deDE = &l10n.Locale{
 
 		// Type values
 		TypeAreaValues:   {"Europa", "Nordamerika", "Südamerika", "Asien"},
-		TypeRegionValues: {"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nordvirginia"},
+		TypeRegionValues: {"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nord Virginia"},
 
 		// Launch request
 		LaunchTitle: {
@@ -44,8 +44,14 @@ var deDE = &l10n.Locale{
 			l10n.Speak(l10n.UseVoice("Marlene", "Willkommen bei der <emphasis level=\"strong\">Voice</emphasis> Demo!")),
 		},
 
+		// Intent "AMAZON.StopIntent"
+		StopTitle: {"Ende Gelände"},
+		Stop:      {"Ende."},
+		HelpTitle: {"Hilfe"},
+		Help:      {"Probier mal 'hopp hopp' oder 'sag etwas' oder 'erzähl mir was'"},
+
 		// Intent: "DemoIntent"
-		DemoIntentSamples: {"schiess' los", "auf geht's", "hop hop"},
+		DemoIntentSamples: {"schiess' los", "auf geht's", "hopp hopp"},
 		DemoIntentTitle:   {"Demo"},
 		DemoIntentText: {
 			"PACE ist geil!",
@@ -100,18 +106,15 @@ var deDE = &l10n.Locale{
 		},
 		AWSStatusRegionSamples: {"in {Region}", "der {Region}"},
 		AWSStatusRegionElicitText: {
-			"In welcher Region? (Europa, Nordamerika, ...)",
-			"Zu welcher Region möchtest du den Status wissen? (Europa, Nordamerika, ...)",
+			"In welcher Region? (Frankfurt, Irland, ...)",
+			"Zu welcher Region möchtest du den Status wissen? (Frankfurt, Nord Virginia, ...)",
 		},
 		AWSStatusRegionElicitSSML: {
-			l10n.Speak("In welcher Region?"),
+			l10n.Speak("In welcher Region?"), // not working?
 			l10n.Speak("Zu welcher Region möchtest du den Status wissen?"),
 		},
-
-		// Intent "AMAZON.StopIntent"
-		StopTitle: {"Ende Gelände"},
-		Stop:      {"Ende."},
-		HelpTitle: {"Hilfe"},
-		Help:      {"Probier mal 'Hop hop' oder 'sag etwas' oder 'erzähl mir was'"},
+		RegionValidateText: {
+			"Bitte wähle eine gültige Region, zum Beispiel Frankfurt, Irland, Nord Virginia.",
+		},
 	},
 }
