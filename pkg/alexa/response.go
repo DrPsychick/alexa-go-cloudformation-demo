@@ -169,24 +169,26 @@ func (b *ResponseBuilder) WithCanFulfillIntent(response *CanFulfillIntent) *Resp
 // AddDirective adds a directive tp the response.
 func (b *ResponseBuilder) AddDirective(directive *Directive) *ResponseBuilder {
 	b.directives = append(b.directives, directive)
-
 	return b
 }
 
 // Build builds the response from the given information.
 func (b *ResponseBuilder) Build() *ResponseEnvelope {
 	// TODO: empty response with directive(s), like Dialog:Delegate
-	return &ResponseEnvelope{
+	r := &ResponseEnvelope{
 		Version:           "1.0",
 		SessionAttributes: b.sessionAttr,
 		Response: Response{
-			OutputSpeech: b.speech,
-			Card:         b.card,
-			Reprompt: &Reprompt{
-				OutputSpeech: b.reprompt,
-			},
+			OutputSpeech:     b.speech,
+			Card:             b.card,
 			Directives:       b.directives,
 			ShouldEndSession: b.shouldEndSession,
 		},
 	}
+	if b.reprompt != nil {
+		r.Response.Reprompt = &Reprompt{
+			OutputSpeech: b.reprompt,
+		}
+	}
+	return r
 }
