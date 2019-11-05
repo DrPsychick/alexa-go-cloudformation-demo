@@ -45,6 +45,7 @@ func NewMux(app Application, sb *gen.SkillBuilder) alexa.Handler {
 
 	mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
 	mux.HandleRequestTypeFunc(alexa.TypeCanFulfillIntentRequest, handleCanFulfillIntent)
+	mux.HandleRequestTypeFunc(alexa.TypeSessionEndedRequest, handleEnd(app))
 
 	// new approach:
 	mux.HandleIntent(alexa.HelpIntent, handleHelp(app, sb))
@@ -88,6 +89,11 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 
 		b.WithSpeech(text).
 			WithSimpleCard(title, text)
+	})
+}
+
+func handleEnd(app Application) alexa.HandlerFunc {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 	})
 }
 
