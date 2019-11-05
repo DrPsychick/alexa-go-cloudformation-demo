@@ -195,12 +195,54 @@ func handleDemo(app Application) alexa.Handler {
 	})
 }
 
+// SlotAuthorities always returns a PerAuthority slice
+func SlotAuthorities(r *alexa.Request, n string) []*alexa.PerAuthority {
+	s, ok := r.Intent.Slots[n]
+	if !ok {
+		return []*alexa.PerAuthority{}
+	}
+	if s.Resolutions == nil || s.Resolutions.PerAuthority == nil {
+		return []*alexa.PerAuthority{}
+	}
+	return s.Resolutions.PerAuthority
+}
+
+func SlotMatch(r *alexa.Request, n string) bool {
+	// TODO: what about multiple Authorities?
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 {
+		return false
+	}
+	if sa[0].Status == nil {
+		return false
+	}
+	return sa[0].Status.Code == alexa.ResolutionStatusMatch
+}
+
+func SlotNoMatch(r *alexa.Request, n string) bool {
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 {
+		return false
+	}
+	if sa[0].Status == nil {
+		return false
+	}
+	return sa[0].Status.Code == alexa.ResolutionStatusNoMatch
+}
+
 func handleAWSStatus(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
 		if err != nil {
 			handleMissingLocale(b, r.Locale)
 			return
+		}
+
+		// TODO: make request content directly accessible
+		// SlotMatch(r, "Region") = true/false
+		// SlotValue(r, "Region")
+		if SlotNoMatch(r, "Region") {
+			// failed validation -> elicit (but need to provide prompt!)
 		}
 
 		region := "unknown"
@@ -216,14 +258,14 @@ func handleAWSStatus(app Application) alexa.Handler {
 		}
 		// TODO: if unknown, respond with Dialog:Delegate
 		if region == "unknown" {
-			b.AddDirective(&alexa.Directive{
-				Type: alexa.DirectiveTypeDialogDelegate,
-				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
-				//	Name: loca.AWSStatus,
-				//	ConfirmationStatus: "NONE",
-				//	Slots: map[string]Slot,
-				//},
-			})
+			if r.DialogState == alexa.DialogStateCompleted {
+				// should not happen (Alexa validation would have failed?)
+			} else {
+				b.AddDirective(&alexa.Directive{
+					Type: alexa.DirectiveTypeDialogDelegate,
+					// UpdatedIntent:  only needed when changing intent
+				})
+			}
 			return
 		}
 

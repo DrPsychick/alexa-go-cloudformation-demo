@@ -48,6 +48,7 @@
           "source": "USER"
         }
       }
-    }
+    },
+    "dialogState": "STARTED"
   }
 }
