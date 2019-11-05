@@ -144,13 +144,19 @@ func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 	m.HandleIntent(intent, handler)
 }
 
+// fallbackHandler returns a fatal error card
+func fallbackHandler(err error) HandlerFunc {
+	return HandlerFunc(func(b *ResponseBuilder, r *Request) {
+		b.WithSimpleCard("Fatal error", "error: "+err.Error()).
+			WithShouldEndSession(true)
+	})
+}
+
 // Serve serves the matched handler.
 func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
 	h, err := m.Handler(r)
 	if err != nil {
-		// TODO: Fallback handler
-		b.WithSimpleCard("Fatal error", "error: "+err.Error()).
-			WithShouldEndSession(true)
+		h = fallbackHandler(err)
 		return
 	}
 

@@ -15,6 +15,8 @@ import (
 const (
 	// SSMLDemoIntent is the name of the SSL demo intent
 	SSMLDemoIntent = "SSMLDemoIntent"
+	// SaySomethingIntent is the name of the say something intent
+	SaySomethingIntent = "SaySomething"
 	// DemoIntent is the name of the demo intent
 	DemoIntent = "DemoIntent"
 )
@@ -208,6 +210,41 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 	})
 }
 
+// SlotAuthorities always returns a PerAuthority slice
+func SlotAuthorities(r *alexa.Request, n string) []*alexa.PerAuthority {
+	s, ok := r.Intent.Slots[n]
+	if !ok {
+		return []*alexa.PerAuthority{}
+	}
+	if s.Resolutions == nil || s.Resolutions.PerAuthority == nil {
+		return []*alexa.PerAuthority{}
+	}
+	return s.Resolutions.PerAuthority
+}
+
+func SlotMatch(r *alexa.Request, n string) bool {
+	// TODO: what about multiple Authorities?
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 {
+		return false
+	}
+	if sa[0].Status == nil {
+		return false
+	}
+	return sa[0].Status.Code == alexa.ResolutionStatusMatch
+}
+
+func SlotNoMatch(r *alexa.Request, n string) bool {
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 {
+		return false
+	}
+	if sa[0].Status == nil {
+		return false
+	}
+	return sa[0].Status.Code == alexa.ResolutionStatusNoMatch
+}
+
 func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	// TODO: the mux should know about slots and "pass" it to the handler via request
 	// register intent, slots, types with the model
@@ -254,6 +291,10 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			return
 		}
 
+		if SlotNoMatch(r, "Region") {
+			// failed validation -> elicit (but need to provide prompt!)
+		}
+
 		region, ok := r.Intent.Slots[loca.TypeRegion]
 		if !ok {
 			// reprompt region slot
@@ -270,7 +311,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			}
 		}
 		// if not provided, respond with Dialog:Delegate
-		if re == "" {
+		if re == "" && r.DialogState != alexa.DialogStateCompleted {
 			b.AddDirective(&alexa.Directive{
 				Type: alexa.DirectiveTypeDialogDelegate,
 				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent

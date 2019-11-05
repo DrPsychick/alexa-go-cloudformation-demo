@@ -68,7 +68,7 @@ const (
 // Intent is the Alexa skill intent.
 type Intent struct {
 	Name               string             `json:"name"`
-	Slots              map[string]Slot    `json:"slots"`
+	Slots              map[string]*Slot   `json:"slots"`
 	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
 }
 
@@ -88,20 +88,42 @@ type SlotValue struct {
 	Resolutions *Resolutions `json:"resolutions"`
 }
 
+type AuthorityValueValue struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+
+type AuthorityValue struct {
+	Value AuthorityValueValue `json:"value"`
+}
+
+// ResolutionStatus represents the status code of a slot resolution
+type StatusCode string
+
+const (
+	// ResolutionStatusMatch is the status code for match
+	ResolutionStatusMatch StatusCode = "ER_SUCCESS_MATCH"
+	// ResolutionStatusNoMatch is the status code for no match
+	ResolutionStatusNoMatch StatusCode = "ER_SUCCESS_NO_MATCH"
+	// ResolutionStatusTimeout is the status code for an error due to timeout
+	ResolutionStatusTimeout StatusCode = "ER_ERROR_TIMEOUT"
+	// ResolutionStatusException is the status code for an error in processing
+	ResolutionStatusException StatusCode = "ER_ERROR_EXCEPTION"
+)
+
+type ResolutionStatus struct {
+	Code StatusCode `json:"code"`
+}
+
+type PerAuthority struct {
+	Authority string            `json:"authority"`
+	Status    *ResolutionStatus `json:"status"`
+	Values    []*AuthorityValue `json:"values"`
+}
+
 // Resolutions is an Alexa skill resolution.
 type Resolutions struct {
-	PerAuthority []*struct {
-		Authority string `json:"authority"`
-		Status    struct {
-			Code string `json:"code"`
-		} `json:"status"`
-		Values []struct {
-			Value struct {
-				Name string `json:"name"`
-				ID   string `json:"id"`
-			} `json:"value"`
-		} `json:"values"`
-	} `json:"resolutionsPerAuthority"`
+	PerAuthority []*PerAuthority `json:"resolutionsPerAuthority"`
 }
 
 // UpdatedIntent is to update the Intent.
@@ -127,15 +149,24 @@ const (
 	TypeCanFulfillIntentRequest RequestType = "CanFulfillIntentRequest"
 )
 
+// DialogStateType represents JSON request `request.dialogState`, see https://developer.amazon.com/docs/custom-skills/delegate-dialog-to-alexa.html
+type DialogStateType string
+
+const (
+	DialogStateStarted    DialogStateType = "STARTED"
+	DialogStateInProgress DialogStateType = "IN_PROGRESS"
+	DialogStateCompleted  DialogStateType = "COMPLETED"
+)
+
 // Request represents the information about the request.
 type Request struct {
-	Type        RequestType `json:"type"`
-	RequestID   string      `json:"requestId"`
-	Timestamp   string      `json:"timestamp"`
-	Locale      string      `json:"locale"`
-	Intent      Intent      `json:"intent,omitempty"`
-	Reason      string      `json:"reason,omitempty"`
-	DialogState string      `json:"dialogState,omitempty"`
+	Type        RequestType     `json:"type"`
+	RequestID   string          `json:"requestId"`
+	Timestamp   string          `json:"timestamp"`
+	Locale      string          `json:"locale"`
+	Intent      Intent          `json:"intent,omitempty"`
+	Reason      string          `json:"reason,omitempty"`
+	DialogState DialogStateType `json:"dialogState,omitempty"`
 
 	Context *Context `json:"-"`
 	Session *Session `json:"-"`
