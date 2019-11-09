@@ -68,6 +68,8 @@ func TestLambda_HandleSaySomething2_ErrorNoLocale(t *testing.T) {
 }
 
 func TestLambda_HandleSaySomething2_ErrorNoTranslation(t *testing.T) {
+	err := loca.Registry.Register(&l10n.Locale{Name: "en-US", TextSnippets: l10n.Snippets{}})
+	assert.NoError(t, err)
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
 	loc.Set(l10n.KeyErrorNoTranslationTitle, []string{"Translation error"})
@@ -102,7 +104,7 @@ func TestLambda_HandleSaySomething2_ErrorNoTranslation(t *testing.T) {
 	m.Serve(b, r)
 	resp := b.Build()
 
-	assert.Equal(t, "Translation error", resp.Response.Card.Title)
+	assert.Equal(t, "error", resp.Response.Card.Title)
 	assert.Contains(t, resp.Response.Card.Content, loca.SaySomething)
-	assert.Contains(t, resp.Response.OutputSpeech.SSML, "missing translations")
+	assert.Contains(t, resp.Response.OutputSpeech.SSML, "An error occurred")
 }
