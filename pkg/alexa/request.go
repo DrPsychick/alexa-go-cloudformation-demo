@@ -85,7 +85,7 @@ type AuthorityValueValue struct {
 }
 
 type AuthorityValue struct {
-	Value AuthorityValueValue `json:"value"`
+	Value *AuthorityValueValue `json:"value,omitempty"`
 }
 
 // ResolutionStatus represents the status code of a slot resolution
@@ -108,8 +108,8 @@ type ResolutionStatus struct {
 
 type PerAuthority struct {
 	Authority string            `json:"authority"`
-	Status    *ResolutionStatus `json:"status"`
-	Values    []*AuthorityValue `json:"values"`
+	Status    *ResolutionStatus `json:"status,omitempty"`
+	Values    []*AuthorityValue `json:"values,omitempty"`
 }
 
 // Resolutions is an Alexa skill resolution.
