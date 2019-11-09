@@ -27,7 +27,7 @@ fi
 
 if [ $production -eq 0 ]; then
     export CF_STACK_NAME="${CF_STACK_NAME}-staging"
-    export ASKS3Key="${ASKS3Key//.zip/-staging.zip}"
+    export ASKS3Key="${ASKS3Key//.zip/.staging.zip}"
 fi
 
 if [ -n "$KEEP_STACK" ]; then
