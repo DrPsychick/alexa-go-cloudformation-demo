@@ -42,7 +42,6 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 	s.Handler.Serve(builder, req.Request)
 
 	return jsoniter.Marshal(builder.Build())
-
 }
 
 // Serve serves the handler.
