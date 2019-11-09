@@ -65,6 +65,12 @@ func (a *Application) AWSStatus(l l10n.LocaleInstance, region string) (string, s
 	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text, region), l.GetAny(ssml, region)
 }
 
+func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (string, string, string) {
+	text := loca.AWSStatusRegionElicitText
+	ssml := loca.AWSStatusRegionElicitSSML
+	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text, region), l.GetAny(ssml, region)
+}
+
 // Logger returns the application logger.
 func (a *Application) Logger() log.Logger {
 	return a.logger

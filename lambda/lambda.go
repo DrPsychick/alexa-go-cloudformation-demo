@@ -27,6 +27,7 @@ type Application interface {
 	SaySomething(l l10n.LocaleInstance) (string, string, string)
 	Demo(l l10n.LocaleInstance) (string, string, string)
 	AWSStatus(l l10n.LocaleInstance, r string) (string, string, string)
+	AWSStatusRegionElicit(l l10n.LocaleInstance, r string) (string, string, string)
 }
 
 func NewMux(app Application) alexa.Handler {
@@ -34,6 +35,7 @@ func NewMux(app Application) alexa.Handler {
 
 	mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
 	mux.HandleRequestTypeFunc(alexa.TypeCanFulfillIntentRequest, handleCanFulfillIntent)
+	mux.HandleRequestTypeFunc(alexa.TypeSessionEndedRequest, handleEnd(app))
 
 	mux.HandleIntent(alexa.HelpIntent, handleHelp(app))
 	mux.HandleIntent(alexa.CancelIntent, handleStop(app))
@@ -79,6 +81,11 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 
 		b.WithSpeech(text).
 			WithSimpleCard(title, text)
+	})
+}
+
+func handleEnd(app Application) alexa.HandlerFunc {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 	})
 }
 
@@ -189,6 +196,59 @@ func handleDemo(app Application) alexa.Handler {
 	})
 }
 
+// SlotValue always returns a string, it will be empty if the slot is not found
+func SlotValue(r *alexa.Request, n string) string {
+	s, ok := r.Intent.Slots[n]
+	if !ok {
+		return ""
+	}
+	return s.Value
+}
+
+// SlotAuthorities always returns a PerAuthority slice
+func SlotAuthorities(r *alexa.Request, n string) []*alexa.PerAuthority {
+	s, ok := r.Intent.Slots[n]
+	if !ok {
+		return []*alexa.PerAuthority{}
+	}
+	if s.Resolutions == nil || s.Resolutions.PerAuthority == nil {
+		return []*alexa.PerAuthority{}
+	}
+	return s.Resolutions.PerAuthority
+}
+
+func SlotResolutionValue(r *alexa.Request, n string) string {
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 || len(sa[0].Values) == 0 || sa[0].Values[0] == nil || sa[0].Values[0].Value == nil {
+		return ""
+	}
+	return sa[0].Values[0].Value.Name
+}
+
+func SlotMatch(r *alexa.Request, n string) bool {
+	// TODO: what about multiple Authorities?
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 {
+		return false
+	}
+	if sa[0].Status == nil {
+		return false
+	}
+	return sa[0].Status.Code == alexa.ResolutionStatusMatch
+}
+
+func SlotNoMatch(r *alexa.Request, n string) bool {
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 {
+		return false
+	}
+	if sa[0].Status == nil {
+		return false
+	}
+	return sa[0].Status.Code == alexa.ResolutionStatusNoMatch
+}
+
+// TODO: refactor this and make it more simple
 func handleAWSStatus(app Application) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		l, err := l10n.Resolve(r.Locale)
@@ -197,30 +257,46 @@ func handleAWSStatus(app Application) alexa.Handler {
 			return
 		}
 
-		region := "unknown"
-		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
-		if rs, ok := r.Intent.Slots["Region"]; ok {
-			if rs.Resolutions != nil && rs.Resolutions.PerAuthority != nil {
-				if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
-					if rsav := rsa[0].Values; len(rsav) > 0 {
-						region = rsav[0].Value.Name
-					}
-				}
+		// TODO: put slot handling in separate function(s)
+
+		// elicit the slot value through Alexa
+		if !SlotMatch(r, "Region") { // using 'not SlotMatch' because that includes a missing slot
+			// failed validation or missing -> elicit - but need to provide prompt!
+			title, text, ssml := app.AWSStatusRegionElicit(l, SlotValue(r, "Region"))
+
+			if len(l.GetErrors()) > 0 {
+				handleLocaleErrors(b, l.GetErrors())
+				l.ResetErrors()
+				return
 			}
-		}
-		// TODO: if unknown, respond with Dialog:Delegate
-		if region == "unknown" {
+
 			b.AddDirective(&alexa.Directive{
-				Type: alexa.DirectiveTypeDialogDelegate,
-				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
-				//	Name: loca.AWSStatus,
-				//	ConfirmationStatus: "NONE",
-				//	Slots: map[string]Slot,
-				//},
-			})
+				Type:         alexa.DirectiveTypeDialogElicitSlot,
+				SlotToElicit: "Region",
+			}).
+				WithSpeech(ssml).
+				WithSimpleCard(title, text)
 			return
 		}
 
+		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
+		region := SlotResolutionValue(r, "Region")
+
+		// if slot is empty and dialog still open, respond with Dialog:Delegate
+		if region == "" {
+			if r.DialogState == alexa.DialogStateCompleted {
+				// should not happen (Alexa validation would have failed?)
+				// how to respond if it does happen?
+			} else {
+				b.AddDirective(&alexa.Directive{
+					Type: alexa.DirectiveTypeDialogDelegate,
+					// UpdatedIntent:  only needed when changing intent
+				})
+			}
+			return
+		}
+
+		// slot was given and validated
 		title, text, ssmlText := app.AWSStatus(l, region)
 
 		if len(l.GetErrors()) > 0 {

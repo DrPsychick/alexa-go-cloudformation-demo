@@ -30,25 +30,9 @@
     }
   },
   "request": {
-    "type": "IntentRequest",
+    "type": "LaunchRequest",
     "requestId": "amzn1.echo-api.request.1234",
     "timestamp": "2016-10-27T21:06:28Z",
-    "locale": "LOCALE",
-    "intent": {
-      "name": "AWSStatus",
-      "slots": {
-        "Region": {
-          "name": "Region",
-          "confirmationStatus": "NONE",
-          "source": "USER"
-        },
-        "Area": {
-          "name": "Area",
-          "confirmationStatus": "NONE",
-          "source": "USER"
-        }
-      }
-    },
-    "dialogState": "STARTED"
+    "locale": "LOCALE"
   }
 }
