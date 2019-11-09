@@ -88,7 +88,7 @@ type Response struct {
 	Card             *Card             `json:"card,omitempty"`
 	Reprompt         *Reprompt         `json:"reprompt,omitempty"`
 	Directives       []*Directive      `json:"directives,omitempty"`
-	ShouldEndSession bool              `json:"shouldEndSession,omitempty"`
+	ShouldEndSession bool              `json:"shouldEndSession"`
 	CanFulfillIntent *CanFulfillIntent `json:"canFulfillIntent,omitempty"`
 }
 
