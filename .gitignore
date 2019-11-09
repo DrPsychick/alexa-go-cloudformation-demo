@@ -3,8 +3,7 @@
 /alfalfa
 /alexa/interactionModels/
 /alexa/skill.json
-/alexa/alexa-demo.zip
-/alexa/alexa-demo-staging.zip
+/alexa/alexa-demo*.zip
 /deploy
 /cloudformation/*-package.yml
 /test/app

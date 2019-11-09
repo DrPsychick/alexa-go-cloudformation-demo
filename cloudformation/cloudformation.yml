@@ -94,7 +94,7 @@ Resources:
             Principal: "*"
             Action:
               - "s3:GetObject"
-            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, "/", !Ref ASKS3Key ] ]
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, "/", !Select [ "0", !Split [ ".", !Ref ASKS3Key ] ], "*" ] ]
 #  AlexaS3Role:
 #    Type: AWS::IAM::Role
 #    Properties:
