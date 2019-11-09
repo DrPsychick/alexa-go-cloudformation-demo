@@ -74,7 +74,7 @@ Resources:
               - "logs:CreateLogGroup"
               - "logs:CreateLogStream"
               - "logs:PutLogEvents"
-            Resource: "arn:aws:rlogs:*:*:*"
+            Resource: "*"
 # workaround: give **PUBLIC** access to Alexa skill.json
   AlexaS3Access:
     Type: AWS::S3::BucketPolicy
