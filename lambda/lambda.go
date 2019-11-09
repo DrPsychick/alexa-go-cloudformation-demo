@@ -79,7 +79,8 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 		}
 
 		b.WithSpeech(text).
-			WithSimpleCard(title, text)
+			WithSimpleCard(title, text).
+			WithShouldEndSession(false)
 	})
 }
 
@@ -105,7 +106,8 @@ func handleHelp(app Application) alexa.Handler {
 		}
 
 		b.WithSpeech(text).
-			WithSimpleCard(title, text)
+			WithSimpleCard(title, text).
+			WithShouldEndSession(false)
 	})
 }
 
