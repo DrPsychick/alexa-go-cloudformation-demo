@@ -36,6 +36,8 @@ type Application interface {
 	Stop(l l10n.LocaleInstance) (string, string, string)
 	SSMLDemo(l l10n.LocaleInstance) (string, string, string)
 	Demo(l l10n.LocaleInstance) (string, string, string)
+	AWSStatus(l l10n.LocaleInstance, r string) (string, string, string)
+	AWSStatusRegionElicit(l l10n.LocaleInstance, r string) (string, string, string)
 	SaySomething(l l10n.LocaleInstance, opts ...alfalfa.ResponseFunc) (alfalfa.ApplicationResponse, error)
 	AWSStatus(l l10n.LocaleInstance, area string, region string) (alfalfa.ApplicationResponse, error)
 }
@@ -212,6 +214,15 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 	})
 }
 
+// SlotValue always returns a string, it will be empty if the slot is not found
+func SlotValue(r *alexa.Request, n string) string {
+	s, ok := r.Intent.Slots[n]
+	if !ok {
+		return ""
+	}
+	return s.Value
+}
+
 // SlotAuthorities always returns a PerAuthority slice
 func SlotAuthorities(r *alexa.Request, n string) []*alexa.PerAuthority {
 	s, ok := r.Intent.Slots[n]
@@ -222,6 +233,14 @@ func SlotAuthorities(r *alexa.Request, n string) []*alexa.PerAuthority {
 		return []*alexa.PerAuthority{}
 	}
 	return s.Resolutions.PerAuthority
+}
+
+func SlotResolutionValue(r *alexa.Request, n string) string {
+	sa := SlotAuthorities(r, n)
+	if len(sa) == 0 || len(sa[0].Values) == 0 || sa[0].Values[0] == nil || sa[0].Values[0].Value == nil {
+		return ""
+	}
+	return sa[0].Values[0].Value.Name
 }
 
 func SlotMatch(r *alexa.Request, n string) bool {
@@ -293,37 +312,43 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			return
 		}
 
-		if SlotNoMatch(r, "Region") {
-			// failed validation -> elicit (but need to provide prompt!)
+		// elicit the slot value through Alexa
+		if !SlotMatch(r, "Region") { // using 'not SlotMatch' because that includes a missing slot
+			// failed validation or missing -> elicit - but need to provide prompt!
+			title, text, ssml := app.AWSStatusRegionElicit(l, SlotValue(r, "Region"))
+
+			if len(l.GetErrors()) > 0 {
+				handleLocaleErrors(b, l.GetErrors())
+				l.ResetErrors()
+				return
+			}
+
+			b.AddDirective(&alexa.Directive{
+				Type:         alexa.DirectiveTypeDialogElicitSlot,
+				SlotToElicit: "Region",
+			}).
+				WithSpeech(ssml).
+				WithSimpleCard(title, text)
+			return
 		}
 
-		region, ok := r.Intent.Slots[loca.TypeRegion]
-		if !ok {
-			// reprompt region slot
-			stats.Inc(app, "handleAWSStatus.error", 1, 1.0, tags...)
-			handleError(b, r, fmt.Errorf("region not defined"))
-			return
-		}
-		re := region.Value
-		if re == "" && region.SlotValue != nil && region.SlotValue.Resolutions != nil {
-			if rpa := region.SlotValue.Resolutions.PerAuthority; rpa != nil && len(rpa) > 0 {
-				if vs := rpa[0].Values; vs != nil && len(vs) > 0 {
-					re = vs[0].Value.Name
-				}
+		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
+		region := SlotResolutionValue(r, "Region")
+
+		// if slot is empty and dialog still open, respond with Dialog:Delegate
+		if region == "" {
+			if r.DialogState == alexa.DialogStateCompleted {
+				// should not happen (Alexa validation would have failed?)
+				// how to respond if it does happen?
+			} else {
+				b.AddDirective(&alexa.Directive{
+					Type: alexa.DirectiveTypeDialogDelegate,
+					// UpdatedIntent:  only needed when changing intent
+				})
 			}
-		}
-		// if not provided, respond with Dialog:Delegate
-		if re == "" && r.DialogState != alexa.DialogStateCompleted {
-			b.AddDirective(&alexa.Directive{
-				Type: alexa.DirectiveTypeDialogDelegate,
-				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
-				//	Name: loca.AWSStatus,
-				//	ConfirmationStatus: "NONE",
-				//	Slots: map[string]Slot,
-				//},
-			})
 			return
 		}
+
 
 		resp, err := app.AWSStatus(loc, ar, re)
 		if err != nil {

@@ -123,6 +123,23 @@ func (b *ResponseBuilder) WithSpeech(text string) *ResponseBuilder {
 	return b
 }
 
+// WithReprompt sets the reprompt output speech on the response
+func (b *ResponseBuilder) WithReprompt(text string) *ResponseBuilder {
+	if strings.HasPrefix(text, "<speak>") && strings.HasSuffix(text, "</speak>") {
+		b.reprompt = &OutputSpeech{
+			Type: "SSML",
+			SSML: text,
+		}
+		return b
+	}
+
+	b.reprompt = &OutputSpeech{
+		Type: "PlainText",
+		Text: "text",
+	}
+	return b
+}
+
 // WithSimpleCard sets a simple card on the response.
 func (b *ResponseBuilder) WithSimpleCard(title, text string) *ResponseBuilder {
 	b.card = &Card{
