@@ -12,5 +12,6 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.5
 	github.com/stretchr/testify v1.3.0
+	github.com/tj/mmake v1.4.0 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0
 )

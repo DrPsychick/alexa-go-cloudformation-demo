@@ -54,6 +54,7 @@ func runMake(c *cli.Context) error {
 	}
 
 	if c.Bool("models") {
+		os.MkdirAll("./alexa/interactionModels/custom", 0755)
 		for l, m := range ms {
 			var filename = "./alexa/interactionModels/custom/" + string(l) + ".json"
 

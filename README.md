@@ -78,8 +78,8 @@ sed -e 's#../deploy#./deploy.zip#' cloudformation/cloudformation.yml > deploy/te
 # this works:
 (GOARCH=amd64 GOOS=linux go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa)
 (cd deploy; 
-cat ../test/lambda_intent_request.json | 
-docker run --rm -i -v "$PWD":/var/task lambci/lambda:go1.x -e DOCKER_LAMBDA_USE_STDIN=1 app
+cat ../test/lambda_intent-slot_request.json |
+docker run --platform linux/amd64 --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x app
 )
 ```
 
