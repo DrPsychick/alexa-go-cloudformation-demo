@@ -15,6 +15,12 @@ const (
 	FlagIsChildDirected   string = "IsChildDirected"
 )
 
+// IntentProvider exposes intents with optional slots
+type IntentProvider interface {
+	GetIntents() map[string]string
+	GetIntentSlots(intent string) map[string]string
+}
+
 // SkillBuilder helps building the SKILL.json.
 type SkillBuilder struct {
 	error        error
@@ -117,6 +123,10 @@ func (s *SkillBuilder) WithModel() *SkillBuilder {
 		WithLocaleRegistry(s.registry)
 	return s
 }
+
+//func (s *SkillBuilder) WithIntentProvider(i IntentProvider) *SkillBuilder {
+
+//}
 
 // Locale returns the corresponding locale builder.
 func (s *SkillBuilder) Locale(locale string) *SkillLocaleBuilder {

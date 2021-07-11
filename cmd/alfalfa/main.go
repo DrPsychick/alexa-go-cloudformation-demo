@@ -17,6 +17,19 @@ var commands = []cli.Command{
 		Name:   "server",
 		Usage:  "Run the lambda server",
 		Action: runServer,
+		Flags:  cmd.Flags{}.Merge(cmd.CommonFlags, cmd.ServerFlags),
+	},
+	{
+		Name:   "lambda",
+		Usage:  "Run the lambda server",
+		Action: runLambda,
+		Flags: cmd.Flags{
+			cli.IntFlag{
+				Name:   "lambda.port",
+				Usage:  "Port on which lambda will listen",
+				EnvVar: "_LAMBDA_SERVER_PORT",
+			},
+		}.Merge(cmd.CommonFlags, cmd.ServerFlags),
 	},
 	{
 		Name:  "make",

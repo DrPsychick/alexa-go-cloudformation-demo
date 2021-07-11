@@ -12,7 +12,7 @@ func WithRequestStats(h alexa.Handler, sable stats.Statable) alexa.Handler {
 			return
 		}
 
-		tags := []interface{}{"intent", r.Intent.Name}
+		tags := []interface{}{"intent", r.Intent.Name, "locale", r.Locale}
 
 		stats.Inc(sable, "request.start", 1, 1.0, tags...)
 		t := stats.Time(sable, "request.time", 1.0, tags...)

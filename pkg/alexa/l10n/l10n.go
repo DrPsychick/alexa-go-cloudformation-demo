@@ -25,6 +25,16 @@ const (
 	KeyPostfixTitle             string = "_Title"
 	KeyPostfixText              string = "_Text"
 	KeyPostfixSSML              string = "_SSML"
+	KeyErrorTitle               string = "Error_Title"
+	KeyErrorText                string = "Error_Text"
+	KeyErrorSSML                string = "Error_SSML"
+	KeyErrorMissingPlaceholder  string = "Error_MissingPlaceholder"
+	KeyErrorNoTranslationTitle  string = "Error_NoTranslation_Title"
+	KeyErrorNoTranslationText   string = "Error_NoTranslation_Text"
+	KeyErrorNoTranslationSSML   string = "Error_NoTranslation_SSML"
+	KeyStopTitle                string = "Stop_Title"
+	KeyStopText                 string = "Stop_Text"
+	KeyStopSSML                 string = "Stop_SSML"
 )
 
 func init() {

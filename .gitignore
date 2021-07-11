@@ -4,6 +4,8 @@
 /alexa/interactionModels/
 /alexa/skill.json
 /alexa/alexa-demo.zip
+/alexa/alexa-demo-staging.zip
 /deploy
 /cloudformation/*-package.yml
 /test/app
+/test/*.log

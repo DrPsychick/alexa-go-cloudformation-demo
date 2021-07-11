@@ -37,15 +37,37 @@
     "intent": {
       "name": "AWSStatus",
       "slots": {
-        "Region": {
+        "AWSRegion": {
           "name": "Region",
           "confirmationStatus": "NONE",
           "source": "USER"
         },
-        "Area": {
+        "AWSArea": {
           "name": "Area",
           "confirmationStatus": "NONE",
-          "source": "USER"
+          "source": "USER",
+          "slotValue": {
+            "type": "Simple",
+            "value": "frankfurt",
+            "resolutions": {
+              "resolutionsPerAuthority": [
+                {
+                  "authority": "amzn1.er-authority.echo-sdk.amzn1.ask.skill.8f065707-2c82-49b4-a78f-6a1fba6c8bae.AWSArea",
+                  "status": {
+                    "code": "ER_SUCCESS_MATCH"
+                  },
+                  "values": [
+                    {
+                      "value": {
+                        "name": "Frankfurt",
+                        "id": "4312d5c8cdda027420c474e2221abc34"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
         }
       }
     }

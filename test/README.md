@@ -39,3 +39,20 @@ ask dialog --replay test/ask_en-US_awsstatus.replay --output test/ask_en-US-awss
 ```bash
 ask validate --skill-id $ASKSkillId --locales en-US,de-DE
 ```
+
+## ask-cli docker
+* always requires a `cli_config` for `ask`, ENV is just to overwrite/select profile
+```shell
+cat << EOF > ask.env
+ASK_DEFAULT_PROFILE=awsdev
+ASK_ACCESS_TOKEN=Atza|IwE...
+ASK_REFRESH_TOKEN=Atzr|IwE...
+ASK_VENDOR_ID=M2...
+EOF
+
+docker run --rm --platform linux/amd64 -it \
+    -v ${PWD}/test:/test -v ${PWD}/test/ask:/home/node/.ask \
+    xavidop/alexa-ask-aws-cli bash
+
+ask dialog --replay /test/ask_de-DE_awsstatus.replay
+```
