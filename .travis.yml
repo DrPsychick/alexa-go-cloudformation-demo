@@ -10,6 +10,7 @@ env:
     - GO111MODULE=on
     - GOARCH=amd64
     - GOOS=linux
+    - DOCKER_CLI_EXPERIMENTAL=enabled
 addons:
   apt:
     update: true
