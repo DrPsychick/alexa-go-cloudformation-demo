@@ -16,10 +16,14 @@ addons:
     update: true
     packages:
       - python3-pip
+      - jq
 services:
   - docker
 
 before_install:
+  - docker_conf=$(sudo cat /etc/docker/daemon.json 2>/dev/null || echo "{}")
+  - docker_conf=$(echo "$docker_conf" |jq '. + {"experimental":true}')
+  - echo "$docker_conf" | sudo tee /etc/docker/daemon.json
   - go mod download
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
