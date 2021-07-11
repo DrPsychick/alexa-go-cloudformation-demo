@@ -17,7 +17,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # TODO: refactor/rethink, how can this be done more elegantly (intents and locales are already defined elsewhere)
 # or is this needed at all? it helps identify missing localization...
 (cd $DIR;
-intentlist="demointent saysomething AWSStatus_0 AWSStatus_1"
+intentlist="stopintent cancelintent helpintent demointent saysomething intent-slot_request AWSStatus_0 AWSStatus_1"
 for t in $intentlist; do
     if [ -n "$request" -a "$request" != "$t" ]; then
         continue

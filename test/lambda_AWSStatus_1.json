@@ -85,7 +85,7 @@
       "name": "AWSStatus",
       "confirmationStatus": "NONE",
       "slots": {
-        "Region": {
+        "AWSRegion": {
           "name": "Region",
           "value": "frankfurt",
           "resolutions": {
@@ -109,7 +109,7 @@
           "confirmationStatus": "NONE",
           "source": "USER"
         },
-        "Area": {
+        "AWSArea": {
           "name": "Area",
           "confirmationStatus": "NONE",
           "source": "USER"

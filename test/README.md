@@ -50,7 +50,9 @@ ASK_REFRESH_TOKEN=Atzr|IwE...
 ASK_VENDOR_ID=M2...
 EOF
 
-docker run --rm --platform linux/amd64 -it --env-file ask.env \
+docker run --rm --platform linux/amd64 -it \
     -v ${PWD}/test:/test -v ${PWD}/test/ask:/home/node/.ask \
     xavidop/alexa-ask-aws-cli bash
+
+ask dialog --replay /test/ask_de-DE_awsstatus.replay
 ```
