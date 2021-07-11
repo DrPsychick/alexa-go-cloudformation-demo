@@ -56,6 +56,10 @@ const (
 	TypeRegionName    string = "Region"
 	TypeRegionValues  string = "AWSRegion_Values"
 	TypeRegionSamples string = "AWSRegion_Samples"
+
+	AMAZONStopSamples   string = "AMAZON.StopIntent_Samples"
+	AMAZONHelpSamples   string = "AMAZON.HelpIntent_Samples"
+	AMAZONCancelSamples string = "AMAZON.CancelIntent_Samples"
 )
 
 var Registry = l10n.NewRegistry()

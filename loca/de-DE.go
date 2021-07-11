@@ -123,5 +123,10 @@ var deDE = &l10n.Locale{
 		RegionValidateText: {
 			"Bitte wähle eine gültige Region, zum Beispiel Frankfurt, Irland, Nord Virginia.",
 		},
+
+		// required for tests to work (delegated to Alexa in real use)
+		AMAZONStopSamples:   {"stop", "beenden"},
+		AMAZONHelpSamples:   {"hilfe", "hilf mir"},
+		AMAZONCancelSamples: {"brich ab"},
 	},
 }

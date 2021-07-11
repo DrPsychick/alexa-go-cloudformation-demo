@@ -60,7 +60,13 @@ Why?
 * Run tests (alexa requests) against your code before you commit or merge with master.
 * Add tests to build pipeline to ensure correct functionality.
 
-### Using aws cli tools
+### Run tests
+```shell
+# will build for linux/amd64 and run multiple requests using lambci/lambda:go1.x docker image
+./test/tests.sh
+```
+
+### Using aws cli tools (OBSOLETE)
 Install prerequisites:
 ```
 pip install --user --upgrade awscli # aws-sam-cli : did not work for me, see below

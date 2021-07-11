@@ -22,10 +22,10 @@ for t in $intentlist; do
     if [ -n "$request" -a "$request" != "$t" ]; then
         continue
     fi
-    cat lambda_${t}.json |grep -A10 '"request"'
+    cat lambda_${t}.json |grep -A20 '"request"'
     for l in de-DE en-US; do
         result=$(sed -e "s/LOCALE/${l}/" lambda_${t}.json | docker run $docker_args --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x app)
-        err=$(echo "$result" | tr ',' '\n' | grep '"content":.*error.*')
+        err=$(echo "$result" | tr ',' '\n' | grep -i '"content":.*error.*')
         if [ -n "$err" ]; then
             failed="${failed}$l $t : $err\n"
         fi

@@ -117,6 +117,10 @@ var enUS = &l10n.Locale{
 		RegionValidateText: {
 			"Please choose a valid region like Frankfurt, Ireland, North Virginia.",
 		},
+		// required for tests to work (delegated to Alexa in real use)
+		AMAZONStopSamples:   {"stop", "terminate"},
+		AMAZONHelpSamples:   {"help", "help me"},
+		AMAZONCancelSamples: {"abort"},
 	},
 	//IntentResponses: l10n.IntentResponses{
 	//	SaySomething: l10n.IntentResponse{
