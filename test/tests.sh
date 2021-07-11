@@ -4,7 +4,7 @@
 
 # determine arch
 docker_args=""
-if [ "$(uname -s)" != "linux" ]; then
+if [ "$(uname -s)" != "Linux" ]; then
     docker_args="--platform linux/amd64"
 fi
 
