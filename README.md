@@ -128,6 +128,22 @@ export ASKVendorId=<VendorId>
 
 ```export $(grep -v '^#' .env | xargs)```
 
+### Lint and test
+```
+go mod download
+go get github.com/tj/mmake/cmd/mmake
+go get golang.org/x/lint/golint
+go get github.com/mattn/goveralls
+alias make=mmake
+
+export GOARCH=amd64
+
+golint ./...
+go vet ./...
+go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
+./test/test.sh
+```
+
 ### Build the lambda function
 * build for `GOOS=Linux` and `GOARCH=amd64` (see above)
 * save it as `./deploy/app` (referenced in the cloudformation template)
