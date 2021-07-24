@@ -218,6 +218,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			handleMissingLocale(b, r.Locale)
 			return
 		}
+
 		// require slot input
 		area, ok := r.Intent.Slots[loca.TypeArea]
 		if !ok {
@@ -226,6 +227,22 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			handleError(b, r, fmt.Errorf("area not defined"))
 			return
 		}
+		ar := area.Value
+		if ar == "" && area.SlotValue != nil && area.SlotValue.Resolutions != nil {
+			if rpa := area.SlotValue.Resolutions.PerAuthority; rpa != nil && len(rpa) > 0 {
+				if vs := rpa[0].Values; vs != nil && len(vs) > 0 {
+					ar = vs[0].Value.Name
+				}
+			}
+		}
+		// if not provided, respond with Dialog:Delegate
+		if ar == "" {
+			b.AddDirective(&alexa.Directive{
+				Type: alexa.DirectiveTypeDialogDelegate,
+			})
+			return
+		}
+
 		region, ok := r.Intent.Slots[loca.TypeRegion]
 		if !ok {
 			// reprompt region slot
@@ -233,38 +250,25 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			handleError(b, r, fmt.Errorf("region not defined"))
 			return
 		}
-
-		//		region := "unknown"
-		//		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
-		//		if rs, ok := r.Intent.Slots["Region"]; ok {
-		//			if rs.Resolutions != nil && rs.Resolutions.PerAuthority != nil {
-		//				if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
-		//					if rsav := rsa[0].Values; len(rsav) > 0 {
-		//						region = rsav[0].Value.Name
-		//					}
-		//				}
-		//			}
-		//		}
-		//		// TODO: if unknown, respond with Dialog:Delegate
-		//		if region == "unknown" {
-		//			b.AddDirective(&alexa.Directive{
-		//				Type: alexa.DirectiveTypeDialogDelegate,
-		//				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
-		//				//	Name: loca.AWSStatus,
-		//				//	ConfirmationStatus: "NONE",
-		//				//	Slots: map[string]Slot,
-		//				//},
-		//			})
-		//			return
-		//		}
-
-		ar := area.Value
-		if ar == "" && area.SlotValue != nil {
-			ar = area.SlotValue.Resolutions.PerAuthority[0].Values[0].Value.Name
-		}
 		re := region.Value
-		if re == "" && region.SlotValue != nil {
-			re = region.SlotValue.Resolutions.PerAuthority[0].Values[0].Value.Name
+		if re == "" && region.SlotValue != nil && region.SlotValue.Resolutions != nil {
+			if rpa := region.SlotValue.Resolutions.PerAuthority; rpa != nil && len(rpa) > 0 {
+				if vs := rpa[0].Values; vs != nil && len(vs) > 0 {
+					re = vs[0].Value.Name
+				}
+			}
+		}
+		// if not provided, respond with Dialog:Delegate
+		if re == "" {
+			b.AddDirective(&alexa.Directive{
+				Type: alexa.DirectiveTypeDialogDelegate,
+				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
+				//	Name: loca.AWSStatus,
+				//	ConfirmationStatus: "NONE",
+				//	Slots: map[string]Slot,
+				//},
+			})
+			return
 		}
 
 		resp, err := app.AWSStatus(loc, ar, re)
