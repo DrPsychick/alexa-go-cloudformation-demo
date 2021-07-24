@@ -77,6 +77,14 @@ type Slot struct {
 	Name        string       `json:"name"`
 	Value       string       `json:"value"`
 	Resolutions *Resolutions `json:"resolutions"`
+	Source      string       `json:"source"`
+	SlotValue   *SlotValue   `json:"slotValue"`
+}
+
+type SlotValue struct {
+	Type        string       `json:"type"`
+	Value       string       `json:"value"`
+	Resolutions *Resolutions `json:"resolutions"`
 }
 
 // Resolutions is an Alexa skill resolution.

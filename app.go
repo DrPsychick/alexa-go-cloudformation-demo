@@ -112,7 +112,7 @@ func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
 func (a *Application) AWSStatus(loc l10n.LocaleInstance, area string, region string) (ApplicationResponse, error) {
 	title := loc.GetAny(loca.AWSStatusTitle)
 	msg := loc.GetAny(loca.AWSStatusText, area, region)
-	msgSSML := loc.GetAny(loca.AWSStatusSSML)
+	msgSSML := loc.GetAny(loca.AWSStatusSSML, area, region)
 
 	if title == "" || msg == "" || msgSSML == "" {
 		return ApplicationResponse{}, ErrorNoTranslation

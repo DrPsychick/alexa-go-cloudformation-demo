@@ -234,31 +234,40 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			return
 		}
 
-//		region := "unknown"
-//		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
-//		if rs, ok := r.Intent.Slots["Region"]; ok {
-//			if rs.Resolutions != nil && rs.Resolutions.PerAuthority != nil {
-//				if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
-//					if rsav := rsa[0].Values; len(rsav) > 0 {
-//						region = rsav[0].Value.Name
-//					}
-//				}
-//			}
-//		}
-//		// TODO: if unknown, respond with Dialog:Delegate
-//		if region == "unknown" {
-//			b.AddDirective(&alexa.Directive{
-//				Type: alexa.DirectiveTypeDialogDelegate,
-//				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
-//				//	Name: loca.AWSStatus,
-//				//	ConfirmationStatus: "NONE",
-//				//	Slots: map[string]Slot,
-//				//},
-//			})
-//			return
-//		}
+		//		region := "unknown"
+		//		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
+		//		if rs, ok := r.Intent.Slots["Region"]; ok {
+		//			if rs.Resolutions != nil && rs.Resolutions.PerAuthority != nil {
+		//				if rsa := rs.Resolutions.PerAuthority; len(rsa) > 0 {
+		//					if rsav := rsa[0].Values; len(rsav) > 0 {
+		//						region = rsav[0].Value.Name
+		//					}
+		//				}
+		//			}
+		//		}
+		//		// TODO: if unknown, respond with Dialog:Delegate
+		//		if region == "unknown" {
+		//			b.AddDirective(&alexa.Directive{
+		//				Type: alexa.DirectiveTypeDialogDelegate,
+		//				//UpdatedIntent: &alexa.Intent{ // only needed when changing intent
+		//				//	Name: loca.AWSStatus,
+		//				//	ConfirmationStatus: "NONE",
+		//				//	Slots: map[string]Slot,
+		//				//},
+		//			})
+		//			return
+		//		}
 
-		resp, err := app.AWSStatus(loc, area.Value, region.Value)
+		ar := area.Value
+		if ar == "" && area.SlotValue != nil {
+			ar = area.SlotValue.Resolutions.PerAuthority[0].Values[0].Value.Name
+		}
+		re := region.Value
+		if re == "" && region.SlotValue != nil {
+			re = region.SlotValue.Resolutions.PerAuthority[0].Values[0].Value.Name
+		}
+
+		resp, err := app.AWSStatus(loc, ar, re)
 		if err != nil {
 			stats.Inc(app, "handleAWSStatus.error", 1, 1.0, tags...)
 			switch err {

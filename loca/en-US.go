@@ -89,9 +89,9 @@ var enUS = &l10n.Locale{
 		// Intent "AWSStatusIntent"
 		AWSStatusSamples: {"how is A.W.S.", "A.W.S. status in {Region}", "about A.W.S."},
 		AWSStatusTitle:   {"AWS Status"},
-		AWSStatusText:    {"AWS Status in region %s: okay"},
+		AWSStatusText:    {"AWS Status in region %s, %s: okay"},
 		AWSStatusSSML: {
-			l10n.Speak("A.W.S. status in %s: all okay"),
+			l10n.Speak("A.W.S. status in %s, %s: all okay"),
 		},
 		AWSStatusTextGood: {
 			"AWS Status in %s: all good",
