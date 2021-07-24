@@ -2,9 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/hamba/cmd"
 	"github.com/hamba/logger"
 	"github.com/hamba/pkg/log"
@@ -36,7 +33,7 @@ func runMake(c *cli.Context) error {
 	// lambda injects supported intents, slots, types
 	newLambda(app, sk)
 
-	ms, err := createModels(sk)
+	ms, err := createSkillModels(sk)
 	if err != nil {
 		return err
 	}
@@ -66,39 +63,4 @@ func runMake(c *cli.Context) error {
 	}
 
 	return nil
-}
-
-// createModels generates and returns a list of Models.
-func createModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
-	m := s.Model().
-		WithDelegationStrategy(alexa.DelegationSkillResponse)
-
-	// we define intents, slots, types in lambda,
-	// that's why `newLambda` must be called before this, if not it will panic.
-
-	// Prompts are part of the Alexa dialog, so independent of lambda.
-	m.WithElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
-	// add variations (texts) to the prompt
-	m.ElicitationPrompt(loca.AWSStatus, loca.TypeRegionName).
-		WithVariation("PlainText").
-		WithVariation("SSML")
-
-	m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
-	m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).
-		WithVariation("SSML")
-
-	// create a Validation prompt, connected to type-values
-	m.WithValidationSlotPrompt(loca.TypeRegionName, alexa.ValidationTypeHasMatch)
-	m.ValidationPrompt(loca.TypeRegionName, alexa.ValidationTypeHasMatch).
-		WithVariation("PlainText")
-
-	// ValidationTypeInSet requires values -> we need to pass a key
-	m.WithValidationSlotPrompt(loca.TypeRegionName, alexa.ValidationTypeInSet, loca.TypeRegionValues)
-	m.ValidationPrompt(loca.TypeRegionName, alexa.ValidationTypeInSet).
-		WithVariation("PlainText")
-
-	//m.Intent(loca.AWSStatus).Slot(loca.TypeRegionName).
-	//	WithValidationRule(alexa.ValidationTypeHasMatch)
-
-	return s.BuildModels()
 }

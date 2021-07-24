@@ -32,7 +32,7 @@ func TestMakeModels(t *testing.T) {
 	sb := newSkill()
 	newLambda(app, sb)
 
-	ms, err := createModels(sb)
+	ms, err := createSkillModels(sb)
 	assert.NoError(t, err)
 
 	for l, m := range ms {

@@ -12,7 +12,7 @@ request=$1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # build for lambda linux
-(cd $DIR/..; export GOOS=linux; export GOARCH=amd64; go build -o ./test/app ./cmd/alfalfa)
+(cd $DIR/..; export GOOS=linux; export GOARCH=amd64; go build -o ./test/app ./cmd/alfalfa) || exit 1
 
 # TODO: refactor/rethink, how can this be done more elegantly (intents and locales are already defined elsewhere)
 # or is this needed at all? it helps identify missing localization...
@@ -39,3 +39,11 @@ if [ -n "$failed" ]; then
     exit 1
 fi
 )
+
+# AFTER deploy!
+#(cd $DIR/..;
+#for dialog in $(ls -1 test/*.replay); do
+#    docker run --rm --platform linux/amd64 -it \
+#        -v ${PWD}/test:/test -v ${PWD}/test/ask:/home/node/.ask \
+#        xavidop/alexa-ask-aws-cli ask dialog --replay /$dialog
+#done)
