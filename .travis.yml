@@ -2,8 +2,8 @@ sudo: false
 
 language: go
 go:
-  - "1.11.x"
   - "1.12.x"
+  - "1.16.x"
   - "1.x"
 env:
   global:
@@ -45,7 +45,7 @@ deploy:
   provider: script
   script: bash cloudformation/deploy.sh
   on:
-    go: "1.12.x"
+    go: "1.x"
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
 

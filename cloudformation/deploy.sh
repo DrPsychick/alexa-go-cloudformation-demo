@@ -13,6 +13,12 @@ if ! check_env_vars "ASKS3Bucket" "ASKS3Key" "ASKClientId" "ASKClientSecret" "AS
     exit 1
 fi
 
+if [ ! -r ./deploy/app ]; then
+    echo "'./deploy/app' does not exist!"
+    echo "you should build it first (see README)"
+    exit 1
+fi
+
 # 3 use cases
 # 1. run within travis on master branch
 # 2. run within travis on development branch
@@ -38,7 +44,7 @@ export ASKSkillTestingInstructions="Demo Alexa skill... $(date +%Y-%m-%d\ %H:%M)
 [ $production -eq 0 ] && echo "ASKSkillTestingInstructions=$ASKSkillTestingInstructions"
 
 # build for local execution (may be different arch)
-[ $production -eq 0 ] && echo "building app to generate skill files..."
+[ $production -eq 0 ] && echo "building app to generate skill files (locally)..."
 (GOARCH=""; GOOS=""; go build -a ./cmd/alfalfa)
 
 # generate Alexa Skill files with local build
@@ -110,8 +116,13 @@ else
 fi
 
 # delete staging stack
-[ $production -eq 0 -a $keep -eq 0 ] && aws cloudformation delete-stack --stack-name $CF_STACK_NAME
+[ $production -eq 0 -a $keep -eq 0 ] && {
+  echo
+  echo "Will DELETE the non-production cloudformation stack in 10 seconds..."
+  echo "Press Ctrl-C to abort (and keep the stack)"
+  sleep 10
+  aws cloudformation delete-stack --stack-name $CF_STACK_NAME
+}
 
-#
 exit $ec
 )

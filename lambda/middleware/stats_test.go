@@ -11,7 +11,7 @@ import (
 )
 
 func TestWithRequestStats(t *testing.T) {
-	tags := []interface{}{"intent", "test-intent"}
+	tags := []interface{}{"intent", "test-intent", "locale", "en-US"}
 	s := new(MockStats)
 	s.On("Inc", "request.start", int64(1), float32(1.0), tags)
 	s.On("Timing", "request.time", mock.Anything, float32(1.0), tags)
@@ -28,6 +28,7 @@ func TestWithRequestStats(t *testing.T) {
 	req := &alexa.Request{
 		Type:   alexa.TypeIntentRequest,
 		Intent: alexa.Intent{Name: "test-intent"},
+		Locale: "en-US",
 	}
 
 	m.Serve(bdr, req)

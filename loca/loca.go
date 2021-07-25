@@ -24,6 +24,9 @@ const (
 	SaySomethingTitle         string = "SaySomething_Title"
 	SaySomethingText          string = "SaySomething_Text"
 	SaySomethingSSML          string = "SaySomething_SSML"
+	SaySomethingUserTitle     string = "SaySomethingUser_Title"
+	SaySomethingUserText      string = "SaySomethingUser_Text"
+	SaySomethingUserSSML      string = "SaySomethingUser_SSML"
 	DemoIntent                string = "DemoIntent"
 	DemoIntentSamples         string = "DemoIntent_Samples"
 	DemoIntentTitle           string = "DemoIntent_Title"
@@ -53,7 +56,14 @@ const (
 	TypeRegionName    string = "Region"
 	TypeRegionValues  string = "AWSRegion_Values"
 	TypeRegionSamples string = "AWSRegion_Samples"
+
+	AMAZONStopSamples   string = "AMAZON.StopIntent_Samples"
+	AMAZONHelpSamples   string = "AMAZON.HelpIntent_Samples"
+	AMAZONCancelSamples string = "AMAZON.CancelIntent_Samples"
 )
+
+// Registry is the global l10n registry
+var Registry = l10n.NewRegistry()
 
 func init() {
 	// default first
@@ -61,7 +71,7 @@ func init() {
 		enUS, deDE, //frFR,
 	}
 	for _, l := range locales {
-		if err := l10n.Register(l); err != nil {
+		if err := Registry.Register(l); err != nil {
 			panic("registration of locale failed")
 		}
 	}

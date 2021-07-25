@@ -23,6 +23,10 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillPrivacyPolicyURL: enUS.GetAll(l10n.KeySkillPrivacyPolicyURL),
 		//l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
 		l10n.KeySkillTestingInstructions: enUS.GetAll(l10n.KeySkillTestingInstructions),
+		l10n.KeyErrorTitle:               {"Fehler"},
+		l10n.KeyErrorText:                {"Es ist folgender Fehler aufgetreten:\n%s"},
+		l10n.KeyErrorSSML:                {"<speak>Es ist ein Fehler aufgetreten.</speak>"},
+		l10n.KeyErrorNoTranslationText:   {"Keine Übersetzung für '%s' gefunden!"},
 
 		// Type values
 		TypeAreaValues:   {"Europa", "Nordamerika", "Südamerika", "Asien"},
@@ -84,13 +88,16 @@ var deDE = &l10n.Locale{
 				"</speak>",
 			"<speak>Ich <emphasis level=\"strong\">grüße</emphasis> dich!</speak>",
 		},
+		SaySomethingUserTitle: {"Hey %s!"},
+		SaySomethingUserText:  {"Mir gefällt dein neues Aussehen, %s."},
+		SaySomethingUserSSML:  {l10n.Speak("Mir <emphasis level=\"strong\">gefällt</emphasis> dein neues Aussehen, %s.")},
 		// Intent "AWSStatusIntent"
 		AWSStatusSamples: {"wie geht's A.W.S.", "A.W.S. Status in {Region}", "A.W.S. Status in {Area}"},
 		AWSStatusTitle:   {"AWS Status"},
-		AWSStatusText:    {"AWS Status in %s: okay"},
+		AWSStatusText:    {"AWS Status in %s, %s: okay"},
 		AWSStatusSSML: {
-			l10n.Speak("A.W.S. Status in Region %s: SNAFU"),
-			l10n.Speak("A.W.S. Status in %s: alles ok"),
+			l10n.Speak("A.W.S. Status in Region %s, %s: SNAFU"),
+			l10n.Speak("A.W.S. Status in %s, %s: alles ok"),
 		},
 		AWSStatusTextGood: {
 			"AWS Status in %s: alles bestens",
@@ -116,5 +123,10 @@ var deDE = &l10n.Locale{
 		RegionValidateText: {
 			"Bitte wähle eine gültige Region, zum Beispiel Frankfurt, Irland, Nord Virginia.",
 		},
+
+		// required for tests to work (delegated to Alexa in real use)
+		AMAZONStopSamples:   {"stop", "beenden"},
+		AMAZONHelpSamples:   {"hilfe", "hilf mir"},
+		AMAZONCancelSamples: {"brich ab"},
 	},
 }
