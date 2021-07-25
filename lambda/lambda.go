@@ -36,7 +36,6 @@ type Application interface {
 	Stop(l l10n.LocaleInstance) (string, string, string)
 	SSMLDemo(l l10n.LocaleInstance) (string, string, string)
 	Demo(l l10n.LocaleInstance) (string, string, string)
-	AWSStatus(l l10n.LocaleInstance, r string) (string, string, string)
 	AWSStatusRegionElicit(l l10n.LocaleInstance, r string) (string, string, string)
 	SaySomething(l l10n.LocaleInstance, opts ...alfalfa.ResponseFunc) (alfalfa.ApplicationResponse, error)
 	AWSStatus(l l10n.LocaleInstance, area string, region string) (alfalfa.ApplicationResponse, error)
@@ -315,11 +314,11 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		// elicit the slot value through Alexa
 		if !SlotMatch(r, "Region") { // using 'not SlotMatch' because that includes a missing slot
 			// failed validation or missing -> elicit - but need to provide prompt!
-			title, text, ssml := app.AWSStatusRegionElicit(l, SlotValue(r, "Region"))
+			title, text, ssml := app.AWSStatusRegionElicit(loc, SlotValue(r, "Region"))
 
-			if len(l.GetErrors()) > 0 {
-				handleLocaleErrors(b, l.GetErrors())
-				l.ResetErrors()
+			if len(loc.GetErrors()) > 0 {
+				handleLocaleErrors(b, loc.GetErrors())
+				loc.ResetErrors()
 				return
 			}
 

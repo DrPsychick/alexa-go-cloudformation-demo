@@ -123,7 +123,18 @@ type PerAuthority struct {
 
 // Resolutions is an Alexa skill resolution.
 type Resolutions struct {
-	PerAuthority []*PerAuthority `json:"resolutionsPerAuthority"`
+	PerAuthority []*struct {
+		Authority string `json:"authority"`
+		Status    struct {
+			Code string `json:"code"`
+		} `json:"status"`
+		Values []struct {
+			Value struct {
+				Name string `json:"name"`
+				ID   string `json:"id"`
+			} `json:"value"`
+		} `json:"values"`
+	} `json:"resolutionsPerAuthority"`
 }
 
 // UpdatedIntent is to update the Intent.
