@@ -37,6 +37,7 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillKeywords: {
 			"demo", "test", "SSML",
 		},
+		l10n.KeyErrorNoTranslationText: {"No translation found for '%s'!"},
 		// Type values
 		TypeAreaValues:   {"Europe", "North America", "Asia Pacific", "South America"},
 		TypeRegionValues: {"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
@@ -88,9 +89,9 @@ var enUS = &l10n.Locale{
 		// Intent "AWSStatusIntent"
 		AWSStatusSamples: {"how is A.W.S.", "A.W.S. status in {Region}", "about A.W.S."},
 		AWSStatusTitle:   {"AWS Status"},
-		AWSStatusText:    {"AWS Status in region %s: okay"},
+		AWSStatusText:    {"AWS Status in region %s, %s: okay"},
 		AWSStatusSSML: {
-			l10n.Speak("A.W.S. status in %s: all okay"),
+			l10n.Speak("A.W.S. status in %s, %s: all okay"),
 		},
 		AWSStatusTextGood: {
 			"AWS Status in %s: all good",
@@ -116,6 +117,10 @@ var enUS = &l10n.Locale{
 		RegionValidateText: {
 			"Please choose a valid region like Frankfurt, Ireland, North Virginia.",
 		},
+		// required for tests to work (delegated to Alexa in real use)
+		AMAZONStopSamples:   {"stop", "terminate"},
+		AMAZONHelpSamples:   {"help", "help me"},
+		AMAZONCancelSamples: {"abort"},
 	},
 	//IntentResponses: l10n.IntentResponses{
 	//	SaySomething: l10n.IntentResponse{

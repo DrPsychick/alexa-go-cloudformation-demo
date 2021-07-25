@@ -21,9 +21,7 @@
       "device": {
         "deviceId": "amzn1.ask.device.AGEA2WJTRFSYU3RGNOYVZ2TDRUQH7P7QDAMFJUTDRKNUREDYBSPSH3OLMRXE7SHSMJUSVIA3RSUGB3UH44TABQQ7DH3RWXY5YFW75QHXJUKDEDMTXUFYHL7SU5UXJU6RLGJ4VLU24IPZXINL25GISFANUVFQ",
         "supportedInterfaces": {}
-      },
-      "apiEndpoint": "https://api.eu.amazonalexa.com",
-      "apiAccessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLjhmMDY1NzA3LTJjODItNDliNC1hNzhmLTZhMWZiYTZjOGJhZSIsImV4cCI6MTU3MjcyODI1OCwiaWF0IjoxNTcyNzI3OTU4LCJuYmYiOjE1NzI3Mjc5NTgsInByaXZhdGVDbGFpbXMiOnsiY29udGV4dCI6IkFBQUFBQUFBQVFCb05HeHlnSHBRRVRJc1lSVXFJbStGSkFFQUFBQUFBQUNvUCsrVkJMUllvRnRxd3FHQ0d5eUEzMER3UFZUZjl1amhxcW1hSEt5Ry8rL3VyOHQyN3AzUlNJb0lzUGRic1N6RWhIZG1wbGFBUmpGeXRKUkdDUTA3N0IvNDFZb2pMK1lDc3M1SHljbE55WGFoNXdYYzV3bXhld3F2a2VsK3NnbkZ3MkdLdFg1UkFIeHhRRUV5Z0dXMFRNL2N1alVad2F4c1pISXZtTTdWYWRva0lYRkUzbDRoWlhraWpDQmtSVUpzM3NVV1hqcGpSRkl3SjRUVG5Kc3dvZ0hZT1VrR2xGVituckNSTlBESnpyU1NJQnpDNlBidXovdDU4YzdYRHo4VXVqQUp0M3ljVGNvaUU5MnZXSjhJVStqcDN2eEFOTnlNV3V2ZEh5ay9nTmIxVE11TndkREJvRjlaZ3BVT0t5UXBmOHQ0QnNtRGFTcnVOdFFLTHN5c25HK1FtQ2ZWTnZCQ2VxczR2ejR2UG9RUm11ZGRITko1c3cvOGdkdkQ4SzZRQTJibSIsImNvbnNlbnRUb2tlbiI6bnVsbCwiZGV2aWNlSWQiOiJhbXpuMS5hc2suZGV2aWNlLkFHRUEyV0pUUkZTWVUzUkdOT1lWWjJURFJVUUg3UDdRREFNRkpVVERSS05VUkVEWUJTUFNIM09MTVJYRTdTSFNNSlVTVklBM1JTVUdCM1VINDRUQUJRUTdESDNSV1hZNVlGVzc1UUhYSlVLREVETVRYVUZZSEw3U1U1VVhKVTZSTEdKNFZMVTI0SVBaWElOTDI1R0lTRkFOVVZGUSIsInVzZXJJZCI6ImFtem4xLmFzay5hY2NvdW50LkFGMzNQRjJRUk1JTkxNSEVRVTdER05GU0UyM1FHU1ZQNUdQWEJZUkhCNTRYWkgzS0NKVUQ0SlpUSU1MRktFRU5ZRU9MUTRTRE40UEE1RUVXVFg1SVVFTkozNElNSzRQVkFYVDZKVFZJRDI2WlBKN0hNS05OQ1IzU1BRUTJNTjM0WDZRR01NQ1RPQUVXUFpSNEZTSlNKNFI3TVFRUFU3WFRJUVBLSkNXNTdON09ZSUJDN0NRTVVPUEhKQTNKWENDVE1ENVZJWjU1VVhYSDJWUSJ9fQ.QoKGB_ZYcAqB7Eo3p1nz_BCGQImmM6tHTAVjQoQ7hKTgkZ-2ELJxOJ83CxlWv-BwYb4GNOtvO-vphU_z8jWbmKbz2NuIhIak7yBza7bs0sSwNlzFUmO5XlRHtgeQmyKtWTphC2o1bLGm06Iv9brorlS5Z9x9Yc6m9LBnIQ35254zX7yiOhm3AyZSTSnXN972k0gf4Ycwl8rQ_iP-a-p8Oib3rCMlzyklprCBlxngbAQ4Vsw0uS7WQTHmLxjomWZPjTFHb1aKhCxLEwcPqQy6ucCCBSaP7tU6rXZmLk0ya7GXSOMC-dMPwpgdjdK43WfFsqLGnx34dKSmOje0D8wtCA"
+      }
     },
     "Viewport": {
       "experiences": [
@@ -85,31 +83,32 @@
       "name": "AWSStatus",
       "confirmationStatus": "NONE",
       "slots": {
-        "Region": {
+        "AWSRegion": {
           "name": "Region",
-          "value": "frankfurt",
-          "resolutions": {
-            "resolutionsPerAuthority": [
-              {
-                "authority": "amzn1.er-authority.echo-sdk.amzn1.ask.skill.8f065707-2c82-49b4-a78f-6a1fba6c8bae.AWSRegion",
-                "status": {
-                  "code": "ER_SUCCESS_MATCH"
-                },
-                "values": [
-                  {
-                    "value": {
-                      "name": "Frankfurt",
-                      "id": "4312d5c8cdda027420c474e2221abc34"
+          "slotValue": {
+            "resolutions": {
+              "resolutionsPerAuthority": [
+                {
+                  "authority": "amzn1.er-authority.echo-sdk.amzn1.ask.skill.8f065707-2c82-49b4-a78f-6a1fba6c8bae.AWSRegion",
+                  "status": {
+                    "code": "ER_SUCCESS_MATCH"
+                  },
+                  "values": [
+                    {
+                      "value": {
+                        "name": "Frankfurt",
+                        "id": "4312d5c8cdda027420c474e2221abc34"
+                      }
                     }
-                  }
-                ]
-              }
-            ]
+                  ]
+                }
+              ]
+            }
           },
           "confirmationStatus": "NONE",
           "source": "USER"
         },
-        "Area": {
+        "AWSArea": {
           "name": "Area",
           "confirmationStatus": "NONE",
           "source": "USER"

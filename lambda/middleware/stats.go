@@ -5,6 +5,7 @@ import (
 	"github.com/hamba/pkg/stats"
 )
 
+// WithRequestStats adds counter and timing stats to intent requests
 func WithRequestStats(h alexa.Handler, sable stats.Statable) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
 		if r.Type != alexa.TypeIntentRequest {
@@ -12,7 +13,7 @@ func WithRequestStats(h alexa.Handler, sable stats.Statable) alexa.Handler {
 			return
 		}
 
-		tags := []interface{}{"intent", r.Intent.Name}
+		tags := []interface{}{"intent", r.Intent.Name, "locale", r.Locale}
 
 		stats.Inc(sable, "request.start", 1, 1.0, tags...)
 		t := stats.Time(sable, "request.time", 1.0, tags...)

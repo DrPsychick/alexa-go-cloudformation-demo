@@ -22,9 +22,14 @@ For `l10n`, see [README.md](pkg/alexa/l10n/README.md)
 
 
 ## code structure
+### commands
 * `/cmd/alfalfa` -> `./deploy/app` is the default command (for lambda)
 * `app make --skill` is the command to generate the Alexa skill json file
 * `app make --models` is the command to generate the Alexa model json files
+* `app` just runs the lambda function, waiting for a request
+
+## what goes where?
+* [ ] link to markdown file, explaining code structure, separation of concerns, interfaces, ... 
 
 ## golang context
 * don't "misuse" context to pass logger etc. instead make the application satisfy the required interfaces
@@ -33,9 +38,12 @@ For `l10n`, see [README.md](pkg/alexa/l10n/README.md)
 ## Install `ask cli` on macOS
 requires Homebrew
 ```
+brew install ask-cli
+# alternatively via npm:
 brew install npm
 npm install -g ask-cli
 ```
+
 Setup ask-cli
 ```
 ask init
@@ -47,8 +55,48 @@ ask util generate-lwa-tokens --no-browser
 # take the `refresh_token` for `ASKRefreshToken` below
 ```
 
+## Test lambda locally
+Why? 
+* Run tests (alexa requests) against your code before you commit or merge with master.
+* Add tests to build pipeline to ensure correct functionality.
+
+### Run tests
+```shell
+# will build for linux/amd64 and run multiple requests using lambci/lambda:go1.x docker image
+./test/tests.sh
+```
+
+### Using aws cli tools (OBSOLETE)
+Install prerequisites:
+```
+pip install --user --upgrade awscli # aws-sam-cli : did not work for me, see below
+docker pull lambci/lambda:go1.x
+```
+
+`sam` requires a zip file
+```
+(cd deploy; zip deploy.zip app)
+sed -e 's#../deploy#./deploy.zip#' cloudformation/cloudformation.yml > deploy/template.yml
+# now we have a template that points to our zip file
+# did not work for me, but apparently should (some problem launching the docker?):
+#sam local invoke --debug -t deploy/template.yml "LambdaFunction"
+
+# this works:
+(GOARCH=amd64 GOOS=linux go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa)
+(cd deploy; 
+cat ../test/lambda_intent-slot_request.json |
+docker run --platform linux/amd64 --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x app
+)
+```
+
 ## Test cloudformation locally
-* you need to setup AWS credentials which can be used to execute cloudformation (see `~/.aws/credentials`)
+Why?
+* run the cloudformation template regularly while you develop and add to it
+* run the cloudformation template from your local machine to test
+* ensure that the aws user has all the permissions needed to create the resources in the stack
+
+What you need:
+* setup AWS credentials which can be used to execute cloudformation (see `~/.aws/credentials`)
 * this cloudformation user needs permissions for
   * `cloudformation`
   * `lambda`
@@ -80,16 +128,44 @@ export ASKVendorId=<VendorId>
 
 ```export $(grep -v '^#' .env | xargs)```
 
+### Lint and test
+```
+go mod download
+go get github.com/tj/mmake/cmd/mmake
+go get golang.org/x/lint/golint
+go get github.com/mattn/goveralls
+alias make=mmake
+
+export GOARCH=amd64
+
+golint ./...
+go vet ./...
+go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
+./test/tests.sh
+```
+
+### Build the lambda function
+* build for `GOOS=Linux` and `GOARCH=amd64` (see above)
+* save it as `./deploy/app` (referenced in the cloudformation template)
+```
+make build
+mkdir deploy
+mv ./alfalfa ./deploy/app
+```
+
 ### Run `deploy.sh`
 (same as in `.travis.yml`)
 * make deploy directory
 * build lambda for cloudformation 
 * run `deploy.sh`
     * generates `skill.json` and `<locale>.json` files for Alexa and uploads to S3
-    * deploys via cloudformation (staging or production)
-        * packages lambda function and uploads to S3
-    * deletes the cloudformation stack after **staging** deploy (unless you set `KEEP_STACK=1`)
-    * you **can** set a different `CF_STACK_NAME`, but `deploy.sh` will still append `-staging`...
+    * deploys via cloudformation (branch `master` -> production, else staging)
+        * staging: append `-staging` to cloudformation stack name
+        * packages Alexa skill and uploads it to S3
+        * cloudformation packages `deploy/app` and uploads it to S3
+    * if staging: (branch != `master`) 
+      * deletes the cloudformation stack 10 seconds after deploy (unless you set `KEEP_STACK=1`)
+      * you **can** set a different `CF_STACK_NAME`, but `deploy.sh` will still append `-staging`...
 
 ```bash
 mkdir deploy
@@ -107,7 +183,7 @@ ask validate -s amzn1.ask.skill.xxx -l en-US > result_en-US.json
 Before first "release"
 * [x] simplify skill and models definition with helper functions -> `gen` package
     * [x] basic structure refactoring + documentation
-* [ ] Integrate intent definition and locale with lambda (simplify app/lambda)
+* [ ] Integrate intent definition and locale with lambda (simplify app/lambda) [Issue #36](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/36)
 * [x] add documentation and examples
     * [x] use case examples (see [Usage](Usage.md))
     * [ ] simple app example explanation in docs

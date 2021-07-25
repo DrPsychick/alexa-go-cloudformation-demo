@@ -68,7 +68,7 @@ const (
 // Intent is the Alexa skill intent.
 type Intent struct {
 	Name               string             `json:"name"`
-	Slots              map[string]*Slot   `json:"slots"`
+	Slots              map[string]*Slot    `json:"slots"`
 	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
 }
 
@@ -76,7 +76,16 @@ type Intent struct {
 type Slot struct {
 	Name        string       `json:"name"`
 	Value       string       `json:"value"`
-	Resolutions *Resolutions `json:"resolutions,omitempty"`
+	Resolutions *Resolutions `json:"resolutions"`
+	Source      string       `json:"source"`
+	SlotValue   *SlotValue   `json:"slotValue"`
+}
+
+// SlotValue defines the value or values captured by the slot
+type SlotValue struct {
+	Type        string       `json:"type"`
+	Value       string       `json:"value"`
+	Resolutions *Resolutions `json:"resolutions"`
 }
 
 type AuthorityValueValue struct {

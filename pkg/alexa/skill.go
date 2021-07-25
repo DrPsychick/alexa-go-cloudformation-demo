@@ -181,8 +181,8 @@ const (
 
 // Apis of the Alexa Skill https://developer.amazon.com/de/docs/smapi/skill-manifest.html#apis
 type Apis struct {
-	AlexaForBusiness *AlexaForBusiness `json:"alexaForBusiness,omitempty"`
-	Custom           *Custom           `json:"custom,omitempty"`
+	ForBusiness *ForBusiness `json:"alexaForBusiness,omitempty"`
+	Custom      *Custom      `json:"custom,omitempty"`
 	//SmartHome *SmartHome `json:"smartHome"`
 	FlashBriefing *FlashBriefing `json:"flashBriefing"`
 	//Health     *Health	`json:"health"`
@@ -191,8 +191,8 @@ type Apis struct {
 	Interfaces []string `json:"interfaces,omitempty"`
 }
 
-// AlexaForBusiness API are available in English only
-type AlexaForBusiness struct {
+// ForBusiness API are available in English only
+type ForBusiness struct {
 	Endpoint   *Endpoint             `json:"endpoint"`
 	Regions    *map[Region]RegionDef `json:"regions"`
 	Interfaces []Interface           `json:"interfaces,omitempty"`
