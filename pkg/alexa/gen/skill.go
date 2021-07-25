@@ -86,7 +86,7 @@ func (s *SkillBuilder) AddCountries(cs []string) *SkillBuilder {
 	return s
 }
 
-// WithLocale creates, registers locale and adds a new locale builder.
+// AddLocale creates, registers locale and adds a new locale builder.
 func (s *SkillBuilder) AddLocale(locale string, opts ...l10n.RegisterFunc) *SkillBuilder {
 	if err := s.registry.Register(l10n.NewLocale(locale), opts...); err != nil {
 		s.error = err
@@ -117,7 +117,7 @@ func (s *SkillBuilder) WithDefaultLocaleTestingInstructions(instructions string)
 	return s
 }
 
-// AddModel creates and returns a new modelBuilder attached to the skill.
+// WithModel creates and returns a new modelBuilder attached to the skill.
 func (s *SkillBuilder) WithModel() *SkillBuilder {
 	s.model = NewModelBuilder().
 		WithLocaleRegistry(s.registry)

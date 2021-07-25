@@ -15,6 +15,7 @@ import (
 //
 //}
 
+// NewSkill returns a configured SkillBuilder
 func NewSkill() *gen.SkillBuilder {
 	return gen.NewSkillBuilder().
 		WithLocaleRegistry(loca.Registry).
@@ -23,7 +24,7 @@ func NewSkill() *gen.SkillBuilder {
 
 }
 
-// createModels generates and returns a list of Models.
+// CreateSkillModels generates and returns a list of Models.
 func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	m := s.Model().
 		WithDelegationStrategy(alexa.DelegationSkillResponse)

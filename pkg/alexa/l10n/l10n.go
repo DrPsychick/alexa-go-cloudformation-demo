@@ -61,14 +61,18 @@ type LocaleInstance interface {
 	ResetErrors()
 }
 
+// Speak wraps text in <speak> tags
 // TODO: move to `ssml` package
 func Speak(text string) string {
 	return "<speak>" + text + "</speak>"
 }
+
+// UseVoice wraps text in tags using a specific voice
 func UseVoice(voice string, text string) string {
 	return `<voice name="` + voice + `">` + text + `</voice>`
 }
 
+// UseVoiceLang wraps text in tags using a specific voice and language
 func UseVoiceLang(voice string, language string, text string) string {
 	return `<voice name="` + voice + `"><lang xml:lang="` + language + `">` + text + `</lang></voice>`
 }

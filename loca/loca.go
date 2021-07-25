@@ -62,6 +62,7 @@ const (
 	AMAZONCancelSamples string = "AMAZON.CancelIntent_Samples"
 )
 
+// Registry is the global l10n registry
 var Registry = l10n.NewRegistry()
 
 func init() {

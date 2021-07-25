@@ -13,14 +13,18 @@ import (
 )
 
 const (
+	// SSMLDemoIntent is the name of the SSL demo intent
 	SSMLDemoIntent = "SSMLDemoIntent"
-	DemoIntent     = "DemoIntent"
+	// DemoIntent is the name of the demo intent
+	DemoIntent = "DemoIntent"
 )
 
 var (
+	// ErrorLocaleNotFound is the error text for missing locale
 	ErrorLocaleNotFound = errors.New("locale not found")
 )
 
+// Application defines the interface used of the app
 type Application interface {
 	log.Loggable
 	stats.Statable
@@ -34,6 +38,7 @@ type Application interface {
 	AWSStatus(l l10n.LocaleInstance, area string, region string) (alfalfa.ApplicationResponse, error)
 }
 
+// NewMux returns a new handler for defined intents
 func NewMux(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	mux := alexa.NewServerMux()
 	sb.WithModel()

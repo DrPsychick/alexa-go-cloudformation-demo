@@ -65,18 +65,18 @@ func Serve(h Handler) error {
 
 // ServeMux is an Alexa request multiplexer.
 type ServeMux struct {
-	mu           sync.RWMutex
-	types        map[RequestType]Handler
-	intents      map[string]Handler
-	intent_slots map[string]string
+	mu          sync.RWMutex
+	types       map[RequestType]Handler
+	intents     map[string]Handler
+	intentSlots map[string]string
 }
 
-// NewServeMux creates a new serve mux.
+// NewServerMux creates a new server mux.
 func NewServerMux() *ServeMux {
 	return &ServeMux{
-		types:        map[RequestType]Handler{},
-		intents:      map[string]Handler{},
-		intent_slots: map[string]string{},
+		types:       map[RequestType]Handler{},
+		intents:     map[string]Handler{},
+		intentSlots: map[string]string{},
 	}
 }
 
@@ -119,7 +119,7 @@ func (m *ServeMux) HandleRequestType(requestType RequestType, handler Handler) {
 	m.mu.Unlock()
 }
 
-// HandleRequestType registers the handler function for the given request type.
+// HandleRequestTypeFunc registers the handler function for the given request type.
 //
 // Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
 func (m *ServeMux) HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
@@ -139,7 +139,7 @@ func (m *ServeMux) HandleIntent(intent string, handler Handler) {
 	m.mu.Unlock()
 }
 
-// HandleIntent registers the handler function for the given intent.
+// HandleIntentFunc registers the handler function for the given intent.
 func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 	m.HandleIntent(intent, handler)
 }
@@ -157,28 +157,29 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
 	h.Serve(b, r)
 }
 
-var DefaultServeMux = NewServerMux()
+// DefaultServerMux is the default mux
+var DefaultServerMux = NewServerMux()
 
 // HandleRequestType registers the handler for the given request type on the DefaultServeMux.
 //
 // Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
 func HandleRequestType(requestType RequestType, handler Handler) {
-	DefaultServeMux.HandleRequestType(requestType, handler)
+	DefaultServerMux.HandleRequestType(requestType, handler)
 }
 
-// HandleRequestType registers the handler function for the given request type on the DefaultServeMux.
+// HandleRequestTypeFunc registers the handler function for the given request type on the DefaultServeMux.
 //
 // Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
 func HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
-	DefaultServeMux.HandleRequestTypeFunc(requestType, handler)
+	DefaultServerMux.HandleRequestTypeFunc(requestType, handler)
 }
 
 // HandleIntent registers the handler for the given intent on the DefaultServeMux.
 func HandleIntent(intent string, handler Handler) {
-	DefaultServeMux.HandleIntent(intent, handler)
+	DefaultServerMux.HandleIntent(intent, handler)
 }
 
-// HandleIntent registers the handler function for the given intent on the DefaultServeMux.
+// HandleIntentFunc registers the handler function for the given intent on the DefaultServeMux.
 func HandleIntentFunc(intent string, handler HandlerFunc) {
-	DefaultServeMux.HandleIntentFunc(intent, handler)
+	DefaultServerMux.HandleIntentFunc(intent, handler)
 }

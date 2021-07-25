@@ -4,16 +4,18 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 )
 
+// Application defines the interface to the app
 type Application interface {
 	Handle()
 	Help() (string, string)
 }
 
-// NewMux creates a new Mux instance.
+// NewServer creates a new Mux instance.
 func NewServer(app Application) alexa.Handler {
 	return nil
 }
 
+// Handler defines the handler function
 type Handler func(alexa.RequestEnvelope) (alexa.ResponseEnvelope, error)
 
 // HandleRequest is the lambda hander

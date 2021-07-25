@@ -573,7 +573,7 @@ type modelValidationRule struct {
 	valuesKey      string
 }
 
-// NewModelValidationBuilder returns an initialized modelValidationBuilder
+// NewModelValidationRulesBuilder returns an initialized modelValidationBuilder
 func NewModelValidationRulesBuilder() *modelValidationRulesBuilder {
 	return &modelValidationRulesBuilder{
 		registry: l10n.NewRegistry(),
@@ -665,6 +665,7 @@ func NewConfirmationPromptBuilder(intent string, slot string) *modelPromptBuilde
 	}
 }
 
+// NewValidationPromptBuilder returns an initialized modelPromptBuilder for Validation.
 func NewValidationPromptBuilder(slot string, t string) *modelPromptBuilder {
 	return &modelPromptBuilder{
 		registry:   l10n.NewRegistry(),

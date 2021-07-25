@@ -81,6 +81,7 @@ type Slot struct {
 	SlotValue   *SlotValue   `json:"slotValue"`
 }
 
+// SlotValue defines the value or values captured by the slot
 type SlotValue struct {
 	Type        string       `json:"type"`
 	Value       string       `json:"value"`

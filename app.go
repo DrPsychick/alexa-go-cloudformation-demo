@@ -9,23 +9,28 @@ import (
 )
 
 var (
+	// ErrorNoTranslation is the text for missing translations
 	ErrorNoTranslation = errors.New("translation missing")
 )
 
+// Config defines additional data that can be provided and used in requests
 type Config struct {
 	user string
 }
 
 //type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
 
+// ResponseFunc defines the function that can optionally be passed to responses
 type ResponseFunc func(cfg *Config)
 
+// WithUser returns a ReponseFunc that sets the user
 func WithUser(user string) ResponseFunc {
 	return func(cfg *Config) {
 		cfg.user = user
 	}
 }
 
+// ApplicationResponse defines the reponse returned to lambda
 type ApplicationResponse struct {
 	Title  string
 	Text   string
@@ -63,7 +68,7 @@ func (a *Application) Stop(l l10n.LocaleInstance) (string, string, string) {
 	return l.GetAny(loca.StopTitle), l.GetAny(loca.Stop), ""
 }
 
-// SimpleResponse handles simple title + text response.
+// SaySomething handles simple title + text response.
 func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error) {
 	// run all ResponseFuncs
 	cfg := &Config{}
@@ -109,6 +114,7 @@ func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
 	return l.Get(loca.DemoIntentTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
 }
 
+// AWSStatus responds with messages containting 2 slots
 func (a *Application) AWSStatus(loc l10n.LocaleInstance, area string, region string) (ApplicationResponse, error) {
 	title := loc.GetAny(loca.AWSStatusTitle)
 	msg := loc.GetAny(loca.AWSStatusText, area, region)
