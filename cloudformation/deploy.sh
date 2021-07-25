@@ -52,10 +52,10 @@ mkdir -p ./alexa/interactionModels/custom
 ./alfalfa make --skill
 ./alfalfa make --models
 # TODO: rename skill on stage deploy
-if [ $production -eq 0 ]; then
-    sed -e 's#"name": "\(.*\)"#"name": "\1 (stage)"#' -i "" ./alexa/skill.json
-    sed -e 's#"invocationName": "\(.*\)"#"invocationName": "\1 stage"#' -i "" ./alexa/interactionModels/custom/*.json
-fi
+#if [ $production -eq 0 ]; then
+#    sed -e 's#"name": "\(.*\)"#"name": "\1 (stage)"#' -i "" ./alexa/skill.json
+#    sed -e 's#"invocationName": "\(.*\)"#"invocationName": "\1 stage"#' -i "" ./alexa/interactionModels/custom/*.json
+#fi
 
 # zip and upload it to S3
 (cd ./alexa; zip -r $ASKS3Key ./)

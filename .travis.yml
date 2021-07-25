@@ -15,6 +15,8 @@ addons:
     update: true
     packages:
       - python3-pip
+      - python3-setuptools
+      - python3-wheel
 services:
   - docker
 
@@ -34,8 +36,8 @@ script:
 
 # is NOT executed on pull requests!
 before_deploy:
-  - pip install --upgrade pip
-  - pip install --upgrade setuptools awscli
+  - pip3 install --upgrade pip
+  - pip3 install --upgrade setuptools awscli
   - mkdir ./deploy
   - go build -a -ldflags "-s -X main.version=$(git describe --tags --always)" -o ./deploy/app ./cmd/alfalfa
 
