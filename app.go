@@ -23,7 +23,7 @@ type Config struct {
 // ResponseFunc defines the function that can optionally be passed to responses
 type ResponseFunc func(cfg *Config)
 
-// WithUser returns a ReponseFunc that sets the user
+// WithUser returns a ResponseFunc that sets the user
 func WithUser(user string) ResponseFunc {
 	return func(cfg *Config) {
 		cfg.user = user
