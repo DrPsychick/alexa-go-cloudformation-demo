@@ -703,7 +703,7 @@ func (p *modelPromptBuilder) BuildLocale(locale string) (alexa.ModelPrompt, erro
 			p.id, locale)
 	}
 	mp := alexa.ModelPrompt{
-		Id:         p.id,
+		ID:         p.id,
 		Variations: []alexa.PromptVariation{},
 	}
 	for _, v := range p.variations {
