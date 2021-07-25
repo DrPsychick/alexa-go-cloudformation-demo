@@ -68,7 +68,7 @@ const (
 // Intent is the Alexa skill intent.
 type Intent struct {
 	Name               string             `json:"name"`
-	Slots              map[string]*Slot    `json:"slots"`
+	Slots              map[string]*Slot   `json:"slots"`
 	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
 }
 
