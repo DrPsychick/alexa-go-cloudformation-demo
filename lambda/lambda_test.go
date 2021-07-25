@@ -85,7 +85,7 @@ func TestLambda_HandleSaySomething2_ErrorNoTranslation(t *testing.T) {
 		Type:   alexa.TypeIntentRequest,
 		Intent: alexa.Intent{
 			Name: loca.SaySomething,
-			Slots: map[string]alexa.Slot{
+			Slots: map[string]*alexa.Slot{
 				"AWSArea": {
 					Name:  "Area",
 					Value: "Europa",

@@ -348,8 +348,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 			return
 		}
 
-
-		resp, err := app.AWSStatus(loc, ar, re)
+		resp, err := app.AWSStatus(loc, ar, region)
 		if err != nil {
 			stats.Inc(app, "handleAWSStatus.error", 1, 1.0, tags...)
 			switch err {
