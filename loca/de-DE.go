@@ -92,7 +92,7 @@ var deDE = &l10n.Locale{
 		SaySomethingUserText:  {"Mir gefällt dein neues Aussehen, %s."},
 		SaySomethingUserSSML:  {l10n.Speak("Mir <emphasis level=\"strong\">gefällt</emphasis> dein neues Aussehen, %s.")},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples: {"wie geht's A.W.S.", "sag mir den A.W.S. Status in {Area}, {Region}", "nach dem A.W.S. Status in {Area}, {Region}"},
+		AWSStatusSamples: {"wie geht's A.W.S.", "sag mir den A.W.S. Status in {Area} {Region}", "nach dem A.W.S. Status in {Area} {Region}"},
 		AWSStatusTitle:   {"AWS Status"},
 		AWSStatusText:    {"AWS Status in %s, %s: okay"},
 		AWSStatusSSML: {
