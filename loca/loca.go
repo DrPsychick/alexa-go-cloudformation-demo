@@ -40,6 +40,8 @@ const (
 	AWSStatusTextGood         string = "AWSStatus_Text_Good"
 	AWSStatusSSMLGood         string = "AWSStatus_SSML_Good"
 	AWSStatusAreaSamples      string = "AWSStatus_Area_Samples"
+	AWSStatusAreaElicitText   string = "AWSStatus_Area_Elicit_Text"
+	AWSStatusAreaElicitSSML   string = "AWSStatus_Area_Elicit_SSML"
 	AWSStatusRegionSamples    string = "AWSStatus_Region_Samples"
 	AWSStatusRegionElicitText string = "AWSStatus_Region_Elicit_Text"
 	AWSStatusRegionElicitSSML string = "AWSStatus_Region_Elicit_SSML"
