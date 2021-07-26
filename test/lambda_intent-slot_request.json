@@ -33,17 +33,57 @@
     "type": "IntentRequest",
     "requestId": "amzn1.echo-api.request.1234",
     "timestamp": "2016-10-27T21:06:28Z",
-    "locale": "de-DE",
+    "locale": "LOCALE",
     "intent": {
       "name": "AWSStatus",
       "slots": {
-        "AWSArea": {
+        "Area": {
           "name": "Area",
-          "value": "Europa"
+          "value": "Europa",
+          "resolutions": {
+            "resolutionsPerAuthority": [
+              {
+                "authority": "amzn1.er-authority.echo-sdk.amzn1.ask.skill.850c7642-4af0-40d3-a60d-691b3491029e.AWSArea",
+                "status": {
+                  "code": "ER_SUCCESS_MATCH"
+                },
+                "values": [
+                  {
+                    "value": {
+                      "name": "Europa",
+                      "id": "06e415f918c577f07328a52e24f75d43"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "confirmationStatus": "NONE",
+          "source": "USER"
         },
-        "AWSRegion": {
+        "Region": {
           "name": "Region",
-          "value": "Frankfurt"
+          "value": "Frankfurt",
+          "resolutions": {
+            "resolutionsPerAuthority": [
+              {
+                "authority": "amzn1.er-authority.echo-sdk.amzn1.ask.skill.850c7642-4af0-40d3-a60d-691b3491029e.AWSRegion",
+                "status": {
+                  "code": "ER_SUCCESS_MATCH"
+                },
+                "values": [
+                  {
+                    "value": {
+                      "name": "Frankfurt",
+                      "id": "06e415f918c577f07328a52e24f75d43"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "confirmationStatus": "NONE",
+          "source": "USER"
         }
       }
     }

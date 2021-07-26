@@ -106,7 +106,7 @@ func handleHelp(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(alexa.HelpIntent)
 
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		loc, err := l10n.Resolve(r.Locale)
+		loc, err := loca.Registry.Resolve(r.Locale)
 		if err != nil {
 			handleMissingLocale(b, r.Locale)
 			return
@@ -288,7 +288,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		}
 
 		// require slot input
-		area, ok := r.Intent.Slots[loca.TypeArea]
+		area, ok := r.Intent.Slots[loca.TypeAreaName]
 		if !ok {
 			// reprompt area slot
 			stats.Inc(app, "request.error", 1, 1.0, tags...)
@@ -312,9 +312,9 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		}
 
 		// elicit the slot value through Alexa
-		if !SlotMatch(r, "Region") { // using 'not SlotMatch' because that includes a missing slot
+		if !SlotMatch(r, loca.TypeRegionName) { // using 'not SlotMatch' because that includes a missing slot
 			// failed validation or missing -> elicit - but need to provide prompt!
-			title, text, ssml := app.AWSStatusRegionElicit(loc, SlotValue(r, "Region"))
+			title, text, ssml := app.AWSStatusRegionElicit(loc, SlotValue(r, loca.TypeRegionName))
 
 			if len(loc.GetErrors()) > 0 {
 				handleLocaleErrors(b, loc.GetErrors())
@@ -324,7 +324,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 
 			b.AddDirective(&alexa.Directive{
 				Type:         alexa.DirectiveTypeDialogElicitSlot,
-				SlotToElicit: "Region",
+				SlotToElicit: loca.TypeRegionName,
 			}).
 				WithSpeech(ssml).
 				WithSimpleCard(title, text)
@@ -332,7 +332,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		}
 
 		// -> r.Intent.Slots["Region"].Resolutions.PerAuthority[0].Values[0].Value.Name
-		region := SlotResolutionValue(r, "Region")
+		region := SlotResolutionValue(r, loca.TypeRegionName)
 
 		// if slot is empty and dialog still open, respond with Dialog:Delegate
 		if region == "" {

@@ -37,18 +37,18 @@
     "intent": {
       "name": "AWSStatus",
       "slots": {
-        "AWSRegion": {
+        "Region": {
           "name": "Region",
           "confirmationStatus": "NONE",
           "source": "USER"
         },
-        "AWSArea": {
+        "Area": {
           "name": "Area",
           "confirmationStatus": "NONE",
           "source": "USER",
           "slotValue": {
             "type": "Simple",
-            "value": "frankfurt",
+            "value": "Europa",
             "resolutions": {
               "resolutionsPerAuthority": [
                 {
@@ -59,7 +59,7 @@
                   "values": [
                     {
                       "value": {
-                        "name": "Frankfurt",
+                        "name": "Europa",
                         "id": "4312d5c8cdda027420c474e2221abc34"
                       }
                     }
