@@ -3,7 +3,7 @@ Transform: 'AWS::Serverless-2016-10-31'
 # REQUIRED for AWS::Serverless
 Parameters:
   LambdaStatsDSN:
-    Default: l2met://
+    Default: l2met://console
     Description: Demo to pass cloudformation parameter to ENV of lambda
     Type: String
   LambdaLogLevel:

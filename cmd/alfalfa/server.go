@@ -19,6 +19,7 @@ func runServer(c *cli.Context) error {
 		log.Fatal(ctx, err.Error())
 	}
 
+	// TODO!
 	//s := rpc.NewServer(app)
 	log.Info(ctx, fmt.Sprintf("Starting lambda server"))
 	// if err :=

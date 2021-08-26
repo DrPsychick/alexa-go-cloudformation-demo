@@ -100,7 +100,7 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 		Title:  tit,
 		Text:   msg,
 		Speech: msgSSML,
-		End:    false,
+		End:    true,
 	}, nil
 }
 
