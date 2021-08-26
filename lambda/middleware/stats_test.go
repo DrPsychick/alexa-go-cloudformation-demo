@@ -11,7 +11,7 @@ import (
 )
 
 func TestWithRequestStats(t *testing.T) {
-	tags := []interface{}{"intent", "test-intent", "locale", "en-US"}
+	tags := []interface{}{"locale", "en-US", "intent", "test-intent"}
 	s := new(MockStats)
 	s.On("Inc", "request.start", int64(1), float32(1.0), tags)
 	s.On("Timing", "request.time", mock.Anything, float32(1.0), tags)
@@ -36,8 +36,12 @@ func TestWithRequestStats(t *testing.T) {
 	s.AssertExpectations(t)
 }
 
-func TestWithRequestStats_DoesNotStatNonIntentRequests(t *testing.T) {
+func TestWithRequestStats_NonIntentRequests(t *testing.T) {
+	tags := []interface{}{"locale", "en-US"}
 	s := new(MockStats)
+	s.On("Inc", "request.start", int64(1), float32(1.0), tags)
+	s.On("Timing", "request.time", mock.Anything, float32(1.0), tags)
+	s.On("Inc", "request.complete", int64(1), float32(1.0), tags)
 	m := middleware.WithRequestStats(alexa.HandlerFunc(
 		func(b *alexa.ResponseBuilder, r *alexa.Request) {
 
@@ -47,7 +51,8 @@ func TestWithRequestStats_DoesNotStatNonIntentRequests(t *testing.T) {
 
 	bdr := &alexa.ResponseBuilder{}
 	req := &alexa.Request{
-		Type: alexa.TypeLaunchRequest,
+		Type:   alexa.TypeLaunchRequest,
+		Locale: "en-US",
 	}
 
 	m.Serve(bdr, req)
