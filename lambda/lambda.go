@@ -286,6 +286,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		WithType(loca.TypeRegion)
 
 	sb.Model().Intent(loca.AWSStatus).
+		WithDelegation(alexa.DelegationSkillResponse).
 		WithSlot(loca.TypeAreaName, loca.TypeArea).
 		WithSlot(loca.TypeRegionName, loca.TypeRegion)
 
