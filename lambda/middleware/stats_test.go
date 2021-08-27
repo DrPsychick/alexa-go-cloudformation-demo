@@ -11,7 +11,7 @@ import (
 )
 
 func TestWithRequestStats(t *testing.T) {
-	tags := []interface{}{"locale", "en-US", "intent", "test-intent"}
+	tags := []interface{}{"locale", "en-US", "intent", "test-intent", "test-slot", "slot-value"}
 	s := new(MockStats)
 	s.On("Inc", "request.start", int64(1), float32(1.0), tags)
 	s.On("Timing", "request.time", mock.Anything, float32(1.0), tags)
@@ -27,8 +27,16 @@ func TestWithRequestStats(t *testing.T) {
 	bdr := &alexa.ResponseBuilder{}
 	req := &alexa.RequestEnvelope{
 		Request: &alexa.Request{
-			Type:   alexa.TypeIntentRequest,
-			Intent: alexa.Intent{Name: "test-intent"},
+			Type: alexa.TypeIntentRequest,
+			Intent: alexa.Intent{
+				Name: "test-intent",
+				Slots: map[string]*alexa.Slot{
+					"test-slot": {
+						Name:  "test-slot",
+						Value: "slot-value",
+					},
+				},
+			},
 			Locale: "en-US",
 		},
 	}

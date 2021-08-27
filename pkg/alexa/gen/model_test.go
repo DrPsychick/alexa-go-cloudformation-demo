@@ -171,6 +171,7 @@ func TestModelBuilder_WithSlotPrompt(t *testing.T) {
 	mb.WithConfirmationSlotPrompt("Intent", "Slot")
 	mb.WithElicitationSlotPrompt("Intent", "Slot")
 	ms1, err3 := mb.Build()
+
 	// error locale not registered
 	ms2, err4 := mb.BuildLocale("en-US")
 
@@ -180,6 +181,7 @@ func TestModelBuilder_WithSlotPrompt(t *testing.T) {
 
 	assert.NoError(t, err3)
 	assert.Empty(t, ms1)
+
 	assert.Error(t, err4)
 	assert.Empty(t, ms2)
 }
@@ -358,13 +360,15 @@ func TestModelSlotBuilder_WithPrompt(t *testing.T) {
 	msb := gen.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType").
 		WithLocaleRegistry(registry).
 		WithElicitationPrompt("elicitation_id").
-		WithConfirmationPrompt("confirmation_id")
+		WithConfirmationPrompt("confirmation_id").
+		WithElicitation(false).
+		WithConfirmation(true)
 
 	ds, err := msb.BuildDialogSlot("en-US")
 
 	assert.NoError(t, err)
 	assert.Equal(t, "elicitation_id", ds.Prompts.Elicitation)
-	assert.True(t, ds.Elicitation)
+	assert.False(t, ds.Elicitation)
 	assert.Equal(t, "confirmation_id", ds.Prompts.Confirmation)
 	assert.True(t, ds.Confirmation)
 }

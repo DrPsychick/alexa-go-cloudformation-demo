@@ -171,28 +171,28 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 }
 
 //// DefaultServerMux is the default mux
-//var DefaultServerMux = NewServerMux()
+var DefaultServerMux = NewServerMux(log.Null)
+
+// HandleRequestType registers the handler for the given request type on the DefaultServeMux.
 //
-//// HandleRequestType registers the handler for the given request type on the DefaultServeMux.
-////
-//// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
-//func HandleRequestType(requestType RequestType, handler Handler) {
-//	DefaultServerMux.HandleRequestType(requestType, handler)
-//}
+// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
+func HandleRequestType(requestType RequestType, handler Handler) {
+	DefaultServerMux.HandleRequestType(requestType, handler)
+}
+
+// HandleRequestTypeFunc registers the handler function for the given request type on the DefaultServeMux.
 //
-//// HandleRequestTypeFunc registers the handler function for the given request type on the DefaultServeMux.
-////
-//// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
-//func HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
-//	DefaultServerMux.HandleRequestTypeFunc(requestType, handler)
-//}
-//
-//// HandleIntent registers the handler for the given intent on the DefaultServeMux.
-//func HandleIntent(intent string, handler Handler) {
-//	DefaultServerMux.HandleIntent(intent, handler)
-//}
-//
-//// HandleIntentFunc registers the handler function for the given intent on the DefaultServeMux.
-//func HandleIntentFunc(intent string, handler HandlerFunc) {
-//	DefaultServerMux.HandleIntentFunc(intent, handler)
-//}
+// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
+func HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
+	DefaultServerMux.HandleRequestTypeFunc(requestType, handler)
+}
+
+// HandleIntent registers the handler for the given intent on the DefaultServeMux.
+func HandleIntent(intent string, handler Handler) {
+	DefaultServerMux.HandleIntent(intent, handler)
+}
+
+// HandleIntentFunc registers the handler function for the given intent on the DefaultServeMux.
+func HandleIntentFunc(intent string, handler HandlerFunc) {
+	DefaultServerMux.HandleIntentFunc(intent, handler)
+}

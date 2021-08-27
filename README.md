@@ -183,12 +183,12 @@ ask validate -s amzn1.ask.skill.xxx -l en-US > result_en-US.json
 Before first "release"
 * [x] simplify skill and models definition with helper functions -> `gen` package
     * [x] basic structure refactoring + documentation
-* [ ] Integrate intent definition and locale with lambda (simplify app/lambda) [Issue #36](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/36)
+* [x] Integrate intent definition and locale with lambda (simplify app/lambda) [Issue #36](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/36)
 * [x] add documentation and examples
     * [x] use case examples (see [Usage](Usage.md))
     * [ ] simple app example explanation in docs
-* [ ] add test cases for lambda (request/response)
-    * [ ] [Issue #25](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/25)
+* [x] add test cases for lambda (request/response)
+    * [x] [Issue #25](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/25)
 * [x] Add staging deploy (validation) [Issue #30](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/30)
     * [x] **decide**: staging deploy -> review+fix **or** try to validate as much as possible before deploying (see [Issue #17](https://github.com/DrPsychick/alexa-go-cloudformation-demo/issues/17))
 * [x] implement and integrate `l10n` package
