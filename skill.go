@@ -39,6 +39,9 @@ func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 		WithVariation("PlainText").
 		WithVariation("SSML")
 
+	// do not require elicitation for Region
+	m.Intent(loca.AWSStatus).Slot(loca.TypeRegionName).WithElicitation(false)
+
 	// this "breaks" the `ask dialog --replay` testing as alexa asks the user to validate the input
 	//m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
 	//m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).

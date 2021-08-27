@@ -435,10 +435,22 @@ func (s *modelSlotBuilder) WithLocaleSamples(locale string, samples []string) *m
 	return s
 }
 
+// WithConfirmation sets confirmationRequired for the slot
+func (s *modelSlotBuilder) WithConfirmation(c bool) *modelSlotBuilder {
+	s.withConfirmation = c
+	return s
+}
+
 // WithConfirmationPrompt requires confirmation and links to the prompt id.
 func (s *modelSlotBuilder) WithConfirmationPrompt(id string) *modelSlotBuilder {
 	s.withConfirmation = true
 	s.confirmationPrompt = id
+	return s
+}
+
+// WithElicitation sets elicitationRequired for the slot
+func (s *modelSlotBuilder) WithElicitation(e bool) *modelSlotBuilder {
+	s.withElicitation = e
 	return s
 }
 
