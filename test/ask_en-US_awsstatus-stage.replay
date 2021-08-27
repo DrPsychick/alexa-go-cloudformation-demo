@@ -1,0 +1,11 @@
+{
+  "skillId": "amzn1.ask.skill.850c7642-4af0-40d3-a60d-691b3491029e",
+  "locale": "en-US",
+  "type": "text",
+  "userInput": [
+    "Alexa open voice demo stage",
+    "tell me the A.W.S. status in Ireland",
+    "Europe",
+    ".quit"
+  ]
+}

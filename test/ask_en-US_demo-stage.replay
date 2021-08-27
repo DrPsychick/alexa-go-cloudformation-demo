@@ -1,0 +1,12 @@
+{
+  "skillId": "amzn1.ask.skill.850c7642-4af0-40d3-a60d-691b3491029e",
+  "locale": "en-US",
+  "type": "text",
+  "userInput": [
+    "Alexa open voice demo stage",
+    "Help",
+    "go ahead",
+    "say something",
+    ".quit"
+  ]
+}

@@ -17,7 +17,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # TODO: refactor/rethink, how can this be done more elegantly (intents and locales are already defined elsewhere)
 # or is this needed at all? it helps identify missing localization...
 (cd $DIR;
-intentlist="stopintent cancelintent helpintent demointent saysomething intent-slot_request AWSStatus_0 AWSStatus_1 AWSStatus_error"
+intentlist="stopintent cancelintent helpintent demointent saysomething emptyintent intent-slot_request AWSStatus AWSStatus_0 AWSStatus_1"
 for t in $intentlist; do
     if [ -n "$request" -a "$request" != "$t" ]; then
         continue
@@ -42,8 +42,8 @@ fi
 
 # AFTER deploy!
 #(cd $DIR/..;
-#for dialog in $(ls -1 test/*.replay); do
+#for dialog in $(ls -1 test/*-stage.replay); do
 #    docker run --rm --platform linux/amd64 -it \
 #        -v ${PWD}/test:/test -v ${PWD}/test/ask:/home/node/.ask \
-#        xavidop/alexa-ask-aws-cli ask dialog --replay /$dialog
+#        xavidop/alexa-ask-aws-cli ask dialog --replay /$dialog --skill-out-io /$dialog.json
 #done)
