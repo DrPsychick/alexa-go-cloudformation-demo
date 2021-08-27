@@ -22,11 +22,14 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 		l,
 		l2met.New(l, ""),
 	)
-	r := &alexa.Request{
-		Locale: "de-DE",
-		Type:   alexa.TypeIntentRequest,
-		Intent: alexa.Intent{
-			Name: loca.SaySomething,
+	r := &alexa.RequestEnvelope{
+		Version: "1.0",
+		Request: &alexa.Request{
+			Locale: "de-DE",
+			Type:   alexa.TypeIntentRequest,
+			Intent: alexa.Intent{
+				Name: loca.SaySomething,
+			},
 		},
 	}
 	sb := gen.NewSkillBuilder()
@@ -49,11 +52,13 @@ func TestLambda_HandleSaySomething2_ErrorNoLocale(t *testing.T) {
 		l,
 		l2met.New(l, ""),
 	)
-	r := &alexa.Request{
-		Locale: "en-US",
-		Type:   alexa.TypeIntentRequest,
-		Intent: alexa.Intent{
-			Name: loca.SaySomething,
+	r := &alexa.RequestEnvelope{
+		Request: &alexa.Request{
+			Locale: "en-US",
+			Type:   alexa.TypeIntentRequest,
+			Intent: alexa.Intent{
+				Name: loca.SaySomething,
+			},
 		},
 	}
 	sb := gen.NewSkillBuilder()
@@ -80,19 +85,21 @@ func TestLambda_HandleSaySomething2_ErrorNoTranslation(t *testing.T) {
 		l,
 		l2met.New(l, ""),
 	)
-	r := &alexa.Request{
-		Locale: "en-US",
-		Type:   alexa.TypeIntentRequest,
-		Intent: alexa.Intent{
-			Name: loca.SaySomething,
-			Slots: map[string]*alexa.Slot{
-				"AWSArea": {
-					Name:  "Area",
-					Value: "Europa",
-				},
-				"AWSRegion": {
-					Name:  "Region",
-					Value: "Frankfurt",
+	r := &alexa.RequestEnvelope{
+		Request: &alexa.Request{
+			Locale: "en-US",
+			Type:   alexa.TypeIntentRequest,
+			Intent: alexa.Intent{
+				Name: loca.SaySomething,
+				Slots: map[string]*alexa.Slot{
+					"AWSArea": {
+						Name:  "Area",
+						Value: "Europa",
+					},
+					"AWSRegion": {
+						Name:  "Region",
+						Value: "Frankfurt",
+					},
 				},
 			},
 		},

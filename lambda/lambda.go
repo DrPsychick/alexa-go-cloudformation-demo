@@ -44,7 +44,7 @@ type Application interface {
 
 // NewMux returns a new handler for defined intents
 func NewMux(app Application, sb *gen.SkillBuilder) alexa.Handler {
-	mux := alexa.NewServerMux()
+	mux := alexa.NewServerMux(app.Logger())
 	sb.WithModel()
 
 	mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
@@ -62,8 +62,8 @@ func NewMux(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	return mux
 }
 
-func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.Request) {
-	intent := r.Intent.Name
+func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+	intent := r.Request.Intent.Name
 	if intent == loca.DemoIntent || intent == loca.SaySomething || intent == loca.AWSStatus {
 		b.WithCanFulfillIntent(&alexa.CanFulfillIntent{
 			CanFulfill: "YES",
@@ -77,10 +77,10 @@ func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.Request) {
 }
 
 func handleLaunch(app Application) alexa.HandlerFunc {
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		loc, err := loca.Registry.Resolve(r.Locale)
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+		loc, err := loca.Registry.Resolve(r.Request.Locale)
 		if err != nil {
-			handleMissingLocale(b, r.Locale)
+			handleMissingLocale(b, r.Request.Locale)
 			return
 		}
 		title, text := app.Launch(loc)
@@ -98,7 +98,7 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 }
 
 func handleEnd(app Application) alexa.HandlerFunc {
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
 	})
 }
 
@@ -106,10 +106,10 @@ func handleEnd(app Application) alexa.HandlerFunc {
 func handleHelp(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(alexa.HelpIntent)
 
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		loc, err := loca.Registry.Resolve(r.Locale)
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+		loc, err := loca.Registry.Resolve(r.Request.Locale)
 		if err != nil {
-			handleMissingLocale(b, r.Locale)
+			handleMissingLocale(b, r.Request.Locale)
 			return
 		}
 		title, text, _ := app.Help(loc)
@@ -130,10 +130,10 @@ func handleStop(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(alexa.StopIntent)
 	sb.Model().WithIntent(alexa.CancelIntent)
 
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		loc, err := loca.Registry.Resolve(r.Locale)
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+		loc, err := loca.Registry.Resolve(r.Request.Locale)
 		if err != nil {
-			handleMissingLocale(b, r.Locale)
+			handleMissingLocale(b, r.Request.Locale)
 			return
 		}
 		title, text, _ := app.Stop(loc)
@@ -152,10 +152,10 @@ func handleStop(app Application, sb *gen.SkillBuilder) alexa.Handler {
 
 func handleSSMLResponse(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(loca.DemoIntent)
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		loc, err := loca.Registry.Resolve(r.Locale)
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+		loc, err := loca.Registry.Resolve(r.Request.Locale)
 		if err != nil {
-			handleMissingLocale(b, r.Locale)
+			handleMissingLocale(b, r.Request.Locale)
 			return
 		}
 
@@ -176,10 +176,10 @@ func handleSSMLResponse(app Application, sb *gen.SkillBuilder) alexa.Handler {
 func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(loca.SaySomething)
 
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		loc, err := loca.Registry.Resolve(r.Locale)
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+		loc, err := loca.Registry.Resolve(r.Request.Locale)
 		if err != nil {
-			handleMissingLocale(b, r.Locale)
+			handleMissingLocale(b, r.Request.Locale)
 			return
 		}
 
@@ -215,8 +215,8 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 }
 
 // SlotValue always returns a string, it will be empty if the slot is not found
-func SlotValue(r *alexa.Request, n string) string {
-	s, ok := r.Intent.Slots[n]
+func SlotValue(r *alexa.RequestEnvelope, n string) string {
+	s, ok := r.Request.Intent.Slots[n]
 	if !ok {
 		return ""
 	}
@@ -224,8 +224,8 @@ func SlotValue(r *alexa.Request, n string) string {
 }
 
 // SlotAuthorities always returns a PerAuthority slice
-func SlotAuthorities(r *alexa.Request, n string) []*alexa.PerAuthority {
-	s, ok := r.Intent.Slots[n]
+func SlotAuthorities(r *alexa.RequestEnvelope, n string) []*alexa.PerAuthority {
+	s, ok := r.Request.Intent.Slots[n]
 	if !ok {
 		return []*alexa.PerAuthority{}
 	}
@@ -235,7 +235,7 @@ func SlotAuthorities(r *alexa.Request, n string) []*alexa.PerAuthority {
 	return s.Resolutions.PerAuthority
 }
 
-func SlotResolutionFirstValue(r *alexa.Request, n string) string {
+func SlotResolutionFirstValue(r *alexa.RequestEnvelope, n string) string {
 	sa := SlotAuthorities(r, n)
 	if len(sa) == 0 || len(sa[0].Values) == 0 || sa[0].Values[0] == nil || sa[0].Values[0].Value == nil {
 		return ""
@@ -245,7 +245,7 @@ func SlotResolutionFirstValue(r *alexa.Request, n string) string {
 
 // func SlotResolutionValues
 
-func SlotMatch(r *alexa.Request, n string) bool {
+func SlotMatch(r *alexa.RequestEnvelope, n string) bool {
 	// TODO: what about multiple Authorities?
 	sa := SlotAuthorities(r, n)
 	if len(sa) == 0 {
@@ -257,7 +257,7 @@ func SlotMatch(r *alexa.Request, n string) bool {
 	return sa[0].Status.Code == alexa.ResolutionStatusMatch
 }
 
-func SlotNoMatch(r *alexa.Request, n string) bool {
+func SlotNoMatch(r *alexa.RequestEnvelope, n string) bool {
 	sa := SlotAuthorities(r, n)
 	if len(sa) == 0 {
 		return false
@@ -280,13 +280,13 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		WithSlot(loca.TypeAreaName, loca.TypeArea).
 		WithSlot(loca.TypeRegionName, loca.TypeRegion)
 
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		tags := []interface{}{"intent", loca.AWSStatus, "locale", r.Locale}
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+		tags := []interface{}{"intent", loca.AWSStatus, "locale", r.Request.Locale}
 
-		loc, err := loca.Registry.Resolve(r.Locale)
+		loc, err := loca.Registry.Resolve(r.Request.Locale)
 		if err != nil {
 			stats.Inc(app, "handleAWSStatus.error", 1, 1.0, tags...)
-			handleMissingLocale(b, r.Locale)
+			handleMissingLocale(b, r.Request.Locale)
 			return
 		}
 
@@ -313,7 +313,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 
 		// if slot is empty and dialog still open, respond with Dialog:Delegate
 		if area == "" {
-			if r.DialogState == alexa.DialogStateCompleted {
+			if r.Request.DialogState == alexa.DialogStateCompleted {
 				// should not happen (Alexa validation would have failed?)
 				// how to respond if it does happen?
 			} else {
@@ -350,7 +350,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 
 		// if slot is empty and dialog still open, respond with Dialog:Delegate
 		if region == "" {
-			if r.DialogState == alexa.DialogStateCompleted {
+			if r.Request.DialogState == alexa.DialogStateCompleted {
 				// should not happen (Alexa validation would have failed?)
 				// how to respond if it does happen?
 			} else {
@@ -396,8 +396,8 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 }
 
 // TODO: handle errors individually to be of more use to the user
-func handleError(b *alexa.ResponseBuilder, r *alexa.Request, err error) {
-	loc := localeDefaults(r.Locale)
+func handleError(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope, err error) {
+	loc := localeDefaults(r.Request.Locale)
 	switch err {
 	default:
 		b.WithSimpleCard(loc.GetAny(l10n.KeyErrorTitle), loc.GetAny(l10n.KeyErrorText, err.Error())).
