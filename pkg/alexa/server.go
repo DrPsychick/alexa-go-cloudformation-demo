@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/hamba/pkg/log"
 	"github.com/json-iterator/go"
 	"sync"
 )
@@ -61,18 +62,25 @@ func Serve(h Handler) error {
 // ServeMux is an Alexa request multiplexer.
 type ServeMux struct {
 	mu          sync.RWMutex
+	logger      log.Logger
 	types       map[RequestType]Handler
 	intents     map[string]Handler
 	intentSlots map[string]string
 }
 
 // NewServerMux creates a new server mux.
-func NewServerMux() *ServeMux {
+func NewServerMux(log log.Logger) *ServeMux {
 	return &ServeMux{
+		logger:      log,
 		types:       map[RequestType]Handler{},
 		intents:     map[string]Handler{},
 		intentSlots: map[string]string{},
 	}
+}
+
+// Logger returns the application logger.
+func (m *ServeMux) Logger() log.Logger {
+	return m.logger
 }
 
 // Handler returns the matched handler for a request, or an error.
@@ -149,6 +157,8 @@ func fallbackHandler(err error) HandlerFunc {
 
 // Serve serves the matched handler.
 func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
+	json, _ := jsoniter.Marshal(r)
+	m.logger.Debug(string(json))
 	h, err := m.Handler(r)
 	if err != nil {
 		h = fallbackHandler(err)
@@ -156,31 +166,33 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	}
 
 	h.Serve(b, r)
+	json, _ = jsoniter.Marshal(b.Build())
+	m.logger.Debug(string(json))
 }
 
-// DefaultServerMux is the default mux
-var DefaultServerMux = NewServerMux()
-
-// HandleRequestType registers the handler for the given request type on the DefaultServeMux.
+//// DefaultServerMux is the default mux
+//var DefaultServerMux = NewServerMux()
 //
-// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
-func HandleRequestType(requestType RequestType, handler Handler) {
-	DefaultServerMux.HandleRequestType(requestType, handler)
-}
-
-// HandleRequestTypeFunc registers the handler function for the given request type on the DefaultServeMux.
+//// HandleRequestType registers the handler for the given request type on the DefaultServeMux.
+////
+//// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
+//func HandleRequestType(requestType RequestType, handler Handler) {
+//	DefaultServerMux.HandleRequestType(requestType, handler)
+//}
 //
-// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
-func HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
-	DefaultServerMux.HandleRequestTypeFunc(requestType, handler)
-}
-
-// HandleIntent registers the handler for the given intent on the DefaultServeMux.
-func HandleIntent(intent string, handler Handler) {
-	DefaultServerMux.HandleIntent(intent, handler)
-}
-
-// HandleIntentFunc registers the handler function for the given intent on the DefaultServeMux.
-func HandleIntentFunc(intent string, handler HandlerFunc) {
-	DefaultServerMux.HandleIntentFunc(intent, handler)
-}
+//// HandleRequestTypeFunc registers the handler function for the given request type on the DefaultServeMux.
+////
+//// Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
+//func HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
+//	DefaultServerMux.HandleRequestTypeFunc(requestType, handler)
+//}
+//
+//// HandleIntent registers the handler for the given intent on the DefaultServeMux.
+//func HandleIntent(intent string, handler Handler) {
+//	DefaultServerMux.HandleIntent(intent, handler)
+//}
+//
+//// HandleIntentFunc registers the handler function for the given intent on the DefaultServeMux.
+//func HandleIntentFunc(intent string, handler HandlerFunc) {
+//	DefaultServerMux.HandleIntentFunc(intent, handler)
+//}

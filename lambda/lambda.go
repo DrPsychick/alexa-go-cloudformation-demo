@@ -44,7 +44,7 @@ type Application interface {
 
 // NewMux returns a new handler for defined intents
 func NewMux(app Application, sb *gen.SkillBuilder) alexa.Handler {
-	mux := alexa.NewServerMux()
+	mux := alexa.NewServerMux(app.Logger())
 	sb.WithModel()
 
 	mux.HandleRequestTypeFunc(alexa.TypeLaunchRequest, handleLaunch(app))
