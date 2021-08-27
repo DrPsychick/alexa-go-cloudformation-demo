@@ -13,7 +13,7 @@ import _ "github.com/joho/godotenv/autoload"
 var version = "v0.0.1"
 
 // used when launched without command (e.g. lambda)
-var default_flags = cmd.Flags{
+var defaultFlags = cmd.Flags{
 	cli.IntFlag{
 		Name:   "lambda.port",
 		Usage:  "Port on which lambda will listen",
@@ -70,7 +70,7 @@ var commands = []cli.Command{
 				Usage:  "Port on which lambda will listen",
 				EnvVar: "_LAMBDA_SERVER_PORT",
 			},
-		}.Merge(default_flags, cmd.ServerFlags),
+		}.Merge(defaultFlags, cmd.ServerFlags),
 	},
 	{
 		Name:  "make",
@@ -98,7 +98,7 @@ func main() {
 	app.Version = version
 	app.Commands = commands
 	// need to be set for default Action
-	app.Flags = default_flags
+	app.Flags = defaultFlags
 	app.Action = runLambda
 
 	err := app.Run(os.Args)

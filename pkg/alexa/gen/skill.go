@@ -21,7 +21,7 @@ type IntentProvider interface {
 	GetIntentSlots(intent string) map[string]string
 }
 
-// SkillBuilder helps building the SKILL.json.
+// SkillBuilder helps to build the SKILL.json.
 type SkillBuilder struct {
 	error        error
 	registry     l10n.LocaleRegistry
