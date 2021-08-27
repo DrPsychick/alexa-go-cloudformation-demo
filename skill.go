@@ -39,9 +39,10 @@ func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 		WithVariation("PlainText").
 		WithVariation("SSML")
 
-	m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
-	m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).
-		WithVariation("SSML")
+	// this "breaks" the `ask dialog --replay` testing as alexa asks the user to validate the input
+	//m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
+	//m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).
+	//	WithVariation("SSML")
 
 	// create a Validation prompt, connected to type-values
 	m.WithValidationSlotPrompt(loca.TypeRegionName, alexa.ValidationTypeHasMatch)
