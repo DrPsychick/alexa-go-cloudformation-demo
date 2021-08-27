@@ -18,17 +18,19 @@ func TestWithRequestStats(t *testing.T) {
 	s.On("Inc", "request.complete", int64(1), float32(1.0), tags)
 
 	m := middleware.WithRequestStats(alexa.HandlerFunc(
-		func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
 
 		}),
 		stats.NewMockStatable(s),
 	)
 
 	bdr := &alexa.ResponseBuilder{}
-	req := &alexa.Request{
-		Type:   alexa.TypeIntentRequest,
-		Intent: alexa.Intent{Name: "test-intent"},
-		Locale: "en-US",
+	req := &alexa.RequestEnvelope{
+		Request: &alexa.Request{
+			Type:   alexa.TypeIntentRequest,
+			Intent: alexa.Intent{Name: "test-intent"},
+			Locale: "en-US",
+		},
 	}
 
 	m.Serve(bdr, req)
@@ -43,16 +45,18 @@ func TestWithRequestStats_NonIntentRequests(t *testing.T) {
 	s.On("Timing", "request.time", mock.Anything, float32(1.0), tags)
 	s.On("Inc", "request.complete", int64(1), float32(1.0), tags)
 	m := middleware.WithRequestStats(alexa.HandlerFunc(
-		func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
 
 		}),
 		stats.NewMockStatable(s),
 	)
 
 	bdr := &alexa.ResponseBuilder{}
-	req := &alexa.Request{
-		Type:   alexa.TypeLaunchRequest,
-		Locale: "en-US",
+	req := &alexa.RequestEnvelope{
+		Request: &alexa.Request{
+			Type:   alexa.TypeLaunchRequest,
+			Locale: "en-US",
+		},
 	}
 
 	m.Serve(bdr, req)

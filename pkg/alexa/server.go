@@ -11,14 +11,14 @@ import (
 
 // Handler represents an alexa request handler.
 type Handler interface {
-	Serve(*ResponseBuilder, *Request)
+	Serve(*ResponseBuilder, *RequestEnvelope)
 }
 
 // HandlerFunc is an adapter allowing a function to be used as a handler.
-type HandlerFunc func(*ResponseBuilder, *Request)
+type HandlerFunc func(*ResponseBuilder, *RequestEnvelope)
 
 // Serve serves the request.
-func (fn HandlerFunc) Serve(b *ResponseBuilder, r *Request) {
+func (fn HandlerFunc) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	fn(b, r)
 }
 
@@ -34,12 +34,8 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	// TODO: panics when we get a wrong request
-	req.Request.Context = req.Context
-	req.Request.Session = req.Session
-
 	builder := &ResponseBuilder{}
-	s.Handler.Serve(builder, req.Request)
+	s.Handler.Serve(builder, req)
 
 	return jsoniter.Marshal(builder.Build())
 }
@@ -80,21 +76,21 @@ func NewServerMux() *ServeMux {
 }
 
 // Handler returns the matched handler for a request, or an error.
-func (m *ServeMux) Handler(r *Request) (Handler, error) {
+func (m *ServeMux) Handler(r *RequestEnvelope) (Handler, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	if h, ok := m.types[r.Type]; ok {
+	if h, ok := m.types[r.Request.Type]; ok {
 		return h, nil
 	}
 
-	if r.Type != TypeIntentRequest {
-		return nil, fmt.Errorf("server: unknown intent type %s", r.Type)
+	if r.Request.Type != TypeIntentRequest {
+		return nil, fmt.Errorf("server: unknown intent type %s", r.Request.Type)
 	}
 
-	h, ok := m.intents[r.Intent.Name]
+	h, ok := m.intents[r.Request.Intent.Name]
 	if !ok {
-		return nil, fmt.Errorf("server: unknown intent %s", r.Intent.Name)
+		return nil, fmt.Errorf("server: unknown intent %s", r.Request.Intent.Name)
 	}
 
 	return h, nil
@@ -145,14 +141,14 @@ func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 
 // fallbackHandler returns a fatal error card
 func fallbackHandler(err error) HandlerFunc {
-	return HandlerFunc(func(b *ResponseBuilder, r *Request) {
+	return HandlerFunc(func(b *ResponseBuilder, r *RequestEnvelope) {
 		b.WithSimpleCard("Fatal error", "error: "+err.Error()).
 			WithShouldEndSession(true)
 	})
 }
 
 // Serve serves the matched handler.
-func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
+func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	h, err := m.Handler(r)
 	if err != nil {
 		h = fallbackHandler(err)

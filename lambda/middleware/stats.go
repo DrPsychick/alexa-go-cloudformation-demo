@@ -9,14 +9,14 @@ import (
 
 // WithRequestStats adds counter and timing stats to intent requests
 func WithRequestStats(h alexa.Handler, sable stats.Statable) alexa.Handler {
-	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
-		tags := []interface{}{"locale", r.Locale}
+	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
+		tags := []interface{}{"locale", r.Request.Locale}
 
-		if r.Type == alexa.TypeIntentRequest {
-			tags = append(tags, "intent", r.Intent.Name)
+		if r.Request.Type == alexa.TypeIntentRequest {
+			tags = append(tags, "intent", r.Request.Intent.Name)
 		}
-		if len(r.Intent.Slots) > 0 {
-			for _, s := range r.Intent.Slots {
+		if len(r.Request.Intent.Slots) > 0 {
+			for _, s := range r.Request.Intent.Slots {
 				v := lambda.SlotValue(r, s.Name)
 				if v != "" {
 					tags = append(tags, strings.ToLower(s.Name), v)

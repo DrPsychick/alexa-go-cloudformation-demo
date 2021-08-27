@@ -11,14 +11,14 @@ import (
 
 func TestWithRecovery(t *testing.T) {
 	h := middleware.WithRecovery(
-		alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
 			panic("panic")
 		}),
 		log.NewMockLoggable(log.Null),
 	)
 
 	bdr := &alexa.ResponseBuilder{}
-	req := &alexa.Request{}
+	req := &alexa.RequestEnvelope{}
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -31,14 +31,14 @@ func TestWithRecovery(t *testing.T) {
 
 func TestWithRecovery_Error(t *testing.T) {
 	h := middleware.WithRecovery(
-		alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.Request) {
+		alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
 			panic(errors.New("panic"))
 		}),
 		log.NewMockLoggable(log.Null),
 	)
 
 	bdr := &alexa.ResponseBuilder{}
-	req := &alexa.Request{}
+	req := &alexa.RequestEnvelope{}
 
 	defer func() {
 		if err := recover(); err != nil {
