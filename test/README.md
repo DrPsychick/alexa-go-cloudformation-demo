@@ -5,9 +5,17 @@ cat test/lambda_intent_request.json |
   docker run --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 lambci/lambda:go1.x deploy/app
 ```
 
-## Alexa Skill
-You can simulate a full dialog with Alexa, once the skill is deployed.
+## Simulate Alexa Skill
+You can simulate a "full" dialog with Alexa, once the skill is deployed.
 So this should be done automatically at the end of a successful staging deploy, before deleting the stack again.
+
+### Limitations:
+The `ask dialog` seems to not support dialogs with Alexa that don't involve lambda.
+* You cannot simulate a delegated slot confirmation ("Please confirm $slot...")
+* You cannot simulate dialog delegation (`DirectiveTypeDialogDelegate`) to Alexa ("Which $slot..."), 
+e.g. lambda must respond with `DirectiveTypeDialogElicitSlot`
+
+You **can** however test this in the developer console (https://developer.amazon.com/alexa/console/ask/test/).
 
 Put some more things into your `.env` file:
 * `ASKSkillId=amzn1.ask.skill.xxxxx` from `ask api list-skills`

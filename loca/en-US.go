@@ -58,7 +58,7 @@ var enUS = &l10n.Locale{
 
 		// default intents
 		StopTitle: {"Ending"},
-		Stop:      {"End."},
+		Stop:      {"End.", "Good bye.", "See U!"},
 		HelpTitle: {"Help"},
 		Help:      {"Try saying 'here we go' or 'go ahead'"},
 

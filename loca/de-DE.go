@@ -50,7 +50,7 @@ var deDE = &l10n.Locale{
 
 		// Intent "AMAZON.StopIntent"
 		StopTitle: {"Ende Gelände"},
-		Stop:      {"Ende."},
+		Stop:      {"Ende.", "Tschüss.", "Bis bald."},
 		HelpTitle: {"Hilfe"},
 		Help:      {"Probier mal 'hopp hopp' oder 'sag etwas' oder 'erzähl mir was'"},
 
