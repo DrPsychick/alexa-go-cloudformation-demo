@@ -18,6 +18,7 @@ addons:
       - python3-pip
       - python3-setuptools
       - python3-wheel
+      - jq
 services:
   - docker
 
@@ -53,8 +54,9 @@ deploy:
     condition: $TRAVIS_BRANCH =~ ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
 
 after_deploy:
+  # cat test/ask/cli_config | jq -c | sed -e 's#\(["{}|]\)#\\\1#g'
   - mkdir -p ./test/ask
-  - echo "$ASK_CONFIG" > ./test/ask/cli_config
+  - echo "$ASK_CONFIG" | jq . > ./test/ask/cli_config
   - chmod o+r ./test/ask/cli_config
   - ls -la ./test/ask/
   - ./test/test-dialogs.sh
