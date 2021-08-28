@@ -59,6 +59,7 @@ after_deploy:
   - echo "$ASK_CONFIG" | jq . > ./test/ask/cli_config
   - chmod o+r ./test/ask/cli_config
   - ls -la ./test/ask/
+  - head -n5 ./test/ask/cli_config
   - ./test/test-dialogs.sh
   - rm -f ./test/ask/cli_config
 
