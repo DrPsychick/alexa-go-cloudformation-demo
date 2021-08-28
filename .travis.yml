@@ -58,8 +58,7 @@ after_deploy:
   - mkdir -p ./test/ask
   - echo "$ASK_CONFIG" | jq . > ./test/ask/cli_config
   - sudo chown 1000:1000 ./test/ask/cli_config
-  - ls -la ./test/ask/
-  - head -n5 ./test/ask/cli_config
+  - sudo chmod o+rw ./test
   - ./test/test-dialogs.sh
   - rm -f ./test/ask/cli_config
 
