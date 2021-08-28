@@ -85,6 +85,9 @@ var enUS = &l10n.Locale{
 				l10n.UseVoiceLang("Kendra", "en-US", "I like the Autobahn, it's so geil"),
 			),
 		},
+		SaySomethingUserTitle: {"Hey %s!"},
+		SaySomethingUserText:  {"I like how you dress %s."},
+		SaySomethingUserSSML:  {l10n.Speak("I <emphasis level=\"strong\">like</emphasis> your new look %s!")},
 
 		// Intent "AWSStatusIntent"
 		AWSStatusSamples: {

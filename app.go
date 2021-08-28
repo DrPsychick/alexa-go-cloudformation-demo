@@ -15,7 +15,7 @@ var (
 
 // Config defines additional data that can be provided and used in requests
 type Config struct {
-	user string
+	User string
 }
 
 //type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
@@ -26,7 +26,7 @@ type ResponseFunc func(cfg *Config)
 // WithUser returns a ResponseFunc that sets the user
 func WithUser(user string) ResponseFunc {
 	return func(cfg *Config) {
-		cfg.user = user
+		cfg.User = user
 	}
 }
 
@@ -68,6 +68,16 @@ func (a *Application) Stop(l l10n.LocaleInstance) (string, string, string) {
 	return l.GetAny(loca.StopTitle), l.GetAny(loca.Stop), ""
 }
 
+// SSMLDemo is the intent to demonstrate SSML output with Alexa.
+func (a *Application) SSMLDemo(l l10n.LocaleInstance) (string, string, string) {
+	return l.GetAny(loca.LaunchTitle), l.GetAny(loca.LaunchText), l.GetAny(loca.LaunchSSML)
+}
+
+// Demo is a simple demo response.
+func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
+	return l.Get(loca.DemoIntentTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
+}
+
 // SaySomething handles simple title + text response.
 func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error) {
 	// run all ResponseFuncs
@@ -75,17 +85,15 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 	for _, opt := range opts {
 		opt(cfg)
 	}
-	//stats.Inc(a, "SaySomething", 1, 1.0)
-	//stats.Timing(a,"SaySomething", 1.0, 1.0)
 
 	tit := ""
 	msg := ""
 	msgSSML := ""
-	if cfg.user != "" {
+	if cfg.User != "" {
 		// personalized response
-		tit = loc.GetAny(loca.SaySomethingUserTitle, cfg.user)
-		msg = loc.GetAny(loca.SaySomethingUserText, cfg.user)
-		msgSSML = loc.GetAny(loca.SaySomethingUserSSML, cfg.user)
+		tit = loc.GetAny(loca.SaySomethingUserTitle, cfg.User)
+		msg = loc.GetAny(loca.SaySomethingUserText, cfg.User)
+		msgSSML = loc.GetAny(loca.SaySomethingUserSSML, cfg.User)
 	} else {
 		tit = loc.GetAny(loca.SaySomethingTitle)
 		msg = loc.GetAny(loca.SaySomethingText)
@@ -102,16 +110,6 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 		Speech: msgSSML,
 		End:    true,
 	}, nil
-}
-
-// SSMLDemo is the intent to demonstrate SSML output with Alexa.
-func (a *Application) SSMLDemo(l l10n.LocaleInstance) (string, string, string) {
-	return l.GetAny(loca.LaunchTitle), l.GetAny(loca.LaunchText), l.GetAny(loca.LaunchSSML)
-}
-
-// Demo is a simple demo response.
-func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
-	return l.Get(loca.DemoIntentTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
 }
 
 // AWSStatus responds with messages containting 2 slots

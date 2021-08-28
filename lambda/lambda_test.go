@@ -229,9 +229,17 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 	initLocaleRegistry(t)
 
 	app := alfalfa.NewApplication(log.Null, stats.Null)
+	personId := "John"
 
 	r := &alexa.RequestEnvelope{
 		Version: "1.0",
+		Context: &alexa.Context{
+			System: &alexa.ContextSystem{
+				Person: &alexa.ContextSystemPerson{
+					PersonID: personId,
+				},
+			},
+		},
 		Request: &alexa.Request{
 			Locale: "de-DE",
 			Type:   alexa.TypeIntentRequest,
@@ -264,16 +272,16 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 	// with translations
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
-	loc.Set(loca.SaySomethingTitle, []string{"?"})
-	loc.Set(loca.SaySomethingText, []string{"Sadly, I have nothing to say."})
-	loc.Set(loca.SaySomethingSSML, []string{l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "I like the Autobahn, it's so geil"))})
+	loc.Set(loca.SaySomethingUserTitle, []string{"Hi %s!"})
+	loc.Set(loca.SaySomethingUserText, []string{"Sadly, I have nothing to tell you %s."})
+	loc.Set(loca.SaySomethingUserSSML, []string{l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "%s do you like the Autobahn?"))})
 
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, loc.Get(loca.SaySomethingTitle), resp.Response.Card.Title)
-	assert.Equal(t, loc.Get(loca.SaySomethingText), resp.Response.Card.Content)
+	assert.Equal(t, loc.Get(loca.SaySomethingUserTitle, personId), resp.Response.Card.Title)
+	assert.Equal(t, loc.Get(loca.SaySomethingUserText, personId), resp.Response.Card.Content)
 }
 
 func TestLambda_HandleAWSStatus(t *testing.T) {

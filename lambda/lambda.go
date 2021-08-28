@@ -184,8 +184,11 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 			handleMissingLocale(b, r.Request.Locale)
 			return
 		}
-
-		resp, err := app.SaySomething(loc)
+		responseFuncs := []alfalfa.ResponseFunc{}
+		if r.Context.System != nil && r.Context.System.Person != nil {
+			responseFuncs = append(responseFuncs, alfalfa.WithUser(r.Context.System.Person.PersonID))
+		}
+		resp, err := app.SaySomething(loc, responseFuncs...)
 		if err != nil {
 			switch err {
 			default:

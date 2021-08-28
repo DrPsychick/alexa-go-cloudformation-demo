@@ -111,10 +111,12 @@ const (
 	ResolutionStatusException StatusCode = "ER_ERROR_EXCEPTION"
 )
 
+// ResolutionStatus indicates the results of attempting to resolve the user utterance against the defined slot types
 type ResolutionStatus struct {
 	Code StatusCode `json:"code"`
 }
 
+// PerAuthority encapsualtes an Authority which is the source of the data provided
 type PerAuthority struct {
 	Authority string            `json:"authority"`
 	Status    *ResolutionStatus `json:"status,omitempty"`
@@ -172,31 +174,150 @@ type Request struct {
 	Session *Session `json:"-"`
 }
 
+// ContextUser a string that represents a unique identifier for the Amazon account for which the skill is enabled
+type ContextUser struct {
+	UserID      string `json:"userId"`
+	AccessToken string `json:"accessToken,omitempty"`
+}
+
+// ContextApplication is used to verify that the request was intended for your service, the ID is the appliation ID for your skill
+type ContextApplication struct {
+	ApplicationID string `json:"applicationId"`
+}
+
 // Session represents the Alexa skill session.
 type Session struct {
-	New         bool   `json:"new"`
-	SessionID   string `json:"sessionId"`
-	Application struct {
-		ApplicationID string `json:"applicationId"`
-	} `json:"application"`
-	Attributes map[string]interface{} `json:"attributes"`
-	User       struct {
-		UserID      string `json:"userId"`
-		AccessToken string `json:"accessToken,omitempty"`
-	} `json:"user"`
+	New         bool                   `json:"new"`
+	SessionID   string                 `json:"sessionId"`
+	Application ContextApplication     `json:"application"`
+	Attributes  map[string]interface{} `json:"attributes"`
+	User        ContextUser            `json:"user"`
+}
+
+// ContextSystemPerson describes the person who is making the request to Alexa (user recognized by voice, not account)
+type ContextSystemPerson struct {
+	PersonID    string `json:"personId"`
+	AccessToken string `json:"accessToken,omitempty"`
+}
+
+// ContextSystem provides information about the current state of the Alexa service and the device interacting with your skill
+type ContextSystem struct {
+	// APIAccessToken a string containing a token that can be used to access Alexa-specific APIs
+	APIAccessToken string `json:"apiAccessToken,omitempty"`
+	// APIEndpoint a string that references the correct base URI to refer to by region, for use with APIs
+	APIEndpoint string       `json:"apiEndpoint,omitempty"`
+	User        *ContextUser `json:"user,omitempty"`
+	// Device provides information about the device used to send the request
+	Device struct {
+		DeviceID            string   `json:"deviceId,omitempty"`
+		SupportedInterfaces []string `json:"supportedInterfaces,omitempty"`
+	} `json:"device,omitempty"`
+	Application ContextApplication `json:"application"`
+	// Unit represents a logical construct organizing actors
+	Unit struct {
+		UnitId           string `json:"unitId"`
+		PersistentUnitId string `json:"persistentUnitId"`
+	} `json:"unit,omitempty"`
+	// Person describes the person who is making the request to Alexa (user recognized by voice, not account)
+	Person *ContextSystemPerson `json:"person,omitempty"`
+}
+
+type AudioPlayerActivity string
+
+const (
+	// AudioPlayerActivityIDLE Nothing was playing, no enqueued items.
+	AudioPlayerActivityIDLE AudioPlayerActivity = "IDLE"
+	// AudioPlayerActivityPAUSE Stream was paused.
+	AudioPlayerActivityPAUSED AudioPlayerActivity = "PAUSED"
+	// AudioPlayerActivityPLAYING Stream was playing.
+	AudioPlayerActivityPLAYING AudioPlayerActivity = "PLAYING"
+
+	// AudioPlayerActivityBufferUnderrun Buffer underrun
+	AudioPlayerActivityBufferUnderrun AudioPlayerActivity = "BUFFER_UNDERRUN"
+	// AudioPlayerActivityFINISHED Stream was finished playing.
+	AudioPlayerActivityFINISHED AudioPlayerActivity = "FINISHED"
+	// AudioPlayerActivitySTOPPED Stream was interrupted.
+	AudioPlayerActivitySTOPPED AudioPlayerActivity = "STOPPED"
+)
+
+type ContextAudioPlayer struct {
+	Token                string              `json:"token"`
+	OffsetInMilliseconds int                 `json:"offsetInMilliseconds"`
+	PlayerActivity       AudioPlayerActivity `json:"playerActivity"`
+}
+
+// ViewportExperience
+type ViewportExperience struct {
+	ArcMinuteWidth  int  `json:"arcMinuteWidth"`
+	ArcMinuteHeight int  `json:"arcMinuteHeight"`
+	CanRotate       bool `json:"canRotate"`
+	CanResize       bool `json:"canResize"`
+}
+
+// ContextViewportMode is the mode for the device
+type ContextViewportMode string
+
+const (
+	ContextViewportModeHUB    ContextViewportMode = "HUB"
+	ContextViewportModeTV     ContextViewportMode = "TV"
+	ContextViewportModePC     ContextViewportMode = "PC"
+	ContextViewportModeMobile ContextViewportMode = "MOBILE"
+	ContextViewportModeAuto   ContextViewportMode = "AUTO"
+)
+
+// ContextViewportShape is the shape of the device
+type ContextViewportShape string
+
+const (
+	ContextViewportShapeRound     ContextViewportShape = "ROUND"
+	ContextViewportShapeRectangle ContextViewportShape = "RECTANGLE"
+)
+
+// ContextViewport provides information about the viewport if the device has a screen
+type ContextViewport struct {
+	Experiences        []*ViewportExperience `json:"experiances,omitempty"`
+	Mode               ContextViewportMode   `json:"mode"`
+	Shape              ContextViewportShape  `json:"shape"`
+	PixelWidth         int                   `json:"pixelWidth"`
+	PixelHeight        int                   `json:"pixelHeight"`
+	CurrentPixelWidth  int                   `json:"currentPixelWidth"`
+	CurrentPixelHeight int                   `json:"currentPixelHeight"`
+	DPI                int                   `json:"dpi"`
+	Touch              []string              `json:"touch"`
+	Keyboard           []string              `json:"keyboard"`
+	Video              struct {
+		Codecs []string `json:"codecs"`
+	} `json:"video"`
+}
+
+type ViewportConfiguration struct {
+	Video struct {
+		Codecs []string `json:"codecs"`
+	} `json:"video,omitempty"`
+	Size struct {
+		Type        string `json:"type"`
+		PixelWidth  int    `json:"pixelWidth"`
+		PixelHeight int    `json:"pixelHeight"`
+	} `json:"size,omitempty"`
+}
+type ContextViewportType struct {
+	ID               string `json:"id"`
+	Type             string `json:"type"`
+	Shape            string `json:"shape"`
+	DPI              string `json:"dpi"`
+	PresentationType string `json:"presentationType"`
+	CanRotate        bool   `json:"canRotate"`
+	Configuration    struct {
+		Current ViewportConfiguration `json:"current"`
+	} `json:"configuration"`
 }
 
 // Context represents the Alexa skill request context.
 type Context struct {
-	System struct {
-		APIAccessToken string `json:"apiAccessToken"`
-		Device         struct {
-			DeviceID string `json:"deviceId,omitempty"`
-		} `json:"device,omitempty"`
-		Application struct {
-			ApplicationID string `json:"applicationId,omitempty"`
-		} `json:"application,omitempty"`
-	} `json:"System,omitempty"`
+	System      *ContextSystem         `json:"System,omitempty"`
+	AudioPlayer *ContextAudioPlayer    `json:"audioPlayer,omitempty"`
+	Viewport    *ContextViewport       `json:"Viewport,omitempty"`
+	Viewports   []*ContextViewportType `json:"Viewports,omitempty"`
 }
 
 // RequestEnvelope represents the alexa request envelope.

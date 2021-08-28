@@ -4,11 +4,78 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/hamba/logger"
+	"github.com/hamba/pkg/log"
+	"github.com/hamba/pkg/stats"
 	"github.com/hamba/statter/l2met"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
+
+func TestApplication_ResponseFunc(t *testing.T) {
+	c := alfalfa.Config{}
+	r := alfalfa.WithUser("Martin")
+	r(&c)
+
+	assert.Equal(t, alfalfa.Config{"Martin"}, c)
+}
+
+func TestApplication_Launch(t *testing.T) {
+	app := alfalfa.NewApplication(log.Null, stats.Null)
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
+
+	title, text := app.Launch(loc)
+
+	assert.NotEmpty(t, title)
+	assert.NotEmpty(t, text)
+}
+
+func TestApplication_Help(t *testing.T) {
+	app := alfalfa.NewApplication(log.Null, stats.Null)
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
+
+	title, text, _ := app.Help(loc)
+
+	assert.NotEmpty(t, title)
+	assert.NotEmpty(t, text)
+}
+
+func TestApplication_Stop(t *testing.T) {
+	app := alfalfa.NewApplication(log.Null, stats.Null)
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
+
+	title, text, _ := app.Stop(loc)
+
+	assert.NotEmpty(t, title)
+	assert.NotEmpty(t, text)
+}
+
+func TestApplication_SSLDemo(t *testing.T) {
+	app := alfalfa.NewApplication(log.Null, stats.Null)
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
+
+	title, text, ssml := app.SSMLDemo(loc)
+
+	assert.NotEmpty(t, title)
+	assert.NotEmpty(t, text)
+	assert.NotEmpty(t, ssml)
+}
+
+func TestApplication_Demo(t *testing.T) {
+	app := alfalfa.NewApplication(log.Null, stats.Null)
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
+
+	title, text, ssml := app.Demo(loc)
+
+	assert.NotEmpty(t, title)
+	assert.NotEmpty(t, text)
+	assert.NotEmpty(t, ssml)
+}
 
 func TestApplication_SaySomething(t *testing.T) {
 	l := logger.New(logger.StreamHandler(os.Stdout, logger.LogfmtFormat()))
@@ -20,6 +87,15 @@ func TestApplication_SaySomething(t *testing.T) {
 	assert.NoError(t, err)
 
 	resp, err := app.SaySomething(loc)
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.Title)
+	assert.NotEmpty(t, resp.Text)
+	assert.NotEmpty(t, resp.Speech)
+
+	// with user
+	r := alfalfa.WithUser("John")
+	resp, err = app.SaySomething(loc, r)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, resp.Title)
@@ -45,54 +121,3 @@ func TestApplication_AWSStatus(t *testing.T) {
 	assert.Contains(t, resp.Text, "Europa")
 	assert.Contains(t, resp.Text, "Frankfurt")
 }
-
-//func TestApplication_SaySomething2_Personalized(t *testing.T) {
-//	loc, err := loca.Registry.Resolve("de-DE")
-//	assert.NoError(t, err)
-//	l := logger.New(logger.StreamHandler(os.Stdout, logger.LogfmtFormat()))
-//	app := alfalfa.NewApplication(
-//		l,
-//		l2met.New(l, ""),
-//	)
-//
-//	f := app.SaySomething2()
-//	res, err := f(loc, alfalfa.WithUser("Fred"))
-//
-//	assert.NoError(t, err)
-//	assert.NotEmpty(t, res.Title)
-//	assert.NotEmpty(t, res.Text)
-//	assert.NotEmpty(t, res.Speech)
-//	assert.Contains(t, res.Text, "Fred")
-//}
-//
-//func TestApplication_SaySomething2_ErrorNoLocale(t *testing.T) {
-//	r := l10n.NewRegistry()
-//	loc := l10n.NewLocale("en-US")
-//	loc.Set(l10n.KeyErrorNoTranslationTitle, []string{"missing translation"})
-//	loc.Set(l10n.KeyErrorNoTranslationText, []string{"no translation found for '%s'"})
-//	err := r.Register(loc)
-//	assert.NoError(t, err)
-//	l := logger.New(logger.StreamHandler(os.Stdout, logger.LogfmtFormat()))
-//	app := alfalfa.NewApplication(
-//		l,
-//		l2met.New(l, ""),
-//	)
-//
-//	f := app.SaySomething2()
-//	res, err := f(loc)
-//	title := ""
-//	text := ""
-//	switch err {
-//	case alfalfa.ErrorNoTranslation:
-//		title = loc.GetAny(l10n.KeyErrorNoTranslationTitle)
-//		text = loc.GetAny(l10n.KeyErrorNoTranslationText, loca.SaySomethingText)
-//	}
-//
-//	assert.Error(t, err)
-//	assert.Equal(t, alfalfa.ErrorNoTranslation, err)
-//	assert.Empty(t, res.Title)
-//	assert.Empty(t, res.Text)
-//	assert.NotEmpty(t, title)
-//	assert.NotEmpty(t, text)
-//	assert.Contains(t, text, loca.SaySomethingText)
-//}
