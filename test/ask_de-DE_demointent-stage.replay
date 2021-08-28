@@ -1,0 +1,13 @@
+{
+  "skillId": "amzn1.ask.skill.850c7642-4af0-40d3-a60d-691b3491029e",
+  "locale": "de-DE",
+  "type": "text",
+  "userInput": [
+    "Alexa öffne meetup go demo stage",
+    "hopp hopp",
+    "schiess los",
+    "auf geths",
+    "tschüss",
+    ".quit"
+  ]
+}
