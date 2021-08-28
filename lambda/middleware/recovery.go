@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/hamba/pkg/log"
 )
@@ -22,7 +21,7 @@ func WithRecovery(h alexa.Handler, lable log.Loggable) alexa.Handler {
 }
 
 // Serve serves the request.
-func (m Recovery) Serve(b *alexa.ResponseBuilder, r *alexa.Request) {
+func (m Recovery) Serve(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
 	defer func() {
 		if v := recover(); v != nil {
 			m.l.Error(fmt.Sprintf("%+v", v))

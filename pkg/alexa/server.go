@@ -4,22 +4,22 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
-
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/hamba/pkg/log"
 	"github.com/json-iterator/go"
+	"sync"
 )
 
 // Handler represents an alexa request handler.
 type Handler interface {
-	Serve(*ResponseBuilder, *Request)
+	Serve(*ResponseBuilder, *RequestEnvelope)
 }
 
 // HandlerFunc is an adapter allowing a function to be used as a handler.
-type HandlerFunc func(*ResponseBuilder, *Request)
+type HandlerFunc func(*ResponseBuilder, *RequestEnvelope)
 
 // Serve serves the request.
-func (fn HandlerFunc) Serve(b *ResponseBuilder, r *Request) {
+func (fn HandlerFunc) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	fn(b, r)
 }
 
@@ -35,14 +35,10 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	req.Request.Context = req.Context
-	req.Request.Session = req.Session
-
 	builder := &ResponseBuilder{}
-	s.Handler.Serve(builder, req.Request)
+	s.Handler.Serve(builder, req)
 
 	return jsoniter.Marshal(builder.Build())
-
 }
 
 // Serve serves the handler.
@@ -65,35 +61,44 @@ func Serve(h Handler) error {
 
 // ServeMux is an Alexa request multiplexer.
 type ServeMux struct {
-	mu      sync.RWMutex
-	types   map[RequestType]Handler
-	intents map[string]Handler
+	mu          sync.RWMutex
+	logger      log.Logger
+	types       map[RequestType]Handler
+	intents     map[string]Handler
+	intentSlots map[string]string
 }
 
-// NewServeMux creates a new serve mux.
-func NewServerMux() *ServeMux {
+// NewServerMux creates a new server mux.
+func NewServerMux(log log.Logger) *ServeMux {
 	return &ServeMux{
-		types:   map[RequestType]Handler{},
-		intents: map[string]Handler{},
+		logger:      log,
+		types:       map[RequestType]Handler{},
+		intents:     map[string]Handler{},
+		intentSlots: map[string]string{},
 	}
+}
+
+// Logger returns the application logger.
+func (m *ServeMux) Logger() log.Logger {
+	return m.logger
 }
 
 // Handler returns the matched handler for a request, or an error.
-func (m *ServeMux) Handler(r *Request) (Handler, error) {
+func (m *ServeMux) Handler(r *RequestEnvelope) (Handler, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	if h, ok := m.types[r.Type]; ok {
+	if h, ok := m.types[r.Request.Type]; ok {
 		return h, nil
 	}
 
-	if r.Type != TypeIntentRequest {
-		return nil, fmt.Errorf("server: unknown intent type %s", r.Type)
+	if r.Request.Type != TypeIntentRequest {
+		return nil, fmt.Errorf("server: unknown intent type %s", r.Request.Type)
 	}
 
-	h, ok := m.intents[r.Intent.Name]
+	h, ok := m.intents[r.Request.Intent.Name]
 	if !ok {
-		return nil, fmt.Errorf("server: unknown intent %s", r.Intent.Name)
+		return nil, fmt.Errorf("server: unknown intent %s", r.Request.Intent.Name)
 	}
 
 	return h, nil
@@ -117,7 +122,7 @@ func (m *ServeMux) HandleRequestType(requestType RequestType, handler Handler) {
 	m.mu.Unlock()
 }
 
-// HandleRequestType registers the handler function for the given request type.
+// HandleRequestTypeFunc registers the handler function for the given request type.
 //
 // Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
 func (m *ServeMux) HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
@@ -137,46 +142,57 @@ func (m *ServeMux) HandleIntent(intent string, handler Handler) {
 	m.mu.Unlock()
 }
 
-// HandleIntent registers the handler function for the given intent.
+// HandleIntentFunc registers the handler function for the given intent.
 func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 	m.HandleIntent(intent, handler)
 }
 
-// Serve serves the matched handler.
-func (m *ServeMux) Serve(b *ResponseBuilder, r *Request) {
-	h, err := m.Handler(r)
-	if err != nil {
-		// TODO: Fallback handler
+// fallbackHandler returns a fatal error card
+func fallbackHandler(err error) HandlerFunc {
+	return HandlerFunc(func(b *ResponseBuilder, r *RequestEnvelope) {
 		b.WithSimpleCard("Fatal error", "error: "+err.Error()).
 			WithShouldEndSession(true)
+	})
+}
+
+// Serve serves the matched handler.
+func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
+	json, _ := jsoniter.Marshal(r)
+	m.logger.Debug(string(json))
+	h, err := m.Handler(r)
+	if err != nil {
+		h = fallbackHandler(err)
 		return
 	}
 
 	h.Serve(b, r)
+	json, _ = jsoniter.Marshal(b.Build())
+	m.logger.Debug(string(json))
 }
 
-var DefaultServeMux = NewServerMux()
+//// DefaultServerMux is the default mux
+var DefaultServerMux = NewServerMux(log.Null)
 
 // HandleRequestType registers the handler for the given request type on the DefaultServeMux.
 //
 // Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
 func HandleRequestType(requestType RequestType, handler Handler) {
-	DefaultServeMux.HandleRequestType(requestType, handler)
+	DefaultServerMux.HandleRequestType(requestType, handler)
 }
 
-// HandleRequestType registers the handler function for the given request type on the DefaultServeMux.
+// HandleRequestTypeFunc registers the handler function for the given request type on the DefaultServeMux.
 //
 // Any attempt to handle the IntentRequest type will be ignored, use Intent instead.
 func HandleRequestTypeFunc(requestType RequestType, handler HandlerFunc) {
-	DefaultServeMux.HandleRequestTypeFunc(requestType, handler)
+	DefaultServerMux.HandleRequestTypeFunc(requestType, handler)
 }
 
 // HandleIntent registers the handler for the given intent on the DefaultServeMux.
 func HandleIntent(intent string, handler Handler) {
-	DefaultServeMux.HandleIntent(intent, handler)
+	DefaultServerMux.HandleIntent(intent, handler)
 }
 
-// HandleIntent registers the handler function for the given intent on the DefaultServeMux.
+// HandleIntentFunc registers the handler function for the given intent on the DefaultServeMux.
 func HandleIntentFunc(intent string, handler HandlerFunc) {
-	DefaultServeMux.HandleIntentFunc(intent, handler)
+	DefaultServerMux.HandleIntentFunc(intent, handler)
 }

@@ -15,7 +15,13 @@ const (
 	FlagIsChildDirected   string = "IsChildDirected"
 )
 
-// SkillBuilder helps building the SKILL.json.
+// IntentProvider exposes intents with optional slots
+type IntentProvider interface {
+	GetIntents() map[string]string
+	GetIntentSlots(intent string) map[string]string
+}
+
+// SkillBuilder helps to build the SKILL.json.
 type SkillBuilder struct {
 	error        error
 	registry     l10n.LocaleRegistry
@@ -80,7 +86,7 @@ func (s *SkillBuilder) AddCountries(cs []string) *SkillBuilder {
 	return s
 }
 
-// WithLocale creates, registers locale and adds a new locale builder.
+// AddLocale creates, registers locale and adds a new locale builder.
 func (s *SkillBuilder) AddLocale(locale string, opts ...l10n.RegisterFunc) *SkillBuilder {
 	if err := s.registry.Register(l10n.NewLocale(locale), opts...); err != nil {
 		s.error = err
@@ -111,12 +117,16 @@ func (s *SkillBuilder) WithDefaultLocaleTestingInstructions(instructions string)
 	return s
 }
 
-// AddModel creates and returns a new modelBuilder attached to the skill.
+// WithModel creates and returns a new modelBuilder attached to the skill.
 func (s *SkillBuilder) WithModel() *SkillBuilder {
 	s.model = NewModelBuilder().
 		WithLocaleRegistry(s.registry)
 	return s
 }
+
+//func (s *SkillBuilder) WithIntentProvider(i IntentProvider) *SkillBuilder {
+
+//}
 
 // Locale returns the corresponding locale builder.
 func (s *SkillBuilder) Locale(locale string) *SkillLocaleBuilder {

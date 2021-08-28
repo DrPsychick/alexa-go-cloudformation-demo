@@ -44,7 +44,7 @@ func (m *modelBuilder) WithInvocation(invocation string) *modelBuilder {
 // WithDelegationStrategy sets the model delegation strategy.
 func (m *modelBuilder) WithDelegationStrategy(strategy string) *modelBuilder {
 	if strategy != alexa.DelegationAlways && strategy != alexa.DelegationSkillResponse {
-		m.error = fmt.Errorf("Unsupported 'delegation': %s", strategy)
+		m.error = fmt.Errorf("unsupported 'delegation': %s", strategy)
 		return m
 	}
 	m.delegation = strategy
@@ -178,8 +178,8 @@ func (m *modelBuilder) ConfirmationPrompt(intent string, slot string) *modelProm
 	return m.prompts[pb.id]
 }
 
-// TODO: a slot can have multiple validation prompts! ID is not unique!
 // ValidationPrompt returns the validation prompt for the intent-slot
+// TODO: a slot can have multiple validation prompts! ID is not unique!
 func (m *modelBuilder) ValidationPrompt(intent string, slot string) *modelPromptBuilder {
 	pb := NewValidationPromptBuilder(intent, slot)
 	return m.prompts[pb.id]
@@ -330,7 +330,7 @@ func (i *modelIntentBuilder) Slot(name string) *modelSlotBuilder {
 // WithDelegation sets the dialog delegation for the intent
 func (i *modelIntentBuilder) WithDelegation(d string) *modelIntentBuilder {
 	if d != alexa.DelegationAlways && d != alexa.DelegationSkillResponse {
-		i.error = fmt.Errorf("Unsupported 'delegation': %s", d)
+		i.error = fmt.Errorf("unsupported 'delegation': %s", d)
 		return i
 	}
 	i.delegation = d
@@ -435,10 +435,22 @@ func (s *modelSlotBuilder) WithLocaleSamples(locale string, samples []string) *m
 	return s
 }
 
+// WithConfirmation sets confirmationRequired for the slot
+func (s *modelSlotBuilder) WithConfirmation(c bool) *modelSlotBuilder {
+	s.withConfirmation = c
+	return s
+}
+
 // WithConfirmationPrompt requires confirmation and links to the prompt id.
 func (s *modelSlotBuilder) WithConfirmationPrompt(id string) *modelSlotBuilder {
 	s.withConfirmation = true
 	s.confirmationPrompt = id
+	return s
+}
+
+// WithElicitation sets elicitationRequired for the slot
+func (s *modelSlotBuilder) WithElicitation(e bool) *modelSlotBuilder {
+	s.withElicitation = e
 	return s
 }
 
@@ -451,7 +463,9 @@ func (s *modelSlotBuilder) WithElicitationPrompt(id string) *modelSlotBuilder {
 
 // WithIntentConfirmationPrompt does nothing.
 func (s *modelSlotBuilder) WithIntentConfirmationPrompt(prompt string) *modelSlotBuilder {
-	// TODO: WithIntentConfirmationPrompt - https://developer.amazon.com/docs/custom-skills/define-the-dialog-to-collect-and-confirm-required-information.html#intent-confirmation
+	// TODO: WithIntentConfirmationPrompt
+	// https://developer.amazon.com/docs/custom-skills/define-the-dialog-to-collect-and-confirm-required-information.html#intent-confirmation
+	// https://developer.amazon.com/en-US/docs/alexa/custom-skills/dialog-interface-reference.html#confirmintent
 	return s
 }
 
@@ -573,7 +587,7 @@ type modelValidationRule struct {
 	valuesKey      string
 }
 
-// NewModelValidationBuilder returns an initialized modelValidationBuilder
+// NewModelValidationRulesBuilder returns an initialized modelValidationBuilder
 func NewModelValidationRulesBuilder() *modelValidationRulesBuilder {
 	return &modelValidationRulesBuilder{
 		registry: l10n.NewRegistry(),
@@ -614,8 +628,8 @@ func (v *modelValidationRulesBuilder) BuildRules(locale string) ([]alexa.SlotVal
 			Prompt: r.prompt,
 		}
 
-		if vals := loc.GetAll(r.valuesKey); r.valuesKey != "" && len(vals) > 0 {
-			val.Values = vals
+		if values := loc.GetAll(r.valuesKey); r.valuesKey != "" && len(values) > 0 {
+			val.Values = values
 		}
 
 		// TODO: implement value: https://developer.amazon.com/docs/smapi/interaction-model-schema.html#dialog_slot_validations
@@ -665,6 +679,7 @@ func NewConfirmationPromptBuilder(intent string, slot string) *modelPromptBuilde
 	}
 }
 
+// NewValidationPromptBuilder returns an initialized modelPromptBuilder for Validation.
 func NewValidationPromptBuilder(slot string, t string) *modelPromptBuilder {
 	return &modelPromptBuilder{
 		registry:   l10n.NewRegistry(),
@@ -702,7 +717,7 @@ func (p *modelPromptBuilder) BuildLocale(locale string) (alexa.ModelPrompt, erro
 			p.id, locale)
 	}
 	mp := alexa.ModelPrompt{
-		Id:         p.id,
+		ID:         p.id,
 		Variations: []alexa.PromptVariation{},
 	}
 	for _, v := range p.variations {

@@ -2,9 +2,13 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 # REQUIRED for AWS::Serverless
 Parameters:
-  LambdaEnv1:
-    Default: FooBar
+  LambdaStatsDSN:
+    Default: l2met://console
     Description: Demo to pass cloudformation parameter to ENV of lambda
+    Type: String
+  LambdaLogLevel:
+    Default: info
+    Description: Log level of lambda application
     Type: String
   ASKSkillTestingInstructions:
     Description: Skill description (change with every deploy to force skill update)
@@ -41,7 +45,8 @@ Resources:
           Type: AlexaSkill
       Environment:
         Variables:
-          LAMBDA_ENV1: !Ref LambdaEnv1
+          STATS_DSN: !Ref LambdaStatsDSN
+          LOG_LEVEL: !Ref LambdaLogLevel
       MemorySize: 128
       Timeout: 5
   LambdaRole:
@@ -89,7 +94,7 @@ Resources:
             Principal: "*"
             Action:
               - "s3:GetObject"
-            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, "/", !Ref ASKS3Key ] ]
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ASKS3Bucket, "/", !Select [ "0", !Split [ ".", !Ref ASKS3Key ] ], "*" ] ]
 #  AlexaS3Role:
 #    Type: AWS::IAM::Role
 #    Properties:

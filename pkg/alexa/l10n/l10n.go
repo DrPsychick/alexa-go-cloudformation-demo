@@ -25,6 +25,16 @@ const (
 	KeyPostfixTitle             string = "_Title"
 	KeyPostfixText              string = "_Text"
 	KeyPostfixSSML              string = "_SSML"
+	KeyErrorTitle               string = "Error_Title"
+	KeyErrorText                string = "Error_Text"
+	KeyErrorSSML                string = "Error_SSML"
+	KeyErrorMissingPlaceholder  string = "Error_MissingPlaceholder"
+	KeyErrorNoTranslationTitle  string = "Error_NoTranslation_Title"
+	KeyErrorNoTranslationText   string = "Error_NoTranslation_Text"
+	KeyErrorNoTranslationSSML   string = "Error_NoTranslation_SSML"
+	KeyStopTitle                string = "Stop_Title"
+	KeyStopText                 string = "Stop_Text"
+	KeyStopSSML                 string = "Stop_SSML"
 )
 
 func init() {
@@ -51,14 +61,18 @@ type LocaleInstance interface {
 	ResetErrors()
 }
 
+// Speak wraps text in <speak> tags
 // TODO: move to `ssml` package
 func Speak(text string) string {
 	return "<speak>" + text + "</speak>"
 }
+
+// UseVoice wraps text in tags using a specific voice
 func UseVoice(voice string, text string) string {
 	return `<voice name="` + voice + `">` + text + `</voice>`
 }
 
+// UseVoiceLang wraps text in tags using a specific voice and language
 func UseVoiceLang(voice string, language string, text string) string {
 	return `<voice name="` + voice + `"><lang xml:lang="` + language + `">` + text + `</lang></voice>`
 }

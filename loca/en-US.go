@@ -37,6 +37,7 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillKeywords: {
 			"demo", "test", "SSML",
 		},
+		l10n.KeyErrorNoTranslationText: {"No translation found for '%s'!"},
 		// Type values
 		TypeAreaValues:   {"Europe", "North America", "Asia Pacific", "South America"},
 		TypeRegionValues: {"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
@@ -57,7 +58,7 @@ var enUS = &l10n.Locale{
 
 		// default intents
 		StopTitle: {"Ending"},
-		Stop:      {"End."},
+		Stop:      {"End.", "Good bye.", "See U!"},
 		HelpTitle: {"Help"},
 		Help:      {"Try saying 'here we go' or 'go ahead'"},
 
@@ -84,13 +85,20 @@ var enUS = &l10n.Locale{
 				l10n.UseVoiceLang("Kendra", "en-US", "I like the Autobahn, it's so geil"),
 			),
 		},
+		SaySomethingUserTitle: {"Hey %s!"},
+		SaySomethingUserText:  {"I like how you dress %s."},
+		SaySomethingUserSSML:  {l10n.Speak("I <emphasis level=\"strong\">like</emphasis> your new look %s!")},
 
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples: {"how is A.W.S.", "A.W.S. status in {Region}", "about A.W.S."},
-		AWSStatusTitle:   {"AWS Status"},
-		AWSStatusText:    {"AWS Status in region %s: okay"},
+		AWSStatusSamples: {
+			"how is A.W.S.", "how is A.W.S. in {Region}", "how is A.W.S. in {Area} {Region}",
+			"tell me the A.W.S. status", "tell me the A.W.S. status in {Area} {Region}",
+			"about A.W.S. status in {Area} {Region}",
+		},
+		AWSStatusTitle: {"AWS Status"},
+		AWSStatusText:  {"AWS Status in region %s, %s: okay", "In %s, %s everything's fine"},
 		AWSStatusSSML: {
-			l10n.Speak("A.W.S. status in %s: all okay"),
+			l10n.Speak("A.W.S. status in %s, %s: all okay"),
 		},
 		AWSStatusTextGood: {
 			"AWS Status in %s: all good",
@@ -101,6 +109,14 @@ var enUS = &l10n.Locale{
 			l10n.Speak("In %s everything's running smoothly"),
 		},
 		AWSStatusAreaSamples: {"in {Area}", "of {Area}"},
+		AWSStatusAreaElicitText: {
+			"In which area? (Europe, North America, ...)",
+			"What area are you interested in? (Europe, North America, ...)",
+		},
+		AWSStatusAreaElicitSSML: {
+			l10n.Speak("In which Area?"), // not working?
+			l10n.Speak("About which area do you want to know the status?"),
+		},
 		AWSStatusAreaConfirmSSML: {
 			l10n.Speak("Are you sure about area {Area}?"),
 		},
@@ -116,6 +132,10 @@ var enUS = &l10n.Locale{
 		RegionValidateText: {
 			"Please choose a valid region like Frankfurt, Ireland, North Virginia.",
 		},
+		// required for tests to work (delegated to Alexa in real use)
+		AMAZONStopSamples:   {"stop", "terminate"},
+		AMAZONHelpSamples:   {"help", "help me"},
+		AMAZONCancelSamples: {"abort"},
 	},
 	//IntentResponses: l10n.IntentResponses{
 	//	SaySomething: l10n.IntentResponse{

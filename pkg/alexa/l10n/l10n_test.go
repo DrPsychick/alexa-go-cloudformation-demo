@@ -208,7 +208,7 @@ func TestLocale_GetAny(t *testing.T) {
 
 	l, err := registry.Resolve("de-DE")
 	assert.NoError(t, err)
-	assert.Equal(t, "Hallo", l.GetAny(Greeting))
+	assert.Contains(t, deDE.TextSnippets[Greeting], l.GetAny(Greeting))
 }
 
 // Locale get with param is covered.
