@@ -1,5 +1,6 @@
 /.env
 /.idea
+/profile.cov
 /alfalfa
 /alexa/interactionModels/
 /alexa/skill.json
@@ -8,3 +9,5 @@
 /cloudformation/*-package.yml
 /test/app
 /test/*.log
+/test/ask*.json
+/test/ask/

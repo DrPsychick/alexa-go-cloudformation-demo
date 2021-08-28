@@ -1,5 +1,5 @@
 dist: focal
-sudo: false
+sudo: true
 
 language: go
 go:
@@ -18,6 +18,7 @@ addons:
       - python3-pip
       - python3-setuptools
       - python3-wheel
+      - jq
 services:
   - docker
 
@@ -31,9 +32,9 @@ script:
   - golint ./...
   - go vet ./...
   - go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
-  - goveralls -coverprofile=profile.cov -service=travis-ci
+  - goveralls -coverprofile=profile.cov -service=travis-ci || echo "Ignoring failure"
   # build and then run lambda tests
-  - ./test/tests.sh
+  - ./test/test-lambda.sh
 
 # is NOT executed on pull requests!
 before_deploy:
@@ -51,6 +52,15 @@ deploy:
     go: "1.x"
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
+
+after_deploy:
+  # cat test/ask/cli_config | jq -c | sed -e 's#\(["{}|]\)#\\\1#g'
+  - mkdir -p ./test/ask
+  - echo "$ASK_CONFIG" | jq . > ./test/ask/cli_config
+  - sudo chown 1000:1000 ./test/ask/cli_config
+  - sudo chmod o+rw ./test
+  - ./test/test-dialogs.sh
+  - rm -f ./test/ask/cli_config
 
 notifications:
   email:

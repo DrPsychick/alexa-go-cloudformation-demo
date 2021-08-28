@@ -18,9 +18,9 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillLargeIconURI: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_large.png",
 		},
-		l10n.KeySkillInvocation: {"meetup go demo"},
+		l10n.KeySkillInvocation: {"alfalfa demo"},
 		l10n.KeySkillTestingInstructions: {
-			"Alexa, open meetup go demo. Yes? Go ahead.",
+			"Alexa, open alfalfa demo. Yes? Go ahead.",
 		},
 		l10n.KeySkillPrivacyPolicyURL: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
@@ -30,7 +30,7 @@ var enUS = &l10n.Locale{
 		//	"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		//},
 		l10n.KeySkillExamplePhrases: {
-			"Alexa, start meetup go demo and go ahead",
+			"Alexa, start alfalfa demo and go ahead",
 			"How is A.W.S.",
 			"Say something",
 		},

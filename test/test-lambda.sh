@@ -24,7 +24,7 @@ for t in $intentlist; do
     fi
     cat lambda_${t}.json |grep -A20 '"request"'
     for l in de-DE en-US; do
-        result=$(sed -e "s/LOCALE/${l}/" lambda_${t}.json | docker run $docker_args --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 -e STATS_DSN=l2met://console lambci/lambda:go1.x app)
+        result=$(set -x; sed -e "s/LOCALE/${l}/" lambda_${t}.json | docker run $docker_args --rm -i -v "$PWD":/var/task -e DOCKER_LAMBDA_USE_STDIN=1 -e STATS_DSN=l2met://console lambci/lambda:go1.x app)
         err=$(echo "$result" | tr ',' '\n' | grep -i '"content":.*error.*')
         if [ -n "$err" ]; then
             failed="${failed}$l $t : $err\n"
@@ -39,11 +39,3 @@ if [ -n "$failed" ]; then
     exit 1
 fi
 )
-
-# AFTER deploy!
-#(cd $DIR/..;
-#for dialog in $(ls -1 test/*-stage.replay); do
-#    docker run --rm --platform linux/amd64 -it \
-#        -v ${PWD}/test:/test -v ${PWD}/test/ask:/home/node/.ask \
-#        xavidop/alexa-ask-aws-cli ask dialog --replay /$dialog --skill-out-io /$dialog.json
-#done)

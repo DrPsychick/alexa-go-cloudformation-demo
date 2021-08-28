@@ -1,9 +1,9 @@
 {
-  "skillId": "amzn1.ask.skill.8f065707-2c82-49b4-a78f-6a1fba6c8bae",
+  "skillId": "amzn1.ask.skill.850c7642-4af0-40d3-a60d-691b3491029e",
   "locale": "de-DE",
   "type": "text",
   "userInput": [
-    "Alexa öffne alfalfa demo",
+    "Alexa öffne alfalfa demo stage",
     "hopp hopp",
     "schiess los",
     "auf geths",
