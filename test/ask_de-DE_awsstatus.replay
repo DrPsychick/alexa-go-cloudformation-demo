@@ -3,10 +3,10 @@
   "locale": "de-DE",
   "type": "text",
   "userInput": [
-    "Alexa öffne alexa go demo",
+    "Alexa öffne meetup go demo",
     "wie geht's A.W.S. in Frankfurt",
     "Europa",
-    "Alexa frage alexa go demo nach A.W.S. status in Europa Irland",
+    "Alexa frage meetup go demo nach A.W.S. status in Europa Irland",
     ".quit"
   ]
 }
