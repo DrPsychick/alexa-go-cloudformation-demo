@@ -15,6 +15,9 @@ fi
 
 # run predefined dialogs after deploy
 set -x
+docker run $docker_args --rm -it -v ${PWD}/test/ask:/home/node/.ask --entrypoint /bin/bash \
+  xavidop/alexa-ask-aws-cli ls -la /home/node/.ask/
+
 if [ "$env" = "stage" ]; then
   for dialog in $(ls -1 test/*-stage.replay); do
       docker run $docker_args --rm -it \
