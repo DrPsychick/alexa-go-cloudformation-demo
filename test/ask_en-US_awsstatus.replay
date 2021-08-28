@@ -3,9 +3,10 @@
   "locale": "en-US",
   "type": "text",
   "userInput": [
-    "Alexa open voice demo",
+    "Alexa open meetup go demo",
     "how is A.W.S. in Frankfurt",
-    "Alexa ask voice demo about A.W.S. status in Ireland",
+    "Europe",
+    "Alexa ask meetup go demo about A.W.S. status in Europe Ireland",
     ".quit"
   ]
 }
