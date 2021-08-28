@@ -3,9 +3,9 @@
   "locale": "de-DE",
   "type": "text",
   "userInput": [
-    "Alexa öffne meetup go demo stage",
+    "Alexa öffne alfalfa demo stage",
     "sag' etwas",
-    "Alexa öffne meetup go demo stage und erzähl' mir was",
+    "Alexa öffne alfalfa demo stage und erzähl' mir was",
     ".quit"
   ]
 }
