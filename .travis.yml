@@ -57,7 +57,7 @@ after_deploy:
   # cat test/ask/cli_config | jq -c | sed -e 's#\(["{}|]\)#\\\1#g'
   - mkdir -p ./test/ask
   - echo "$ASK_CONFIG" | jq . > ./test/ask/cli_config
-  - chown 1000:1000 ./test/ask/cli_config
+  - chmod o+rw ./test/ask/cli_config
   - ls -la ./test/ask/
   - head -n5 ./test/ask/cli_config
   - ./test/test-dialogs.sh
