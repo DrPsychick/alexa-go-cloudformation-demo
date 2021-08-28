@@ -3,9 +3,9 @@
   "locale": "en-US",
   "type": "text",
   "userInput": [
-    "Alexa open meetup go demo stage and tell me the A.W.S. status in Ireland",
+    "Alexa open meet up go demo stage and tell me the A.W.S. status in Ireland",
     "Europe",
-    "Alexa ask meetup go demo stage about A.W.S. status in Europe Frankfurt",
+    "Alexa ask meet up go demo stage about A.W.S. status in Europe Frankfurt",
     ".quit"
   ]
 }
