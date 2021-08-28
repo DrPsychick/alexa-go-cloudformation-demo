@@ -3,9 +3,10 @@
   "locale": "de-DE",
   "type": "text",
   "userInput": [
-    "Alexa öffne voice demo",
+    "Alexa öffne alexa go demo",
     "wie geht's A.W.S. in Frankfurt",
-    "Alexa frage voice demo nach A.W.S. status in Irland",
+    "Europa",
+    "Alexa frage alexa go demo nach A.W.S. status in Europa Irland",
     ".quit"
   ]
 }

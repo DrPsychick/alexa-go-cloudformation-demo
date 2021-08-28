@@ -10,9 +10,9 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillName:        {"Voice control demo"},
 		l10n.KeySkillDescription: {"Demonstrationsskill für das Meetup"},
 		l10n.KeySkillSummary:     {"Dieser Skill demonstriert was man mit dem DrPsychick/alexa package machen kann"},
-		l10n.KeySkillInvocation:  {"voice demo"},
+		l10n.KeySkillInvocation:  {"alexa go demo"},
 		l10n.KeySkillExamplePhrases: {
-			"Alexa, starte voice demo und sag etwas",
+			"Alexa, starte alexa go demo und sag etwas",
 			"schiess los",
 			"hopp hopp",
 		},
