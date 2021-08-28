@@ -33,7 +33,7 @@ script:
   - go test -gcflags=-l -covermode=count -coverprofile=profile.cov ./...
   - goveralls -coverprofile=profile.cov -service=travis-ci
   # build and then run lambda tests
-  - ./test/tests.sh
+  - ./test/test-lambda.sh
 
 # is NOT executed on pull requests!
 before_deploy:
@@ -51,6 +51,9 @@ deploy:
     go: "1.x"
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^development|master$ && $TRAVIS_SECURE_ENV_VARS = "true"
+
+after_deploy:
+  - ./test/test-dialogs.sh
 
 notifications:
   email:
