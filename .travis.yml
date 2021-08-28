@@ -55,7 +55,10 @@ deploy:
 after_deploy:
   - mkdir -p ./test/ask
   - echo "$ASK_CONFIG" > ./test/ask/cli_config
+  - chmod o+r ./test/ask/cli_config
+  - ls -la ./test/ask/
   - ./test/test-dialogs.sh
+  - rm -f ./test/ask/cli_config
 
 notifications:
   email:

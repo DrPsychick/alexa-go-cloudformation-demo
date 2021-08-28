@@ -13,11 +13,7 @@ if [ -n "$TRAVIS_BRANCH" -a "$TRAVIS_BRANCH" = "master" ]; then
   env=prod
 fi
 
-request=$1
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
 # run predefined dialogs after deploy
-(cd $DIR/..;
 set -x
 if [ "$env" = "stage" ]; then
   for dialog in $(ls -1 test/*-stage.replay); do
@@ -34,4 +30,3 @@ if [ "$env" = "prod" ]; then
           xavidop/alexa-ask-aws-cli ask dialog --replay /$dialog --save-skill-io /${dialog/replay/json}
   done
 fi
-)
