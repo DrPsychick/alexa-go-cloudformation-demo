@@ -209,8 +209,8 @@ type ContextSystem struct {
 	User        *ContextUser `json:"user,omitempty"`
 	// Device provides information about the device used to send the request
 	Device struct {
-		DeviceID            string   `json:"deviceId,omitempty"`
-		SupportedInterfaces []string `json:"supportedInterfaces,omitempty"`
+		DeviceID            string              `json:"deviceId,omitempty"`
+		SupportedInterfaces map[string]struct{} `json:"supportedInterfaces,omitempty"`
 	} `json:"device,omitempty"`
 	Application ContextApplication `json:"application"`
 	// Unit represents a logical construct organizing actors
@@ -304,7 +304,7 @@ type ContextViewportType struct {
 	ID               string `json:"id"`
 	Type             string `json:"type"`
 	Shape            string `json:"shape"`
-	DPI              string `json:"dpi"`
+	DPI              int    `json:"dpi"`
 	PresentationType string `json:"presentationType"`
 	CanRotate        bool   `json:"canRotate"`
 	Configuration    struct {
