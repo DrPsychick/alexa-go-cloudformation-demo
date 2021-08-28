@@ -54,7 +54,7 @@ deploy:
 
 after_deploy:
   - mkdir -p ./test/ask
-  - echo "$ASK_CONFIG" > ./test/ask/ask_config
+  - echo "$ASK_CONFIG" > ./test/ask/cli_config
   - ./test/test-dialogs.sh
 
 notifications:
