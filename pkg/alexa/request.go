@@ -100,6 +100,19 @@ type SlotValue struct {
 	Resolutions *Resolutions `json:"resolutions"`
 }
 
+func (r *RequestEnvelope) Slots(name string) (map[string]*Slot, error) {
+	i, err := r.Intent()
+	if err != nil {
+		return map[string]*Slot{}, err
+	}
+
+	if i.Slots == nil {
+		return map[string]*Slot{}, errors.New("slot does not exist")
+	}
+
+	return i.Slots, nil
+}
+
 func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 	i, err := r.Intent()
 	if err != nil {
@@ -210,6 +223,13 @@ const (
 	// TypeCanFulfillIntentRequest
 	TypeCanFulfillIntentRequest RequestType = "CanFulfillIntentRequest"
 )
+
+func (r *RequestEnvelope) RequestType() (RequestType, error) {
+	if r.Request == nil || r.Request.Type == "" {
+		return "", errors.New("error")
+	}
+	return r.Request.Type, nil
+}
 
 // DialogStateType represents JSON request `request.dialogState`, see https://developer.amazon.com/docs/custom-skills/delegate-dialog-to-alexa.html
 type DialogStateType string
