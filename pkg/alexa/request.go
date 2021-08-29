@@ -2,6 +2,15 @@ package alexa
 
 import "errors"
 
+// Error constants
+var (
+	ErrorUnknown                   = errors.New("unknown error")
+	ErrorNoIntent                  = errors.New("request has no intent")
+	ErrorNoSlot                    = errors.New("slot does not exist")
+	ErrorSlotNoResolutions         = errors.New("slot has no resolutions")
+	ErrorSlotNoResolutionWithMatch = errors.New("no resolution with match")
+)
+
 // Locale constants.
 const (
 	// LocaleAmericanEnglish is the locale for American English.
@@ -78,10 +87,17 @@ type Intent struct {
 func (r *RequestEnvelope) Intent() (Intent, error) {
 	i := r.Request.Intent
 	if i.Name == "" {
-		return Intent{}, errors.New("request has no intent")
+		return Intent{}, ErrorNoIntent
 	}
 
 	return i, nil
+}
+func (r *RequestEnvelope) IntentName() string {
+	i, err := r.Intent()
+	if err != nil {
+		return ""
+	}
+	return i.Name
 }
 
 // Slot is an Alexa skill slot.
@@ -100,17 +116,17 @@ type SlotValue struct {
 	Resolutions *Resolutions `json:"resolutions"`
 }
 
-func (r *RequestEnvelope) Slots(name string) (map[string]*Slot, error) {
+func (r *RequestEnvelope) Slots(name string) map[string]*Slot {
 	i, err := r.Intent()
 	if err != nil {
-		return map[string]*Slot{}, err
+		return map[string]*Slot{}
 	}
 
 	if i.Slots == nil {
-		return map[string]*Slot{}, errors.New("slot does not exist")
+		return map[string]*Slot{}
 	}
 
-	return i.Slots, nil
+	return i.Slots
 }
 
 func (r *RequestEnvelope) Slot(name string) (Slot, error) {
@@ -121,7 +137,7 @@ func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 
 	s, ok := i.Slots[name]
 	if !ok {
-		return Slot{}, errors.New("slot does not exist")
+		return Slot{}, ErrorNoSlot
 	}
 
 	return *s, nil
@@ -139,7 +155,7 @@ func (r *RequestEnvelope) SlotValue(name string) (string, error) {
 
 func (s *Slot) SlotResolutionsPerAuthorities() ([]*PerAuthority, error) {
 	if s.Resolutions == nil {
-		return []*PerAuthority{}, errors.New("slot has no resolutions")
+		return []*PerAuthority{}, ErrorSlotNoResolutions
 	}
 
 	return s.Resolutions.PerAuthority, nil
@@ -158,7 +174,7 @@ func (s *Slot) FirstAuthorityWithMatch(name string) (PerAuthority, error) {
 		}
 	}
 
-	return PerAuthority{}, errors.New("no resolution with match")
+	return PerAuthority{}, ErrorSlotNoResolutionWithMatch
 }
 
 type AuthorityValueValue struct {
@@ -224,11 +240,25 @@ const (
 	TypeCanFulfillIntentRequest RequestType = "CanFulfillIntentRequest"
 )
 
-func (r *RequestEnvelope) RequestType() (RequestType, error) {
-	if r.Request == nil || r.Request.Type == "" {
-		return "", errors.New("error")
+func (r *RequestEnvelope) RequestType() RequestType {
+	if r.Request == nil {
+		return ""
 	}
-	return r.Request.Type, nil
+	return r.Request.Type
+}
+
+func (r *RequestEnvelope) IsIntentRequest() bool {
+	if r.Request == nil || r.Request.Type == "" {
+		return false
+	}
+	return r.Request.Type == TypeIntentRequest
+}
+
+func (r *RequestEnvelope) RequestLocale() string {
+	if r.Request == nil {
+		return ""
+	}
+	return r.Request.Locale
 }
 
 // DialogStateType represents JSON request `request.dialogState`, see https://developer.amazon.com/docs/custom-skills/delegate-dialog-to-alexa.html
