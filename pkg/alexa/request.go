@@ -1,5 +1,7 @@
 package alexa
 
+import "errors"
+
 // Locale constants.
 const (
 	// LocaleAmericanEnglish is the locale for American English.
@@ -72,6 +74,16 @@ type Intent struct {
 	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
 }
 
+// Intent returns the intent if it exists
+func (r *RequestEnvelope) Intent() (Intent, error) {
+	i := r.Request.Intent
+	if i.Name == "" {
+		return Intent{}, errors.New("request has no intent")
+	}
+
+	return i, nil
+}
+
 // Slot is an Alexa skill slot.
 type Slot struct {
 	Name        string       `json:"name"`
@@ -86,6 +98,54 @@ type SlotValue struct {
 	Type        string       `json:"type"`
 	Value       string       `json:"value"`
 	Resolutions *Resolutions `json:"resolutions"`
+}
+
+func (r *RequestEnvelope) Slot(name string) (Slot, error) {
+	i, err := r.Intent()
+	if err != nil {
+		return Slot{}, err
+	}
+
+	s, ok := i.Slots[name]
+	if !ok {
+		return Slot{}, errors.New("slot does not exist")
+	}
+
+	return *s, nil
+}
+
+// SlotValue returns the value of the slot if it exists
+func (r *RequestEnvelope) SlotValue(name string) (string, error) {
+	s, err := r.Slot(name)
+	if err != nil {
+		return "", err
+	}
+
+	return s.Value, nil
+}
+
+func (s *Slot) SlotResolutionsPerAuthorities() ([]*PerAuthority, error) {
+	if s.Resolutions == nil {
+		return []*PerAuthority{}, errors.New("slot has no resolutions")
+	}
+
+	return s.Resolutions.PerAuthority, nil
+}
+
+// SlotAuthorities returns
+func (s *Slot) FirstAuthorityWithMatch(name string) (PerAuthority, error) {
+	auths, err := s.SlotResolutionsPerAuthorities()
+	if err != nil {
+		return PerAuthority{}, err
+	}
+
+	for _, a := range auths {
+		if a.Status != nil && a.Status.Code == ResolutionStatusMatch {
+			return *a, nil
+		}
+	}
+
+	return PerAuthority{}, errors.New("no resolution with match")
 }
 
 type AuthorityValueValue struct {

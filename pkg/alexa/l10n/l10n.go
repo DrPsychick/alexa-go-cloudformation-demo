@@ -28,6 +28,7 @@ const (
 	KeyErrorTitle               string = "Error_Title"
 	KeyErrorText                string = "Error_Text"
 	KeyErrorSSML                string = "Error_SSML"
+	KeyErrorUnknown             string = "Error_Unknown"
 	KeyErrorMissingPlaceholder  string = "Error_MissingPlaceholder"
 	KeyErrorNoTranslationTitle  string = "Error_NoTranslation_Title"
 	KeyErrorNoTranslationText   string = "Error_NoTranslation_Text"
