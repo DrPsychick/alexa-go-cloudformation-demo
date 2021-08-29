@@ -116,7 +116,7 @@ type SlotValue struct {
 	Resolutions *Resolutions `json:"resolutions"`
 }
 
-func (r *RequestEnvelope) Slots(name string) map[string]*Slot {
+func (r *RequestEnvelope) Slots() map[string]*Slot {
 	i, err := r.Intent()
 	if err != nil {
 		return map[string]*Slot{}
