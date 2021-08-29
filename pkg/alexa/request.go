@@ -28,7 +28,7 @@ const (
 	// LocaleCanadianFrench is the locale for Canadian French.
 	LocaleCanadianFrench = "fr-CA"
 
-	// LocaleFrenchFrench is the locale for French (France).
+	// LocaleFrench is the locale for French (France).
 	LocaleFrench = "fr-FR"
 
 	// LocaleGerman is the locale for standard dialect German (Germany).
@@ -83,7 +83,7 @@ type Intent struct {
 	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
 }
 
-// Intent returns the intent if it exists
+// Intent returns the intent or an empty intent
 func (r *RequestEnvelope) Intent() (Intent, error) {
 	i := r.Request.Intent
 	if i.Name == "" {
@@ -92,6 +92,8 @@ func (r *RequestEnvelope) Intent() (Intent, error) {
 
 	return i, nil
 }
+
+// IntentName returns the name of the intent or "" if it's no intent request
 func (r *RequestEnvelope) IntentName() string {
 	i, err := r.Intent()
 	if err != nil {
@@ -116,6 +118,7 @@ type SlotValue struct {
 	Resolutions *Resolutions `json:"resolutions"`
 }
 
+// Slots returns the list of slots, an empty list if no intent was found
 func (r *RequestEnvelope) Slots() map[string]*Slot {
 	i, err := r.Intent()
 	if err != nil {
@@ -129,6 +132,7 @@ func (r *RequestEnvelope) Slots() map[string]*Slot {
 	return i.Slots
 }
 
+// Slot returns the named slot or an error
 func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 	i, err := r.Intent()
 	if err != nil {
@@ -153,7 +157,8 @@ func (r *RequestEnvelope) SlotValue(name string) (string, error) {
 	return s.Value, nil
 }
 
-func (s *Slot) SlotResolutionsPerAuthorities() ([]*PerAuthority, error) {
+// SlotResolutionsPerAuthority returns the list of ResolutionsPerAuthority
+func (s *Slot) SlotResolutionsPerAuthority() ([]*PerAuthority, error) {
 	if s.Resolutions == nil {
 		return []*PerAuthority{}, ErrorSlotNoResolutions
 	}
@@ -161,9 +166,9 @@ func (s *Slot) SlotResolutionsPerAuthorities() ([]*PerAuthority, error) {
 	return s.Resolutions.PerAuthority, nil
 }
 
-// SlotAuthorities returns
-func (s *Slot) FirstAuthorityWithMatch(name string) (PerAuthority, error) {
-	auths, err := s.SlotResolutionsPerAuthorities()
+// FirstAuthorityWithMatch returns the first authority with ResolutionStatusMatch
+func (s *Slot) FirstAuthorityWithMatch() (PerAuthority, error) {
+	auths, err := s.SlotResolutionsPerAuthority()
 	if err != nil {
 		return PerAuthority{}, err
 	}
@@ -177,16 +182,18 @@ func (s *Slot) FirstAuthorityWithMatch(name string) (PerAuthority, error) {
 	return PerAuthority{}, ErrorSlotNoResolutionWithMatch
 }
 
+// AuthorityValueValue points to the unique ID and value
 type AuthorityValueValue struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
 }
 
+// AuthorityValue is an entry in the list of values
 type AuthorityValue struct {
 	Value *AuthorityValueValue `json:"value,omitempty"`
 }
 
-// ResolutionStatus represents the status code of a slot resolution
+// StatusCode represents the status code of a slot resolution
 type StatusCode string
 
 const (
@@ -205,7 +212,7 @@ type ResolutionStatus struct {
 	Code StatusCode `json:"code"`
 }
 
-// PerAuthority encapsualtes an Authority which is the source of the data provided
+// PerAuthority encapsulates an Authority which is the source of the data provided
 type PerAuthority struct {
 	Authority string            `json:"authority"`
 	Status    *ResolutionStatus `json:"status,omitempty"`
@@ -230,13 +237,13 @@ type RequestType string
 
 // Request type constants.
 const (
-	// TypeLaunchRequest
+	// TypeLaunchRequest string that represents a launch request
 	TypeLaunchRequest RequestType = "LaunchRequest"
-	// TypeIntentRequest
+	// TypeIntentRequest string that represents an intent request
 	TypeIntentRequest RequestType = "IntentRequest"
-	// TypeSessionEndedRequest
+	// TypeSessionEndedRequest string that represents a session end request
 	TypeSessionEndedRequest RequestType = "SessionEndedRequest"
-	// TypeCanFulfillIntentRequest
+	// TypeCanFulfillIntentRequest string that represents a can fulfill intent request
 	TypeCanFulfillIntentRequest RequestType = "CanFulfillIntentRequest"
 )
 
@@ -290,7 +297,7 @@ type ContextUser struct {
 	AccessToken string `json:"accessToken,omitempty"`
 }
 
-// ContextApplication is used to verify that the request was intended for your service, the ID is the appliation ID for your skill
+// ContextApplication is used to verify that the request was intended for your service, the ID is the application ID for your skill
 type ContextApplication struct {
 	ApplicationID string `json:"applicationId"`
 }
@@ -337,7 +344,7 @@ type AudioPlayerActivity string
 const (
 	// AudioPlayerActivityIDLE Nothing was playing, no enqueued items.
 	AudioPlayerActivityIDLE AudioPlayerActivity = "IDLE"
-	// AudioPlayerActivityPAUSE Stream was paused.
+	// AudioPlayerActivityPAUSED Stream was paused.
 	AudioPlayerActivityPAUSED AudioPlayerActivity = "PAUSED"
 	// AudioPlayerActivityPLAYING Stream was playing.
 	AudioPlayerActivityPLAYING AudioPlayerActivity = "PLAYING"
@@ -356,7 +363,7 @@ type ContextAudioPlayer struct {
 	PlayerActivity       AudioPlayerActivity `json:"playerActivity"`
 }
 
-// ViewportExperience
+// ViewportExperience has info about the device
 type ViewportExperience struct {
 	ArcMinuteWidth  int  `json:"arcMinuteWidth"`
 	ArcMinuteHeight int  `json:"arcMinuteHeight"`
@@ -385,7 +392,7 @@ const (
 
 // ContextViewport provides information about the viewport if the device has a screen
 type ContextViewport struct {
-	Experiences        []*ViewportExperience `json:"experiances,omitempty"`
+	Experiences        []*ViewportExperience `json:"experiences,omitempty"`
 	Mode               ContextViewportMode   `json:"mode"`
 	Shape              ContextViewportShape  `json:"shape"`
 	PixelWidth         int                   `json:"pixelWidth"`
