@@ -63,9 +63,9 @@ func handleCanFulfillIntent(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) 
 
 func handleLaunch(app Application) alexa.HandlerFunc {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		loc, err := loca.Registry.Resolve(r.Request.Locale)
+		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
-			handleMissingLocale(b, r.Request.Locale)
+			handleMissingLocale(b, r.RequestLocale())
 			return
 		}
 		title, text := app.Launch(loc)
@@ -84,9 +84,9 @@ func handleLaunch(app Application) alexa.HandlerFunc {
 
 func handleEnd(app Application) alexa.HandlerFunc {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		loc, err := loca.Registry.Resolve(r.Request.Locale)
+		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
-			handleMissingLocale(b, r.Request.Locale)
+			handleMissingLocale(b, r.RequestLocale())
 			return
 		}
 
@@ -109,9 +109,9 @@ func handleHelp(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(alexa.HelpIntent)
 
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		loc, err := loca.Registry.Resolve(r.Request.Locale)
+		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
-			handleMissingLocale(b, r.Request.Locale)
+			handleMissingLocale(b, r.RequestLocale())
 			return
 		}
 		title, text, _ := app.Help(loc)
@@ -133,9 +133,9 @@ func handleStop(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(alexa.CancelIntent)
 
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		loc, err := loca.Registry.Resolve(r.Request.Locale)
+		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
-			handleMissingLocale(b, r.Request.Locale)
+			handleMissingLocale(b, r.RequestLocale())
 			return
 		}
 		title, text, _ := app.Stop(loc)
@@ -155,9 +155,9 @@ func handleStop(app Application, sb *gen.SkillBuilder) alexa.Handler {
 func handleSSMLResponse(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	sb.Model().WithIntent(loca.DemoIntent)
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		loc, err := loca.Registry.Resolve(r.Request.Locale)
+		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
-			handleMissingLocale(b, r.Request.Locale)
+			handleMissingLocale(b, r.RequestLocale())
 			return
 		}
 
@@ -179,9 +179,9 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 	sb.Model().WithIntent(loca.SaySomething)
 
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		loc, err := loca.Registry.Resolve(r.Request.Locale)
+		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
-			handleMissingLocale(b, r.Request.Locale)
+			handleMissingLocale(b, r.RequestLocale())
 			return
 		}
 		responseFuncs := []alfalfa.ResponseFunc{}
@@ -287,12 +287,12 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		WithSlot(loca.TypeRegionName, loca.TypeRegion)
 
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		tags := []interface{}{"intent", loca.AWSStatus, "locale", r.Request.Locale}
+		tags := []interface{}{"intent", loca.AWSStatus, "locale", r.RequestLocale()}
 
-		loc, err := loca.Registry.Resolve(r.Request.Locale)
+		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
 			stats.Inc(app, "handleAWSStatus.error", 1, 1.0, tags...)
-			handleMissingLocale(b, r.Request.Locale)
+			handleMissingLocale(b, r.RequestLocale())
 			return
 		}
 
@@ -408,7 +408,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 
 // TODO: handle errors individually to be of more use to the user
 func handleError(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope, err error) {
-	loc := localeDefaults(r.Request.Locale)
+	loc := localeDefaults(r.RequestLocale())
 	switch err {
 	default:
 		b.WithSimpleCard(loc.GetAny(l10n.KeyErrorTitle), loc.GetAny(l10n.KeyErrorText, err.Error())).

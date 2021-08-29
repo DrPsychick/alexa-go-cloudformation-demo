@@ -9,45 +9,52 @@ var (
 	ErrorNoSlot                    = errors.New("slot does not exist")
 	ErrorSlotNoResolutions         = errors.New("slot has no resolutions")
 	ErrorSlotNoResolutionWithMatch = errors.New("no resolution with match")
+	ErrorNoSystemInContext         = errors.New("no system in context")
+	ErrorNoUserInContext           = errors.New("no user in context")
+	ErrorNoPersonInContext         = errors.New("no person in system context")
+	ErrorNoApplicationID           = errors.New("no application ID in the request")
 )
+
+// RequestLocale represents the locale of the request
+type RequestLocale string
 
 // Locale constants.
 const (
 	// LocaleAmericanEnglish is the locale for American English.
-	LocaleAmericanEnglish = "en-US"
+	LocaleAmericanEnglish RequestLocale = "en-US"
 
 	// LocaleAustralianEnglish is the locale for Australian English.
-	LocaleAustralianEnglish = "en-AU"
+	LocaleAustralianEnglish RequestLocale = "en-AU"
 
 	// LocaleBritishEnglish is the locale for UK English.
-	LocaleBritishEnglish = "en-GB"
+	LocaleBritishEnglish RequestLocale = "en-GB"
 
 	// LocaleCanadianEnglish is the locale for Canadian English.
-	LocaleCanadianEnglish = "en-CA"
+	LocaleCanadianEnglish RequestLocale = "en-CA"
 
 	// LocaleCanadianFrench is the locale for Canadian French.
-	LocaleCanadianFrench = "fr-CA"
+	LocaleCanadianFrench RequestLocale = "fr-CA"
 
 	// LocaleFrench is the locale for French (France).
-	LocaleFrench = "fr-FR"
+	LocaleFrench RequestLocale = "fr-FR"
 
 	// LocaleGerman is the locale for standard dialect German (Germany).
-	LocaleGerman = "de-DE"
+	LocaleGerman RequestLocale = "de-DE"
 
 	//LocaleIndianEnglish is the locale for Indian English.
-	LocaleIndianEnglish = "en-IN"
+	LocaleIndianEnglish RequestLocale = "en-IN"
 
 	// LocaleItalian is the locale for Italian (Italy).
-	LocaleItalian = "it-IT"
+	LocaleItalian RequestLocale = "it-IT"
 
 	// LocaleJapanese is the locale for Japanese (Japan).
-	LocaleJapanese = "ja-JP"
+	LocaleJapanese RequestLocale = "ja-JP"
 
 	// LocaleMexicanSpanish is the locale for Mexican Spanish.
-	LocaleMexicanSpanish = "es-MX"
+	LocaleMexicanSpanish RequestLocale = "es-MX"
 
 	// LocaleSpanish is the  for Spanish (Spain).
-	LocaleSpanish = "es-ES"
+	LocaleSpanish RequestLocale = "es-ES"
 )
 
 // ConfirmationStatus represents confirmationStatus in JSON
@@ -100,6 +107,16 @@ func (r *RequestEnvelope) IntentName() string {
 		return ""
 	}
 	return i.Name
+}
+
+// IsIntentConfirmed returns true if the confirmation status is CONFIRMED
+func (r *RequestEnvelope) IsIntentConfirmed() bool {
+	i, err := r.Intent()
+	if err != nil {
+		return false
+	}
+
+	return i.ConfirmationStatus == ConfirmationStatusConfirmed
 }
 
 // Slot is an Alexa skill slot.
@@ -265,7 +282,15 @@ func (r *RequestEnvelope) RequestLocale() string {
 	if r.Request == nil {
 		return ""
 	}
-	return r.Request.Locale
+	return string(r.Request.Locale)
+}
+
+func (r *RequestEnvelope) RequestDialogState() DialogStateType {
+	if r.Request == nil {
+		return ""
+	}
+
+	return r.Request.DialogState
 }
 
 // DialogStateType represents JSON request `request.dialogState`, see https://developer.amazon.com/docs/custom-skills/delegate-dialog-to-alexa.html
@@ -282,7 +307,7 @@ type Request struct {
 	Type        RequestType     `json:"type"`
 	RequestID   string          `json:"requestId"`
 	Timestamp   string          `json:"timestamp"`
-	Locale      string          `json:"locale"`
+	Locale      RequestLocale   `json:"locale"`
 	Intent      Intent          `json:"intent,omitempty"`
 	Reason      string          `json:"reason,omitempty"`
 	DialogState DialogStateType `json:"dialogState,omitempty"`
@@ -302,13 +327,41 @@ type ContextApplication struct {
 	ApplicationID string `json:"applicationId"`
 }
 
+// ApplicationID returns the application ID from the session first, then system or throw an error. Use it to verify the request is meant for your Skill.
+func (r *RequestEnvelope) ApplicationID() (string, error) {
+	// Session or System
+	if r.Session == nil {
+		s, err := r.System()
+		if err != nil || s.Application == nil {
+			return "", ErrorNoApplicationID
+		}
+
+		return s.Application.ApplicationID, nil
+	}
+
+	if r.Session.Application == nil {
+		return "", ErrorNoApplicationID
+	}
+
+	return r.Session.Application.ApplicationID, nil
+}
+
 // Session represents the Alexa skill session.
 type Session struct {
 	New         bool                   `json:"new"`
 	SessionID   string                 `json:"sessionId"`
-	Application ContextApplication     `json:"application"`
+	Application *ContextApplication    `json:"application"`
 	Attributes  map[string]interface{} `json:"attributes"`
-	User        ContextUser            `json:"user"`
+	User        *ContextUser           `json:"user"`
+}
+
+// SessionID returns the sessionID or an empty string
+func (r *RequestEnvelope) SessionID() string {
+	if r.Session == nil {
+		return ""
+	}
+	return r.Session.SessionID
+
 }
 
 // ContextSystemPerson describes the person who is making the request to Alexa (user recognized by voice, not account)
@@ -329,7 +382,7 @@ type ContextSystem struct {
 		DeviceID            string              `json:"deviceId,omitempty"`
 		SupportedInterfaces map[string]struct{} `json:"supportedInterfaces,omitempty"`
 	} `json:"device,omitempty"`
-	Application ContextApplication `json:"application"`
+	Application *ContextApplication `json:"application"`
 	// Unit represents a logical construct organizing actors
 	Unit struct {
 		UnitId           string `json:"unitId"`
@@ -337,6 +390,33 @@ type ContextSystem struct {
 	} `json:"unit,omitempty"`
 	// Person describes the person who is making the request to Alexa (user recognized by voice, not account)
 	Person *ContextSystemPerson `json:"person,omitempty"`
+}
+
+// System returns the system object if it exists in the context
+func (r *RequestEnvelope) System() (*ContextSystem, error) {
+	if r.Context == nil || r.Context.System == nil {
+		return &ContextSystem{}, ErrorNoSystemInContext
+	}
+
+	return r.Context.System, nil
+}
+
+// ContextPerson returns the person in the context or throw an error if no person exists
+func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
+	s, err := r.System()
+	if err != nil || s.Person == nil {
+		return &ContextSystemPerson{}, ErrorNoPersonInContext
+	}
+	return r.Context.System.Person, nil
+}
+
+// ContextUser returns the user in the context or throw an error if no user exists
+func (r *RequestEnvelope) ContextUser() (*ContextUser, error) {
+	s, err := r.System()
+	if err != nil || s.User == nil {
+		return &ContextUser{}, ErrorNoUserInContext
+	}
+	return r.Context.System.User, nil
 }
 
 type AudioPlayerActivity string
