@@ -5,7 +5,7 @@ import (
 	"github.com/hamba/cmd"
 	"github.com/hamba/logger"
 	"github.com/hamba/pkg/log"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli/v2"
 	"io/ioutil"
 	"os"
 )

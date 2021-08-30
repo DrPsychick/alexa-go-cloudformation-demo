@@ -15,7 +15,7 @@ import (
 	"github.com/hamba/pkg/log"
 	//"github.com/hamba/pkg/stats"
 	//"github.com/hamba/statter/l2met"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli/v2"
 	//"os"
 	"time"
 )

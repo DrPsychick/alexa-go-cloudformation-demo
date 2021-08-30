@@ -5,7 +5,7 @@ import (
 
 	"github.com/hamba/cmd"
 	"github.com/hamba/pkg/log"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli/v2"
 )
 
 func runServer(c *cli.Context) error {

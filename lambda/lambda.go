@@ -287,7 +287,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		WithSlot(loca.TypeRegionName, loca.TypeRegion)
 
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		tags := []interface{}{"intent", loca.AWSStatus, "locale", r.RequestLocale()}
+		tags := []string{"intent", loca.AWSStatus, "locale", r.RequestLocale()}
 
 		loc, err := loca.Registry.Resolve(r.RequestLocale())
 		if err != nil {
