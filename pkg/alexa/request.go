@@ -4,15 +4,15 @@ import "errors"
 
 // Error constants
 var (
-	ErrorUnknown                   = errors.New("unknown error")
-	ErrorNoIntent                  = errors.New("request has no intent")
-	ErrorNoSlot                    = errors.New("slot does not exist")
-	ErrorSlotNoResolutions         = errors.New("slot has no resolutions")
-	ErrorSlotNoResolutionWithMatch = errors.New("no resolution with match")
-	ErrorNoSystemInContext         = errors.New("no system in context")
-	ErrorNoUserInContext           = errors.New("no user in context")
-	ErrorNoPersonInContext         = errors.New("no person in system context")
-	ErrorNoApplicationID           = errors.New("no application ID in the request")
+	ErrUnknown                   = errors.New("unknown error")
+	ErrNoIntent                  = errors.New("request has no intent")
+	ErrNoSlot                    = errors.New("slot does not exist")
+	ErrSlotNoResolutions         = errors.New("slot has no resolutions")
+	ErrSlotNoResolutionWithMatch = errors.New("no resolution with match")
+	ErrNoSystemInContext         = errors.New("no system in context")
+	ErrNoUserInContext           = errors.New("no user in context")
+	ErrNoPersonInContext         = errors.New("no person in system context")
+	ErrNoApplicationID           = errors.New("no application ID in the request")
 )
 
 // RequestLocale represents the locale of the request
@@ -94,7 +94,7 @@ type Intent struct {
 func (r *RequestEnvelope) Intent() (Intent, error) {
 	i := r.Request.Intent
 	if i.Name == "" {
-		return Intent{}, ErrorNoIntent
+		return Intent{}, ErrNoIntent
 	}
 
 	return i, nil
@@ -158,7 +158,7 @@ func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 
 	s, ok := i.Slots[name]
 	if !ok {
-		return Slot{}, ErrorNoSlot
+		return Slot{}, ErrNoSlot
 	}
 
 	return *s, nil
@@ -177,7 +177,7 @@ func (r *RequestEnvelope) SlotValue(name string) (string, error) {
 // SlotResolutionsPerAuthority returns the list of ResolutionsPerAuthority
 func (s *Slot) SlotResolutionsPerAuthority() ([]*PerAuthority, error) {
 	if s.Resolutions == nil {
-		return []*PerAuthority{}, ErrorSlotNoResolutions
+		return []*PerAuthority{}, ErrSlotNoResolutions
 	}
 
 	return s.Resolutions.PerAuthority, nil
@@ -196,7 +196,7 @@ func (s *Slot) FirstAuthorityWithMatch() (PerAuthority, error) {
 		}
 	}
 
-	return PerAuthority{}, ErrorSlotNoResolutionWithMatch
+	return PerAuthority{}, ErrSlotNoResolutionWithMatch
 }
 
 // AuthorityValueValue points to the unique ID and value
@@ -333,14 +333,14 @@ func (r *RequestEnvelope) ApplicationID() (string, error) {
 	if r.Session == nil {
 		s, err := r.System()
 		if err != nil || s.Application == nil {
-			return "", ErrorNoApplicationID
+			return "", ErrNoApplicationID
 		}
 
 		return s.Application.ApplicationID, nil
 	}
 
 	if r.Session.Application == nil {
-		return "", ErrorNoApplicationID
+		return "", ErrNoApplicationID
 	}
 
 	return r.Session.Application.ApplicationID, nil
@@ -395,7 +395,7 @@ type ContextSystem struct {
 // System returns the system object if it exists in the context
 func (r *RequestEnvelope) System() (*ContextSystem, error) {
 	if r.Context == nil || r.Context.System == nil {
-		return &ContextSystem{}, ErrorNoSystemInContext
+		return &ContextSystem{}, ErrNoSystemInContext
 	}
 
 	return r.Context.System, nil
@@ -405,7 +405,7 @@ func (r *RequestEnvelope) System() (*ContextSystem, error) {
 func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 	s, err := r.System()
 	if err != nil || s.Person == nil {
-		return &ContextSystemPerson{}, ErrorNoPersonInContext
+		return &ContextSystemPerson{}, ErrNoPersonInContext
 	}
 	return r.Context.System.Person, nil
 }
@@ -414,7 +414,7 @@ func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 func (r *RequestEnvelope) ContextUser() (*ContextUser, error) {
 	s, err := r.System()
 	if err != nil || s.User == nil {
-		return &ContextUser{}, ErrorNoUserInContext
+		return &ContextUser{}, ErrNoUserInContext
 	}
 	return r.Context.System.User, nil
 }
