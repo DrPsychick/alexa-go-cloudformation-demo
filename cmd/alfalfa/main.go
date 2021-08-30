@@ -1,14 +1,13 @@
 package main
 
 import (
-	"github.com/hamba/cmd"
 	"log"
 	"os"
 
+	"github.com/hamba/cmd"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
 )
-
-import _ "github.com/joho/godotenv/autoload"
 
 var version = "v0.0.1"
 
@@ -60,8 +59,7 @@ func main() {
 	app.Flags = cmd.CommonFlags.Merge(cmd.ServerFlags)
 	app.Action = runLambda
 
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

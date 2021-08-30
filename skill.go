@@ -15,13 +15,12 @@ import (
 //
 //}
 
-// NewSkill returns a configured SkillBuilder
+// NewSkill returns a configured SkillBuilder.
 func NewSkill() *gen.SkillBuilder {
 	return gen.NewSkillBuilder().
 		WithLocaleRegistry(loca.Registry).
 		WithCategory(alexa.CategoryOrganizersAndAssistants).
 		WithPrivacyFlag(gen.FlagIsExportCompliant, true)
-
 }
 
 // CreateSkillModels generates and returns a list of Models.
@@ -44,8 +43,8 @@ func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	m.Intent(loca.AWSStatus).Slot(loca.TypeRegionName).WithElicitation(false)
 
 	// this "breaks" the `ask dialog --replay` testing as alexa asks the user to validate the input
-	//m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
-	//m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).
+	// m.WithConfirmationSlotPrompt(loca.AWSStatus, loca.TypeAreaName)
+	// m.ConfirmationPrompt(loca.AWSStatus, loca.TypeAreaName).
 	//	WithVariation("SSML")
 
 	// create a Validation prompt, connected to type-values
@@ -58,7 +57,7 @@ func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	m.ValidationPrompt(loca.TypeRegionName, alexa.ValidationTypeInSet).
 		WithVariation("PlainText")
 
-	//m.Intent(loca.AWSStatus).Slot(loca.TypeRegionName).
+	// m.Intent(loca.AWSStatus).Slot(loca.TypeRegionName).
 	//	WithValidationRule(alexa.ValidationTypeHasMatch)
 
 	return s.BuildModels()

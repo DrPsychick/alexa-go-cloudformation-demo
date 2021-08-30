@@ -2,11 +2,12 @@ package gen
 
 import (
 	"fmt"
+
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
-// Flags for alexa.Privacy
+// Flags for alexa.Privacy.
 const (
 	FlagIsExportCompliant string = "IsExportCompliant"
 	FlagContainsAds       string = "ContainsAds"
@@ -15,7 +16,7 @@ const (
 	FlagIsChildDirected   string = "IsChildDirected"
 )
 
-// IntentProvider exposes intents with optional slots
+// IntentProvider exposes intents with optional slots.
 type IntentProvider interface {
 	GetIntents() map[string]string
 	GetIntentSlots(intent string) map[string]string
@@ -31,7 +32,7 @@ type SkillBuilder struct {
 	privacyFlags map[string]bool
 	locales      map[string]*SkillLocaleBuilder
 	model        *modelBuilder
-	//permissions2 *SkillPermissionsBuilder
+	// permissions2 *SkillPermissionsBuilder
 }
 
 // NewSkillBuilder returns a new basic SkillBuilder.
@@ -98,7 +99,7 @@ func (s *SkillBuilder) AddLocale(locale string, opts ...l10n.RegisterFunc) *Skil
 	return s
 }
 
-// WithDefaultLocale sets the default locale for the skill (used for
+// WithDefaultLocale sets the default locale for the skill (used for.
 func (s *SkillBuilder) WithDefaultLocale(locale string) *SkillBuilder {
 	if err := s.registry.SetDefault(locale); err != nil {
 		s.error = err
@@ -124,7 +125,7 @@ func (s *SkillBuilder) WithModel() *SkillBuilder {
 	return s
 }
 
-//func (s *SkillBuilder) WithIntentProvider(i IntentProvider) *SkillBuilder {
+// func (s *SkillBuilder) WithIntentProvider(i IntentProvider) *SkillBuilder {
 
 //}
 
@@ -178,7 +179,7 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) {
 		return nil, fmt.Errorf("skill category is required")
 	}
 	skill.Manifest.Publishing.Category = s.category
-	// TODO: ensure unique occurance?
+	// TODO: ensure unique occurrence?
 	if len(s.countries) > 0 {
 		skill.Manifest.Publishing.Countries = s.countries
 	} else {
@@ -493,7 +494,7 @@ func (l *SkillLocaleBuilder) BuildPrivacyLocale() (alexa.PrivacyLocaleDef, error
 	// Error: privacyAndCompliance.locales.en-US - object instance has properties which are not allowed by the schema: ["termsOfUse"]
 	if loc.Get(l.skillTermsURL) != "" {
 		return alexa.PrivacyLocaleDef{}, fmt.Errorf("'termsOfUse' makes Skill deployment fail! (%s)", l.locale)
-		//p.TermsOfUse = loc.Get(l.skillTermsURL)
+		// p.TermsOfUse = loc.Get(l.skillTermsURL)
 	}
 	return p, nil
 }

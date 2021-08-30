@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/hamba/cmd"
 	"github.com/hamba/pkg/log"
 	"github.com/urfave/cli/v2"
@@ -20,8 +18,8 @@ func runServer(c *cli.Context) error {
 	}
 
 	// TODO!
-	//s := rpc.NewServer(app)
-	log.Info(ctx, fmt.Sprintf("Starting lambda server"))
+	// s := rpc.NewServer(app)
+	log.Info(ctx, "Starting lambda server")
 	// if err :=
 
 	return nil

@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/hamba/pkg/log"
-	"github.com/json-iterator/go"
-	"sync"
+	jsoniter "github.com/json-iterator/go"
 )
 
 // Handler represents an alexa request handler.
@@ -147,7 +148,7 @@ func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 	m.HandleIntent(intent, handler)
 }
 
-// fallbackHandler returns a fatal error card
+// fallbackHandler returns a fatal error card.
 func fallbackHandler(err error) HandlerFunc {
 	return HandlerFunc(func(b *ResponseBuilder, r *RequestEnvelope) {
 		b.WithSimpleCard("Fatal error", "error: "+err.Error()).
@@ -162,7 +163,6 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	h, err := m.Handler(r)
 	if err != nil {
 		h = fallbackHandler(err)
-		return
 	}
 
 	h.Serve(b, r)
@@ -170,7 +170,7 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	m.logger.Debug(string(json))
 }
 
-//// DefaultServerMux is the default mux
+// DefaultServerMux is the default mux.
 var DefaultServerMux = NewServerMux(log.Null)
 
 // HandleRequestType registers the handler for the given request type on the DefaultServeMux.

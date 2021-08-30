@@ -1,8 +1,23 @@
 package alexa
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
-// Error constants
+// NotFoundError defines a generic not found error.
+type NotFoundError struct {
+	element string
+}
+
+// Error returns a string representing the error including the element missing.
+func (e NotFoundError) Error() string {
+	return fmt.Sprintf("'%s' not found in request", e.element)
+}
+
+// use it: return "", &ErrNotFound("Slot")
+
+// Error constants.
 var (
 	ErrUnknown                   = errors.New("unknown error")
 	ErrNoIntent                  = errors.New("request has no intent")
@@ -15,7 +30,7 @@ var (
 	ErrNoApplicationID           = errors.New("no application ID in the request")
 )
 
-// RequestLocale represents the locale of the request
+// RequestLocale represents the locale of the request.
 type RequestLocale string
 
 // Locale constants.
@@ -41,7 +56,7 @@ const (
 	// LocaleGerman is the locale for standard dialect German (Germany).
 	LocaleGerman RequestLocale = "de-DE"
 
-	//LocaleIndianEnglish is the locale for Indian English.
+	// LocaleIndianEnglish is the locale for Indian English.
 	LocaleIndianEnglish RequestLocale = "en-IN"
 
 	// LocaleItalian is the locale for Italian (Italy).
@@ -57,7 +72,7 @@ const (
 	LocaleSpanish RequestLocale = "es-ES"
 )
 
-// ConfirmationStatus represents confirmationStatus in JSON
+// ConfirmationStatus represents confirmationStatus in JSON.
 type ConfirmationStatus string
 
 const (
@@ -73,13 +88,13 @@ const (
 
 // Built in intents.
 const (
-	//HelpIntent is the Alexa built-in Help Intent.
+	// HelpIntent is the Alexa built-in Help Intent.
 	HelpIntent = "AMAZON.HelpIntent"
 
-	//CancelIntent is the Alexa built-in Cancel Intent.
+	// CancelIntent is the Alexa built-in Cancel Intent.
 	CancelIntent = "AMAZON.CancelIntent"
 
-	//StopIntent is the Alexa built-in Stop Intent.
+	// StopIntent is the Alexa built-in Stop Intent.
 	StopIntent = "AMAZON.StopIntent"
 )
 
@@ -90,7 +105,7 @@ type Intent struct {
 	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus"`
 }
 
-// Intent returns the intent or an empty intent
+// Intent returns the intent or an empty intent.
 func (r *RequestEnvelope) Intent() (Intent, error) {
 	i := r.Request.Intent
 	if i.Name == "" {
@@ -100,7 +115,7 @@ func (r *RequestEnvelope) Intent() (Intent, error) {
 	return i, nil
 }
 
-// IntentName returns the name of the intent or "" if it's no intent request
+// IntentName returns the name of the intent or "" if it's no intent request.
 func (r *RequestEnvelope) IntentName() string {
 	i, err := r.Intent()
 	if err != nil {
@@ -109,7 +124,7 @@ func (r *RequestEnvelope) IntentName() string {
 	return i.Name
 }
 
-// IsIntentConfirmed returns true if the confirmation status is CONFIRMED
+// IsIntentConfirmed returns true if the confirmation status is CONFIRMED.
 func (r *RequestEnvelope) IsIntentConfirmed() bool {
 	i, err := r.Intent()
 	if err != nil {
@@ -128,14 +143,14 @@ type Slot struct {
 	SlotValue   *SlotValue   `json:"slotValue"`
 }
 
-// SlotValue defines the value or values captured by the slot
+// SlotValue defines the value or values captured by the slot.
 type SlotValue struct {
 	Type        string       `json:"type"`
 	Value       string       `json:"value"`
 	Resolutions *Resolutions `json:"resolutions"`
 }
 
-// Slots returns the list of slots, an empty list if no intent was found
+// Slots returns the list of slots, an empty list if no intent was found.
 func (r *RequestEnvelope) Slots() map[string]*Slot {
 	i, err := r.Intent()
 	if err != nil {
@@ -149,7 +164,7 @@ func (r *RequestEnvelope) Slots() map[string]*Slot {
 	return i.Slots
 }
 
-// Slot returns the named slot or an error
+// Slot returns the named slot or an error.
 func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 	i, err := r.Intent()
 	if err != nil {
@@ -164,7 +179,7 @@ func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 	return *s, nil
 }
 
-// SlotValue returns the value of the slot if it exists
+// SlotValue returns the value of the slot if it exists.
 func (r *RequestEnvelope) SlotValue(name string) (string, error) {
 	s, err := r.Slot(name)
 	if err != nil {
@@ -174,7 +189,7 @@ func (r *RequestEnvelope) SlotValue(name string) (string, error) {
 	return s.Value, nil
 }
 
-// SlotResolutionsPerAuthority returns the list of ResolutionsPerAuthority
+// SlotResolutionsPerAuthority returns the list of ResolutionsPerAuthority.
 func (s *Slot) SlotResolutionsPerAuthority() ([]*PerAuthority, error) {
 	if s.Resolutions == nil {
 		return []*PerAuthority{}, ErrSlotNoResolutions
@@ -183,7 +198,7 @@ func (s *Slot) SlotResolutionsPerAuthority() ([]*PerAuthority, error) {
 	return s.Resolutions.PerAuthority, nil
 }
 
-// FirstAuthorityWithMatch returns the first authority with ResolutionStatusMatch
+// FirstAuthorityWithMatch returns the first authority with ResolutionStatusMatch.
 func (s *Slot) FirstAuthorityWithMatch() (PerAuthority, error) {
 	auths, err := s.SlotResolutionsPerAuthority()
 	if err != nil {
@@ -199,37 +214,37 @@ func (s *Slot) FirstAuthorityWithMatch() (PerAuthority, error) {
 	return PerAuthority{}, ErrSlotNoResolutionWithMatch
 }
 
-// AuthorityValueValue points to the unique ID and value
+// AuthorityValueValue points to the unique ID and value.
 type AuthorityValueValue struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
 }
 
-// AuthorityValue is an entry in the list of values
+// AuthorityValue is an entry in the list of values.
 type AuthorityValue struct {
 	Value *AuthorityValueValue `json:"value,omitempty"`
 }
 
-// StatusCode represents the status code of a slot resolution
+// StatusCode represents the status code of a slot resolution.
 type StatusCode string
 
 const (
-	// ResolutionStatusMatch is the status code for match
+	// ResolutionStatusMatch is the status code for match.
 	ResolutionStatusMatch StatusCode = "ER_SUCCESS_MATCH"
-	// ResolutionStatusNoMatch is the status code for no match
+	// ResolutionStatusNoMatch is the status code for no match.
 	ResolutionStatusNoMatch StatusCode = "ER_SUCCESS_NO_MATCH"
-	// ResolutionStatusTimeout is the status code for an error due to timeout
+	// ResolutionStatusTimeout is the status code for an error due to timeout.
 	ResolutionStatusTimeout StatusCode = "ER_ERROR_TIMEOUT"
-	// ResolutionStatusException is the status code for an error in processing
+	// ResolutionStatusException is the status code for an error in processing.
 	ResolutionStatusException StatusCode = "ER_ERROR_EXCEPTION"
 )
 
-// ResolutionStatus indicates the results of attempting to resolve the user utterance against the defined slot types
+// ResolutionStatus indicates the results of attempting to resolve the user utterance against the defined slot types.
 type ResolutionStatus struct {
 	Code StatusCode `json:"code"`
 }
 
-// PerAuthority encapsulates an Authority which is the source of the data provided
+// PerAuthority encapsulates an Authority which is the source of the data provided.
 type PerAuthority struct {
 	Authority string            `json:"authority"`
 	Status    *ResolutionStatus `json:"status,omitempty"`
@@ -241,15 +256,9 @@ type Resolutions struct {
 	PerAuthority []*PerAuthority `json:"resolutionsPerAuthority"`
 }
 
-// UpdatedIntent is to update the Intent.
-// **same** as Intent, just with a different json key
-//type UpdatedIntent struct {
-//	Name               string             `json:"name,omitempty"`
-//	ConfirmationStatus ConfirmationStatus `json:"confirmationStatus,omitempty"`
-//	Slots              map[string]Slot    `json:"slots,omitempty"`
-//}
-
-// RequestType represents JSON request `request.type`, see https://developer.amazon.com/docs/custom-skills/request-types-reference.html
+// RequestType represents JSON request `request.type`
+//
+// see https://developer.amazon.com/docs/custom-skills/request-types-reference.html
 type RequestType string
 
 // Request type constants.
@@ -264,6 +273,7 @@ const (
 	TypeCanFulfillIntentRequest RequestType = "CanFulfillIntentRequest"
 )
 
+// RequestType returns the type of the request.
 func (r *RequestEnvelope) RequestType() RequestType {
 	if r.Request == nil {
 		return ""
@@ -271,6 +281,7 @@ func (r *RequestEnvelope) RequestType() RequestType {
 	return r.Request.Type
 }
 
+// IsIntentRequest returns tru when the request is a TypeIntentRequest.
 func (r *RequestEnvelope) IsIntentRequest() bool {
 	if r.Request == nil || r.Request.Type == "" {
 		return false
@@ -278,6 +289,7 @@ func (r *RequestEnvelope) IsIntentRequest() bool {
 	return r.Request.Type == TypeIntentRequest
 }
 
+// RequestLocale returns the locale of the request as string (e.g. "en-US").
 func (r *RequestEnvelope) RequestLocale() string {
 	if r.Request == nil {
 		return ""
@@ -285,6 +297,7 @@ func (r *RequestEnvelope) RequestLocale() string {
 	return string(r.Request.Locale)
 }
 
+// RequestDialogState returns the dialog state of the request.
 func (r *RequestEnvelope) RequestDialogState() DialogStateType {
 	if r.Request == nil {
 		return ""
@@ -293,13 +306,18 @@ func (r *RequestEnvelope) RequestDialogState() DialogStateType {
 	return r.Request.DialogState
 }
 
-// DialogStateType represents JSON request `request.dialogState`, see https://developer.amazon.com/docs/custom-skills/delegate-dialog-to-alexa.html
+// DialogStateType represents JSON request `request.dialogState`
+//
+// see https://developer.amazon.com/docs/custom-skills/delegate-dialog-to-alexa.html
 type DialogStateType string
 
 const (
-	DialogStateStarted    DialogStateType = "STARTED"
+	// DialogStateStarted defines a started dialog.
+	DialogStateStarted DialogStateType = "STARTED"
+	// DialogStateInProgress defines a dialog in progress.
 	DialogStateInProgress DialogStateType = "IN_PROGRESS"
-	DialogStateCompleted  DialogStateType = "COMPLETED"
+	// DialogStateCompleted defines a completed dialog.
+	DialogStateCompleted DialogStateType = "COMPLETED"
 )
 
 // Request represents the information about the request.
@@ -316,18 +334,22 @@ type Request struct {
 	Session *Session `json:"-"`
 }
 
-// ContextUser a string that represents a unique identifier for the Amazon account for which the skill is enabled
+// ContextUser a string that represents a unique identifier for the Amazon account for which the skill is enabled.
 type ContextUser struct {
 	UserID      string `json:"userId"`
 	AccessToken string `json:"accessToken,omitempty"`
 }
 
-// ContextApplication is used to verify that the request was intended for your service, the ID is the application ID for your skill
+// ContextApplication is used to verify that the request was intended for your service
+//
+// The ID is the application ID for your skill.
 type ContextApplication struct {
 	ApplicationID string `json:"applicationId"`
 }
 
-// ApplicationID returns the application ID from the session first, then system or returns an error. Use it to verify the request is meant for your Skill.
+// ApplicationID returns the application ID from the session first, then system or returns an error
+//
+// Use it to verify the request is meant for your Skill.
 func (r *RequestEnvelope) ApplicationID() (string, error) {
 	// Session or System
 	if r.Session == nil {
@@ -355,22 +377,23 @@ type Session struct {
 	User        *ContextUser           `json:"user"`
 }
 
-// SessionID returns the sessionID or an empty string
+// SessionID returns the sessionID or an empty string.
 func (r *RequestEnvelope) SessionID() string {
 	if r.Session == nil {
 		return ""
 	}
 	return r.Session.SessionID
-
 }
 
-// ContextSystemPerson describes the person who is making the request to Alexa (user recognized by voice, not account)
+// ContextSystemPerson describes the person who is making the request to Alexa
+//
+// This is the user recognized by voice, not account from which the request came.
 type ContextSystemPerson struct {
 	PersonID    string `json:"personId"`
 	AccessToken string `json:"accessToken,omitempty"`
 }
 
-// ContextSystem provides information about the current state of the Alexa service and the device interacting with your skill
+// ContextSystem provides information about the current state of the Alexa service and the interacting device.
 type ContextSystem struct {
 	// APIAccessToken a string containing a token that can be used to access Alexa-specific APIs
 	APIAccessToken string `json:"apiAccessToken,omitempty"`
@@ -385,14 +408,14 @@ type ContextSystem struct {
 	Application *ContextApplication `json:"application"`
 	// Unit represents a logical construct organizing actors
 	Unit struct {
-		UnitId           string `json:"unitId"`
-		PersistentUnitId string `json:"persistentUnitId"`
+		UnitID           string `json:"unitId"`
+		PersistentUnitID string `json:"persistentUnitId"`
 	} `json:"unit,omitempty"`
 	// Person describes the person who is making the request to Alexa (user recognized by voice, not account)
 	Person *ContextSystemPerson `json:"person,omitempty"`
 }
 
-// System returns the system object if it exists in the context
+// System returns the system object if it exists in the context.
 func (r *RequestEnvelope) System() (*ContextSystem, error) {
 	if r.Context == nil || r.Context.System == nil {
 		return &ContextSystem{}, ErrNoSystemInContext
@@ -401,7 +424,7 @@ func (r *RequestEnvelope) System() (*ContextSystem, error) {
 	return r.Context.System, nil
 }
 
-// ContextPerson returns the person in the context or returns an error if no person exists
+// ContextPerson returns the person in the context or returns an error if no person exists.
 func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 	s, err := r.System()
 	if err != nil || s.Person == nil {
@@ -410,7 +433,7 @@ func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 	return r.Context.System.Person, nil
 }
 
-// ContextUser returns the user in the context or returns an error if no user exists
+// ContextUser returns the user in the context or returns an error if no user exists.
 func (r *RequestEnvelope) ContextUser() (*ContextUser, error) {
 	s, err := r.System()
 	if err != nil || s.User == nil {
@@ -419,6 +442,7 @@ func (r *RequestEnvelope) ContextUser() (*ContextUser, error) {
 	return r.Context.System.User, nil
 }
 
+// AudioPlayerActivity defines the activities of an audio player.
 type AudioPlayerActivity string
 
 const (
@@ -428,8 +452,7 @@ const (
 	AudioPlayerActivityPAUSED AudioPlayerActivity = "PAUSED"
 	// AudioPlayerActivityPLAYING Stream was playing.
 	AudioPlayerActivityPLAYING AudioPlayerActivity = "PLAYING"
-
-	// AudioPlayerActivityBufferUnderrun Buffer underrun
+	// AudioPlayerActivityBufferUnderrun Buffer underrun.
 	AudioPlayerActivityBufferUnderrun AudioPlayerActivity = "BUFFER_UNDERRUN"
 	// AudioPlayerActivityFINISHED Stream was finished playing.
 	AudioPlayerActivityFINISHED AudioPlayerActivity = "FINISHED"
@@ -437,13 +460,14 @@ const (
 	AudioPlayerActivitySTOPPED AudioPlayerActivity = "STOPPED"
 )
 
+// ContextAudioPlayer is available when the device has an audio player.
 type ContextAudioPlayer struct {
 	Token                string              `json:"token"`
 	OffsetInMilliseconds int                 `json:"offsetInMilliseconds"`
 	PlayerActivity       AudioPlayerActivity `json:"playerActivity"`
 }
 
-// ViewportExperience has info about the device
+// ViewportExperience has info about the device.
 type ViewportExperience struct {
 	ArcMinuteWidth  int  `json:"arcMinuteWidth"`
 	ArcMinuteHeight int  `json:"arcMinuteHeight"`
@@ -451,18 +475,23 @@ type ViewportExperience struct {
 	CanResize       bool `json:"canResize"`
 }
 
-// ContextViewportMode is the mode for the device
+// ContextViewportMode is the mode for the device.
 type ContextViewportMode string
 
 const (
-	ContextViewportModeHUB    ContextViewportMode = "HUB"
-	ContextViewportModeTV     ContextViewportMode = "TV"
-	ContextViewportModePC     ContextViewportMode = "PC"
+	// ContextViewportModeHUB defines a HUB device.
+	ContextViewportModeHUB ContextViewportMode = "HUB"
+	// ContextViewportModeTV defines a TV device.
+	ContextViewportModeTV ContextViewportMode = "TV"
+	// ContextViewportModePC defines a PC device.
+	ContextViewportModePC ContextViewportMode = "PC"
+	// ContextViewportModeMobile defines a MOBILE device.
 	ContextViewportModeMobile ContextViewportMode = "MOBILE"
-	ContextViewportModeAuto   ContextViewportMode = "AUTO"
+	// ContextViewportModeAuto defines a AUTO device.
+	ContextViewportModeAuto ContextViewportMode = "AUTO"
 )
 
-// ContextViewportShape is the shape of the device
+// ContextViewportShape is the shape of the device.
 type ContextViewportShape string
 
 const (
@@ -470,7 +499,7 @@ const (
 	ContextViewportShapeRectangle ContextViewportShape = "RECTANGLE"
 )
 
-// ContextViewport provides information about the viewport if the device has a screen
+// ContextViewport provides information about the viewport if the device has a screen.
 type ContextViewport struct {
 	Experiences        []*ViewportExperience `json:"experiences,omitempty"`
 	Mode               ContextViewportMode   `json:"mode"`
@@ -487,6 +516,7 @@ type ContextViewport struct {
 	} `json:"video"`
 }
 
+// ViewportConfiguration contains the viewport configuration of the device in use.
 type ViewportConfiguration struct {
 	Video struct {
 		Codecs []string `json:"codecs"`
@@ -497,6 +527,8 @@ type ViewportConfiguration struct {
 		PixelHeight int    `json:"pixelHeight"`
 	} `json:"size,omitempty"`
 }
+
+// ContextViewportType defines an available viewport of the device.
 type ContextViewportType struct {
 	ID               string `json:"id"`
 	Type             string `json:"type"`
@@ -511,10 +543,10 @@ type ContextViewportType struct {
 
 // Context represents the Alexa skill request context.
 type Context struct {
-	System      *ContextSystem         `json:"System,omitempty"`
+	System      *ContextSystem         `json:"System,omitempty"` //nolint:tagliatelle
 	AudioPlayer *ContextAudioPlayer    `json:"audioPlayer,omitempty"`
-	Viewport    *ContextViewport       `json:"Viewport,omitempty"`
-	Viewports   []*ContextViewportType `json:"Viewports,omitempty"`
+	Viewport    *ContextViewport       `json:"Viewport,omitempty"`  //nolint:tagliatelle
+	Viewports   []*ContextViewportType `json:"Viewports,omitempty"` //nolint:tagliatelle
 }
 
 // RequestEnvelope represents the alexa request envelope.

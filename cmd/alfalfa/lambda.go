@@ -1,23 +1,21 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo"
+	"os"
+	"time"
+
+	alfalfa "github.com/drpsychick/alexa-go-cloudformation-demo"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda/middleware"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/hamba/cmd"
 	"github.com/hamba/logger"
-	"github.com/hamba/pkg/stats"
-	"os"
-	//"github.com/hamba/logger"
 	"github.com/hamba/pkg/log"
-	//"github.com/hamba/pkg/stats"
-	//"github.com/hamba/statter/l2met"
+	"github.com/hamba/pkg/stats"
 	"github.com/urfave/cli/v2"
-	//"os"
-	"time"
 )
 
 func runLambda(c *cli.Context) error {
@@ -60,15 +58,16 @@ func runLambda(c *cli.Context) error {
 	for l, m := range ms {
 		log.Info(ctx, fmt.Sprintf("accepting locale '%s' invocation '%s'", l, m.Model.Language.Invocation))
 	}
-	defer ctx.Close()
+	defer ctx.Close() //nolint:errcheck
 
 	stats.Timing(ctx, "Ready", time.Since(start), 1.0)
 	if err := alexa.Serve(l); err != nil {
-		log.Fatal(ctx, err)
+		log.Error(ctx, err.Error())
+		return nil
 	}
 
-	log.Fatal(ctx, "Serve() should not have returned")
-	return nil
+	log.Error(ctx, "Serve() should not have returned")
+	return errors.New("Serve() should not have returned")
 }
 
 func newLambda(app *alfalfa.Application, sb *gen.SkillBuilder) alexa.Handler {

@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
+
 	"github.com/hamba/cmd"
 	"github.com/hamba/logger"
 	"github.com/hamba/pkg/log"
 	"github.com/urfave/cli/v2"
-	"io/ioutil"
-	"os"
 )
 
 func runMake(c *cli.Context) error {
@@ -45,18 +46,22 @@ func runMake(c *cli.Context) error {
 			log.Fatal(ctx, err)
 		}
 		res, _ := json.MarshalIndent(s, "", "  ")
-		if err := ioutil.WriteFile("./alexa/skill.json", res, 0644); err != nil {
+		if err := ioutil.WriteFile("./alexa/skill.json", res, 0o644); err != nil { //nolint:gosec
 			log.Fatal(ctx, err)
 		}
 	}
 
 	if c.Bool("models") {
-		os.MkdirAll("./alexa/interactionModels/custom", 0755)
+		if err := os.MkdirAll("./alexa/interactionModels/custom", 0o755); err != nil { //nolint:gosec
+			log.Fatal(ctx, "could not create directory ./alexa/interactionModels/custom")
+			return err
+		}
+
 		for l, m := range ms {
-			var filename = "./alexa/interactionModels/custom/" + string(l) + ".json"
+			filename := "./alexa/interactionModels/custom/" + l + ".json"
 
 			res, _ := json.MarshalIndent(m, "", "  ")
-			if err := ioutil.WriteFile(filename, res, 0644); err != nil {
+			if err := ioutil.WriteFile(filename, res, 0o644); err != nil { //nolint:gosec
 				log.Fatal(ctx, err)
 			}
 		}

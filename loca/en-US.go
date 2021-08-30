@@ -13,10 +13,10 @@ var enUS = &l10n.Locale{
 			"This skill demonstrates what you can do with the alexa package and cloudformation",
 		},
 		l10n.KeySkillSmallIconURI: {
-			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_small.png",
+			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_small.png", //nolint:lll
 		},
 		l10n.KeySkillLargeIconURI: {
-			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_large.png",
+			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_large.png", //nolint:lll
 		},
 		l10n.KeySkillInvocation: {"alfalfa demo"},
 		l10n.KeySkillTestingInstructions: {
@@ -25,10 +25,11 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillPrivacyPolicyURL: {
 			"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
 		},
-		// Error: privacyAndCompliance.locales.en-US - object instance has properties which are not allowed by the schema: ["termsOfUse"]
-		//l10n.KeySkillTermsOfUse: []string{
+		// Error: privacyAndCompliance.locales.en-US
+		// - object instance has properties which are not allowed by the schema: ["termsOfUse"]
+		// l10n.KeySkillTermsOfUse: []string{
 		//	"https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/LICENSE",
-		//},
+		// },
 		l10n.KeySkillExamplePhrases: {
 			"Alexa, start alfalfa demo and go ahead",
 			"How is A.W.S.",
@@ -38,6 +39,9 @@ var enUS = &l10n.Locale{
 			"demo", "test", "SSML",
 		},
 		l10n.KeyErrorNoTranslationText: {"No translation found for '%s'!"},
+		l10n.KeyErrorNoTranslationSSML: {
+			l10n.Speak("No translation found for '%s'!"),
+		},
 		// Type values
 		TypeAreaValues:   {"Europe", "North America", "Asia Pacific", "South America"},
 		TypeRegionValues: {"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
@@ -137,7 +141,7 @@ var enUS = &l10n.Locale{
 		AMAZONHelpSamples:   {"help", "help me"},
 		AMAZONCancelSamples: {"abort"},
 	},
-	//IntentResponses: l10n.IntentResponses{
+	// IntentResponses: l10n.IntentResponses{
 	//	SaySomething: l10n.IntentResponse{
 	//		Samples: []string{"say something", "tell me a story"},
 	//		Title:   []string{"Answer", "Title 2"},
@@ -187,5 +191,5 @@ var enUS = &l10n.Locale{
 	//			},
 	//		},
 	//	},
-	//},
+	// },
 }
