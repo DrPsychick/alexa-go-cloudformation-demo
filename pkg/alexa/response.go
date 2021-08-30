@@ -135,7 +135,7 @@ func (b *ResponseBuilder) WithReprompt(text string) *ResponseBuilder {
 
 	b.reprompt = &OutputSpeech{
 		Type: "PlainText",
-		Text: "text",
+		Text: text,
 	}
 	return b
 }
@@ -206,6 +206,9 @@ func (b *ResponseBuilder) Build() *ResponseEnvelope {
 		r.Response.Reprompt = &Reprompt{
 			OutputSpeech: b.reprompt,
 		}
+	}
+	if b.canFulfillIntent != nil {
+		r.Response.CanFulfillIntent = b.canFulfillIntent
 	}
 	return r
 }

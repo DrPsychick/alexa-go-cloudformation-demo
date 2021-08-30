@@ -190,23 +190,23 @@ func (s *Slot) SlotResolutionsPerAuthority() ([]*PerAuthority, error) {
 		return []*PerAuthority{}, &NotFoundError{"slot resolutions", ""}
 	}
 
-	return s.Resolutions.PerAuthority, nil
+	return s.Resolutions.ResolutionsPerAuthority, nil
 }
 
 // FirstAuthorityWithMatch returns the first authority with ResolutionStatusMatch.
-func (s *Slot) FirstAuthorityWithMatch() (PerAuthority, error) {
+func (s *Slot) FirstAuthorityWithMatch() (*PerAuthority, error) {
 	auths, err := s.SlotResolutionsPerAuthority()
 	if err != nil {
-		return PerAuthority{}, err
+		return &PerAuthority{}, err
 	}
 
 	for _, a := range auths {
 		if a.Status != nil && a.Status.Code == ResolutionStatusMatch {
-			return *a, nil
+			return a, nil
 		}
 	}
 
-	return PerAuthority{}, ErrSlotNoResolutionWithMatch
+	return &PerAuthority{}, ErrSlotNoResolutionWithMatch
 }
 
 // AuthorityValueValue points to the unique ID and value.
@@ -248,7 +248,7 @@ type PerAuthority struct {
 
 // Resolutions is an Alexa skill resolution.
 type Resolutions struct {
-	PerAuthority []*PerAuthority `json:"resolutionsPerAuthority"`
+	ResolutionsPerAuthority []*PerAuthority `json:"resolutionsPerAuthority"`
 }
 
 // RequestType represents JSON request `request.type`
@@ -346,7 +346,7 @@ type ContextApplication struct {
 //
 // Use it to verify the request is meant for your Skill.
 func (r *RequestEnvelope) ApplicationID() (string, error) {
-	// Session or System
+	// System first, then Session
 	if r.Session == nil {
 		s, err := r.System()
 		if err != nil || s.Application == nil {

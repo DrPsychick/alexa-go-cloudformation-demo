@@ -89,17 +89,17 @@ func (m *ServeMux) Handler(r *RequestEnvelope) (Handler, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	if h, ok := m.types[r.Request.Type]; ok {
+	if h, ok := m.types[r.RequestType()]; ok {
 		return h, nil
 	}
 
-	if r.Request.Type != TypeIntentRequest {
-		return nil, fmt.Errorf("server: unknown intent type %s", r.Request.Type)
+	if r.RequestType() != TypeIntentRequest {
+		return nil, fmt.Errorf("server: unknown intent type %s", r.RequestType())
 	}
 
-	h, ok := m.intents[r.Request.Intent.Name]
+	h, ok := m.intents[r.IntentName()]
 	if !ok {
-		return nil, fmt.Errorf("server: unknown intent %s", r.Request.Intent.Name)
+		return nil, fmt.Errorf("server: unknown intent %s", r.IntentName())
 	}
 
 	return h, nil
