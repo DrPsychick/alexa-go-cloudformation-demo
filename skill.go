@@ -6,15 +6,6 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 )
 
-// setup the skill
-//func setupSkill() {
-//	var skill alexa.Skill
-//
-//	skill.Category = alexa.CategoryOrganizersAndAssistants
-//	skill.Locales = []alexa.Locale{"de-DE", "en-US"}
-//
-//}
-
 // NewSkill returns a configured SkillBuilder.
 func NewSkill() *gen.SkillBuilder {
 	return gen.NewSkillBuilder().
@@ -31,7 +22,8 @@ func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	// we define intents, slots, types in lambda,
 	// that's why `newLambda` must be called before this, if not it will panic.
 
-	// this "breaks" `ask dialog --replay` when starting the intent without any slots (as Alexa will try to get the Region slot from the user)
+	// this "breaks" `ask dialog --replay` when starting the intent without any slots
+	// (as Alexa will try to get the Region slot from the user)
 	// Prompts are part of the Alexa dialog, so independent of lambda.
 	m.WithElicitationSlotPrompt(loca.AWSStatus, loca.TypeRegionName)
 	// add variations (texts) to the prompt

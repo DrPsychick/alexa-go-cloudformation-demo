@@ -1,3 +1,4 @@
+// Package loca contains all localization for the skill.
 package loca
 
 import (

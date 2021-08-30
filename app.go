@@ -1,3 +1,4 @@
+// Package alfalfa contains base elements of the skill project (app, skill).
 package alfalfa
 
 import (
@@ -125,26 +126,14 @@ func (a *Application) AWSStatus(loc l10n.LocaleInstance, area, region string) (A
 	}, nil
 }
 
-//func (a *Application) AWSStatus(l l10n.LocaleInstance, region string) (string, string, string) {
-//	// TODO: we need to have access to slot values here!
-//	// request (with slot values) status from AWS status provider
-//	// decide how to respond based on status results
-//	// return response texts
-//	text := loca.AWSStatusText
-//	ssml := loca.AWSStatusSSML
-//	if region == "Frankfurt" {
-//		text = loca.AWSStatusTextGood
-//		ssml = loca.AWSStatusSSMLGood
-//	}
-//	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text, region), l.GetAny(ssml, region)
-//}
-
+// AWSStatusRegionElicit will ask for the Region value.
 func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (string, string, string) {
 	text := loca.AWSStatusRegionElicitText
 	ssml := loca.AWSStatusRegionElicitSSML
 	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text), l.GetAny(ssml)
 }
 
+// AWSStatusAreaElicit will ask for the Area value.
 func (a *Application) AWSStatusAreaElicit(l l10n.LocaleInstance, region string) (string, string, string) {
 	text := loca.AWSStatusAreaElicitText
 	ssml := loca.AWSStatusAreaElicitSSML

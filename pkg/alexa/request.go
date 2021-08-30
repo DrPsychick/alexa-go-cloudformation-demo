@@ -180,13 +180,13 @@ func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 }
 
 // SlotValue returns the value of the slot if it exists.
-func (r *RequestEnvelope) SlotValue(name string) (string, error) {
+func (r *RequestEnvelope) SlotValue(name string) string {
 	s, err := r.Slot(name)
 	if err != nil {
-		return "", err
+		return ""
 	}
 
-	return s.Value, nil
+	return s.Value
 }
 
 // SlotResolutionsPerAuthority returns the list of ResolutionsPerAuthority.
@@ -495,7 +495,9 @@ const (
 type ContextViewportShape string
 
 const (
-	ContextViewportShapeRound     ContextViewportShape = "ROUND"
+	// ContextViewportShapeRound defines a round shape.
+	ContextViewportShapeRound ContextViewportShape = "ROUND"
+	// ContextViewportShapeRectangle defines a rectangular shape.
 	ContextViewportShapeRectangle ContextViewportShape = "RECTANGLE"
 )
 

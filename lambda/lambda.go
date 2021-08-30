@@ -1,3 +1,4 @@
+// Package lambda defines intents, handles requests and calls Application functions accordingly.
 package lambda
 
 import (
@@ -43,7 +44,7 @@ func NewMux(app Application, sb *gen.SkillBuilder) alexa.Handler {
 	mux.HandleIntent(alexa.StopIntent, handleStop(app, sb))
 	mux.HandleIntent(loca.DemoIntent, handleSSMLResponse(app, sb))
 	mux.HandleIntent(loca.SaySomething, handleSaySomethingResponse(app, sb))
-	mux.HandleIntent(loca.AWSStatus, handleAWSStatus(app, sb)) //, WithSlot(loca.TypeArea))
+	mux.HandleIntent(loca.AWSStatus, handleAWSStatus(app, sb))
 
 	return mux
 }
@@ -191,7 +192,7 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 		}
 		resp, err := app.SaySomething(loc, responseFuncs...)
 		if err != nil {
-			//case alfalfa.ErrNoTranslation:
+			// case alfalfa.ErrNoTranslation:
 			// if errors.Is(err, ErrNoTranslation) {
 			resp = alfalfa.ApplicationResponse{}
 			resp.Title = loc.GetAny(l10n.KeyErrorNoTranslationTitle)
@@ -217,61 +218,7 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 	})
 }
 
-// SlotValue always returns a string, it will be empty if the slot is not found.
-func SlotValue(r *alexa.RequestEnvelope, n string) string {
-	s, ok := r.Request.Intent.Slots[n]
-	if !ok {
-		return ""
-	}
-	return s.Value
-}
-
-//// SlotAuthorities always returns a PerAuthority slice.
-//func SlotAuthorities(r *alexa.RequestEnvelope, n string) []*alexa.PerAuthority {
-//	s, ok := r.Request.Intent.Slots[n]
-//	if !ok {
-//		return []*alexa.PerAuthority{}
-//	}
-//	if s.Resolutions == nil || s.Resolutions.PerAuthority == nil {
-//		return []*alexa.PerAuthority{}
-//	}
-//	return s.Resolutions.PerAuthority
-//}
-
-//func SlotResolutionFirstValue(r *alexa.RequestEnvelope, n string) string {
-//	sa := SlotAuthorities(r, n)
-//	if len(sa) == 0 || len(sa[0].Values) == 0 || sa[0].Values[0] == nil || sa[0].Values[0].Value == nil {
-//		return ""
-//	}
-//	return sa[0].Values[0].Value.Name
-//}
-
-// func SlotResolutionValues
-
-//func SlotMatch(r *alexa.RequestEnvelope, n string) bool {
-//	// TODO: what about multiple Authorities?
-//	sa := SlotAuthorities(r, n)
-//	if len(sa) == 0 {
-//		return false
-//	}
-//	if sa[0].Status == nil {
-//		return false
-//	}
-//	return sa[0].Status.Code == alexa.ResolutionStatusMatch
-//}
-
-//func SlotNoMatch(r *alexa.RequestEnvelope, n string) bool {
-//	sa := SlotAuthorities(r, n)
-//	if len(sa) == 0 {
-//		return false
-//	}
-//	if sa[0].Status == nil {
-//		return false
-//	}
-//	return sa[0].Status.Code == alexa.ResolutionStatusNoMatch
-//}
-
-func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
+func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler { //nolint:funlen,cyclop
 	// TODO: the mux should know about slots and "pass" it to the handler via request
 	// register intent, slots, types with the model
 	sb.Model().WithIntent(loca.AWSStatus)
@@ -299,7 +246,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		// elicit the slot value through Alexa
 		if err != nil || err2 != nil {
 			// failed validation or missing -> elicit - but need to provide prompt!
-			title, text, ssml := app.AWSStatusAreaElicit(loc, SlotValue(r, loca.TypeAreaName))
+			title, text, ssml := app.AWSStatusAreaElicit(loc, r.SlotValue(loca.TypeAreaName))
 
 			if len(loc.GetErrors()) > 0 {
 				handleLocaleErrors(b, loc.GetErrors())
@@ -317,8 +264,8 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		}
 		area := slotArea.Value
 
-		//// if slot is empty and dialog still open, respond with Dialog:Delegate
-		//if area == "" {
+		// if slot is empty and dialog still open, respond with Dialog:Delegate
+		// if area == "" {
 		//	if r.Request.DialogState == alexa.DialogStateCompleted {
 		//		// should not happen (Alexa validation would have failed?)
 		//		// how to respond if it does happen?
@@ -329,14 +276,14 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		//		})
 		//	}
 		//	return
-		//}
+		// }
 
 		slotRegion, err := r.Slot(loca.TypeRegionName)
 		_, err2 = slotRegion.FirstAuthorityWithMatch()
 		// elicit the slot value through Alexa
 		if err != nil || err2 != nil {
 			// failed validation or missing -> elicit - but need to provide prompt!
-			title, text, ssml := app.AWSStatusRegionElicit(loc, SlotValue(r, loca.TypeRegionName))
+			title, text, ssml := app.AWSStatusRegionElicit(loc, r.SlotValue(loca.TypeRegionName))
 
 			if len(loc.GetErrors()) > 0 {
 				handleLocaleErrors(b, loc.GetErrors())
@@ -354,8 +301,8 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		}
 		region := slotRegion.Value
 
-		//// if slot is empty and dialog still open, respond with Dialog:Delegate
-		//if region == "" {
+		// if slot is empty and dialog still open, respond with Dialog:Delegate
+		// if region == "" {
 		//	if r.Request.DialogState == alexa.DialogStateCompleted {
 		//		// should not happen (Alexa validation would have failed?)
 		//		// how to respond if it does happen?
@@ -366,12 +313,12 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler {
 		//		})
 		//	}
 		//	return
-		//}
+		// }
 
 		resp, err := app.AWSStatus(loc, area, region)
 		if err != nil {
 			stats.Inc(app, "handleAWSStatus.error", 1, 1.0, tags...)
-			//case alfalfa.ErrNoTranslation:
+			// case alfalfa.ErrNoTranslation:
 			// if errors.Is(err, ErrNoTranslation) {
 			resp = alfalfa.ApplicationResponse{}
 			resp.Title = loc.GetAny(l10n.KeyErrorNoTranslationTitle)

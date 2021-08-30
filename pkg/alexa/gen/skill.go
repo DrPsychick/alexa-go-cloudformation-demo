@@ -148,7 +148,7 @@ func (s *SkillBuilder) Model() *modelBuilder {
 }
 
 // Build builds an alexa.Skill object.
-func (s *SkillBuilder) Build() (*alexa.Skill, error) {
+func (s *SkillBuilder) Build() (*alexa.Skill, error) { //nolint:funlen,cyclop
 	if s.error != nil {
 		return nil, s.error
 	}
@@ -491,7 +491,8 @@ func (l *SkillLocaleBuilder) BuildPrivacyLocale() (alexa.PrivacyLocaleDef, error
 		PrivacyPolicyURL: loc.Get(l.skillPrivacyURL),
 	}
 	// seems not (yet) supported ?!?
-	// Error: privacyAndCompliance.locales.en-US - object instance has properties which are not allowed by the schema: ["termsOfUse"]
+	// Error: privacyAndCompliance.locales.en-US
+	// - object instance has properties which are not allowed by the schema: ["termsOfUse"]
 	if loc.Get(l.skillTermsURL) != "" {
 		return alexa.PrivacyLocaleDef{}, fmt.Errorf("'termsOfUse' makes Skill deployment fail! (%s)", l.locale)
 		// p.TermsOfUse = loc.Get(l.skillTermsURL)
