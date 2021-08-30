@@ -254,13 +254,13 @@ type RequestType string
 
 // Request type constants.
 const (
-	// TypeLaunchRequest string that represents a launch request
+	// TypeLaunchRequest defines a launch request type.
 	TypeLaunchRequest RequestType = "LaunchRequest"
-	// TypeIntentRequest string that represents an intent request
+	// TypeIntentRequest defines a intent request type.
 	TypeIntentRequest RequestType = "IntentRequest"
-	// TypeSessionEndedRequest string that represents a session end request
+	// TypeSessionEndedRequest defines a session end request type.
 	TypeSessionEndedRequest RequestType = "SessionEndedRequest"
-	// TypeCanFulfillIntentRequest string that represents a can fulfill intent request
+	// TypeCanFulfillIntentRequest defines a can fulfill intent request type.
 	TypeCanFulfillIntentRequest RequestType = "CanFulfillIntentRequest"
 )
 
@@ -327,7 +327,7 @@ type ContextApplication struct {
 	ApplicationID string `json:"applicationId"`
 }
 
-// ApplicationID returns the application ID from the session first, then system or throw an error. Use it to verify the request is meant for your Skill.
+// ApplicationID returns the application ID from the session first, then system or returns an error. Use it to verify the request is meant for your Skill.
 func (r *RequestEnvelope) ApplicationID() (string, error) {
 	// Session or System
 	if r.Session == nil {
@@ -401,7 +401,7 @@ func (r *RequestEnvelope) System() (*ContextSystem, error) {
 	return r.Context.System, nil
 }
 
-// ContextPerson returns the person in the context or throw an error if no person exists
+// ContextPerson returns the person in the context or returns an error if no person exists
 func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 	s, err := r.System()
 	if err != nil || s.Person == nil {
@@ -410,7 +410,7 @@ func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 	return r.Context.System.Person, nil
 }
 
-// ContextUser returns the user in the context or throw an error if no user exists
+// ContextUser returns the user in the context or returns an error if no user exists
 func (r *RequestEnvelope) ContextUser() (*ContextUser, error) {
 	s, err := r.System()
 	if err != nil || s.User == nil {
