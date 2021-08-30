@@ -8,26 +8,21 @@ import (
 // NotFoundError defines a generic not found error.
 type NotFoundError struct {
 	element string
+	name    string
 }
 
 // Error returns a string representing the error including the element missing.
 func (e NotFoundError) Error() string {
-	return fmt.Sprintf("'%s' not found in request", e.element)
+	if e.name == "" {
+		return fmt.Sprintf("element '%s' was not found in the request", e.element)
+	}
+	return fmt.Sprintf("element '%s' with name '%s' was not found in the request", e.element, e.name)
 }
-
-// use it: return "", &ErrNotFound("Slot")
 
 // Error constants.
 var (
 	ErrUnknown                   = errors.New("unknown error")
-	ErrNoIntent                  = errors.New("request has no intent")
-	ErrNoSlot                    = errors.New("slot does not exist")
-	ErrSlotNoResolutions         = errors.New("slot has no resolutions")
 	ErrSlotNoResolutionWithMatch = errors.New("no resolution with match")
-	ErrNoSystemInContext         = errors.New("no system in context")
-	ErrNoUserInContext           = errors.New("no user in context")
-	ErrNoPersonInContext         = errors.New("no person in system context")
-	ErrNoApplicationID           = errors.New("no application ID in the request")
 )
 
 // RequestLocale represents the locale of the request.
@@ -109,7 +104,7 @@ type Intent struct {
 func (r *RequestEnvelope) Intent() (Intent, error) {
 	i := r.Request.Intent
 	if i.Name == "" {
-		return Intent{}, ErrNoIntent
+		return Intent{}, &NotFoundError{"intent", ""}
 	}
 
 	return i, nil
@@ -173,7 +168,7 @@ func (r *RequestEnvelope) Slot(name string) (Slot, error) {
 
 	s, ok := i.Slots[name]
 	if !ok {
-		return Slot{}, ErrNoSlot
+		return Slot{}, &NotFoundError{"slot", name}
 	}
 
 	return *s, nil
@@ -192,7 +187,7 @@ func (r *RequestEnvelope) SlotValue(name string) string {
 // SlotResolutionsPerAuthority returns the list of ResolutionsPerAuthority.
 func (s *Slot) SlotResolutionsPerAuthority() ([]*PerAuthority, error) {
 	if s.Resolutions == nil {
-		return []*PerAuthority{}, ErrSlotNoResolutions
+		return []*PerAuthority{}, &NotFoundError{"slot resolutions", ""}
 	}
 
 	return s.Resolutions.PerAuthority, nil
@@ -355,14 +350,14 @@ func (r *RequestEnvelope) ApplicationID() (string, error) {
 	if r.Session == nil {
 		s, err := r.System()
 		if err != nil || s.Application == nil {
-			return "", ErrNoApplicationID
+			return "", &NotFoundError{"Context.System.Application", ""}
 		}
 
 		return s.Application.ApplicationID, nil
 	}
 
 	if r.Session.Application == nil {
-		return "", ErrNoApplicationID
+		return "", &NotFoundError{"Session.Application", ""}
 	}
 
 	return r.Session.Application.ApplicationID, nil
@@ -418,7 +413,7 @@ type ContextSystem struct {
 // System returns the system object if it exists in the context.
 func (r *RequestEnvelope) System() (*ContextSystem, error) {
 	if r.Context == nil || r.Context.System == nil {
-		return &ContextSystem{}, ErrNoSystemInContext
+		return &ContextSystem{}, &NotFoundError{"Context.System", ""}
 	}
 
 	return r.Context.System, nil
@@ -428,7 +423,7 @@ func (r *RequestEnvelope) System() (*ContextSystem, error) {
 func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 	s, err := r.System()
 	if err != nil || s.Person == nil {
-		return &ContextSystemPerson{}, ErrNoPersonInContext
+		return &ContextSystemPerson{}, &NotFoundError{"System.Person", ""}
 	}
 	return r.Context.System.Person, nil
 }
@@ -437,7 +432,7 @@ func (r *RequestEnvelope) ContextPerson() (*ContextSystemPerson, error) {
 func (r *RequestEnvelope) ContextUser() (*ContextUser, error) {
 	s, err := r.System()
 	if err != nil || s.User == nil {
-		return &ContextUser{}, ErrNoUserInContext
+		return &ContextUser{}, &NotFoundError{"System.User", ""}
 	}
 	return r.Context.System.User, nil
 }
