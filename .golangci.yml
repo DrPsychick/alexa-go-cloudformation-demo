@@ -1,0 +1,45 @@
+run:
+  tests: false
+  deadline: 5m
+  skip-files:
+    - loca/fr-FR.go
+  skip-dirs:
+    - test
+
+linters-settings:
+  cyclop:
+    max-complexity: 12
+    skip-tests: true
+  gofumpt:
+    extra-rules: true
+  godox:
+    keywords:
+      - HACK
+      - FIXME
+      - BUG
+
+linters:
+  enable-all: true
+  disable:
+    - interfacer # deprecated
+    - scopelint # deprecated
+    - maligned # deprecated
+    - golint # deprecated
+    - exhaustive
+    - exhaustivestruct
+    - forcetypeassert
+    - gochecknoglobals
+    - gochecknoinits
+    - goerr113
+    - gomnd
+    - nlreturn
+    - wrapcheck
+    - wsl
+
+issues:
+  exclude-use-default: false
+#  exclude-rules:
+#    - text: "G404:"
+##      path: pkg/alexa/l10n/
+#      linters:
+#        - gosec
