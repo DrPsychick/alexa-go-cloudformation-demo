@@ -1,36 +1,37 @@
+// Package alfalfa contains base elements of the skill project (app, skill).
 package alfalfa
 
 import (
 	"errors"
+
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
 )
 
-var (
-	// ErrorNoTranslation is the text for missing translations
-	ErrorNoTranslation = errors.New("translation missing")
-)
+// ErrNoTranslation is the text for missing translations.
+// TODO: define own errors that can take arguments.
+var ErrNoTranslation = errors.New("translation missing")
 
-// Config defines additional data that can be provided and used in requests
+// Config defines additional data that can be provided and used in requests.
 type Config struct {
 	User string
 }
 
-//type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
+// type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
 
-// ResponseFunc defines the function that can optionally be passed to responses
+// ResponseFunc defines the function that can optionally be passed to responses.
 type ResponseFunc func(cfg *Config)
 
-// WithUser returns a ResponseFunc that sets the user
+// WithUser returns a ResponseFunc that sets the user.
 func WithUser(user string) ResponseFunc {
 	return func(cfg *Config) {
 		cfg.User = user
 	}
 }
 
-// ApplicationResponse defines the reponse returned to lambda
+// ApplicationResponse defines the response returned to lambda.
 type ApplicationResponse struct {
 	Title  string
 	Text   string
@@ -39,13 +40,13 @@ type ApplicationResponse struct {
 	End    bool
 }
 
-// Application defines the base application
+// Application defines the base application.
 type Application struct {
 	logger  log.Logger
 	statter stats.Statter
 }
 
-// NewApplication returns an Application with the logger and statter
+// NewApplication returns an Application with the logger and statter.
 func NewApplication(l log.Logger, s stats.Statter) *Application {
 	return &Application{
 		logger:  l,
@@ -86,9 +87,7 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 		opt(cfg)
 	}
 
-	tit := ""
-	msg := ""
-	msgSSML := ""
+	var tit, msg, msgSSML string
 	if cfg.User != "" {
 		// personalized response
 		tit = loc.GetAny(loca.SaySomethingUserTitle, cfg.User)
@@ -101,7 +100,7 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 	}
 
 	if msg == "" {
-		return ApplicationResponse{}, ErrorNoTranslation
+		return ApplicationResponse{}, ErrNoTranslation
 	}
 
 	return ApplicationResponse{
@@ -112,44 +111,29 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 	}, nil
 }
 
-// AWSStatus responds with messages containting 2 slots
-func (a *Application) AWSStatus(loc l10n.LocaleInstance, area string, region string) (ApplicationResponse, error) {
+// AWSStatus responds with messages containing 2 slots.
+func (a *Application) AWSStatus(loc l10n.LocaleInstance, area, region string) (ApplicationResponse, error) {
 	title := loc.GetAny(loca.AWSStatusTitle)
 	msg := loc.GetAny(loca.AWSStatusText, area, region)
 	msgSSML := loc.GetAny(loca.AWSStatusSSML, area, region)
-
-	if title == "" || msg == "" || msgSSML == "" {
-		return ApplicationResponse{}, ErrorNoTranslation
-	}
 
 	return ApplicationResponse{
 		Title:  title,
 		Text:   msg,
 		Speech: msgSSML,
-		Image:  "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_%s.png",
+		Image:  "https://raw.githubusercontent.com/DrPsychick/alexa-go-cloudformation-demo/master/alexa/assets/images/de-DE_%s.png", //nolint:lll
 		End:    true,
 	}, nil
 }
 
-//func (a *Application) AWSStatus(l l10n.LocaleInstance, region string) (string, string, string) {
-//	// TODO: we need to have access to slot values here!
-//	// request (with slot values) status from AWS status provider
-//	// decide how to respond based on status results
-//	// return response texts
-//	text := loca.AWSStatusText
-//	ssml := loca.AWSStatusSSML
-//	if region == "Frankfurt" {
-//		text = loca.AWSStatusTextGood
-//		ssml = loca.AWSStatusSSMLGood
-//	}
-//	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text, region), l.GetAny(ssml, region)
-//}
-
+// AWSStatusRegionElicit will ask for the Region value.
 func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (string, string, string) {
 	text := loca.AWSStatusRegionElicitText
 	ssml := loca.AWSStatusRegionElicitSSML
 	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text), l.GetAny(ssml)
 }
+
+// AWSStatusAreaElicit will ask for the Area value.
 func (a *Application) AWSStatusAreaElicit(l l10n.LocaleInstance, region string) (string, string, string) {
 	text := loca.AWSStatusAreaElicitText
 	ssml := loca.AWSStatusAreaElicitSSML

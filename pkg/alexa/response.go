@@ -14,7 +14,7 @@ type AudioItem struct {
 	Stream Stream `json:"stream,omitempty"`
 }
 
-// DirectiveType represents various Directive Types
+// DirectiveType represents various Directive Types.
 type DirectiveType string
 
 // Directive types.
@@ -29,7 +29,7 @@ const (
 type Directive struct {
 	Type          DirectiveType `json:"type,omitempty"`
 	SlotToElicit  string        `json:"slotToElicit,omitempty"`
-	UpdatedIntent *Intent       `json:"UpdatedIntent,omitempty"`
+	UpdatedIntent *Intent       `json:"updatedIntent,omitempty"`
 	PlayBehavior  string        `json:"playBehavior,omitempty"`
 	AudioItem     *AudioItem    `json:"audioItem,omitempty"`
 }
@@ -123,7 +123,7 @@ func (b *ResponseBuilder) WithSpeech(text string) *ResponseBuilder {
 	return b
 }
 
-// WithReprompt sets the reprompt output speech on the response
+// WithReprompt sets the reprompt output speech on the response.
 func (b *ResponseBuilder) WithReprompt(text string) *ResponseBuilder {
 	if strings.HasPrefix(text, "<speak>") && strings.HasSuffix(text, "</speak>") {
 		b.reprompt = &OutputSpeech{
@@ -135,7 +135,7 @@ func (b *ResponseBuilder) WithReprompt(text string) *ResponseBuilder {
 
 	b.reprompt = &OutputSpeech{
 		Type: "PlainText",
-		Text: "text",
+		Text: text,
 	}
 	return b
 }
@@ -206,6 +206,9 @@ func (b *ResponseBuilder) Build() *ResponseEnvelope {
 		r.Response.Reprompt = &Reprompt{
 			OutputSpeech: b.reprompt,
 		}
+	}
+	if b.canFulfillIntent != nil {
+		r.Response.CanFulfillIntent = b.canFulfillIntent
 	}
 	return r
 }

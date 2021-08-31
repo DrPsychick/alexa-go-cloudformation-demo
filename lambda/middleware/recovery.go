@@ -1,7 +1,9 @@
+// Package middleware for lambda requests
 package middleware
 
 import (
 	"fmt"
+
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/hamba/pkg/log"
 )

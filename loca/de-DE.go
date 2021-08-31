@@ -21,12 +21,15 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillLargeIconURI:     enUS.GetAll(l10n.KeySkillLargeIconURI),
 		l10n.KeySkillKeywords:         enUS.GetAll(l10n.KeySkillKeywords),
 		l10n.KeySkillPrivacyPolicyURL: enUS.GetAll(l10n.KeySkillPrivacyPolicyURL),
-		//l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
+		// l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
 		l10n.KeySkillTestingInstructions: enUS.GetAll(l10n.KeySkillTestingInstructions),
 		l10n.KeyErrorTitle:               {"Fehler"},
 		l10n.KeyErrorText:                {"Es ist folgender Fehler aufgetreten:\n%s"},
 		l10n.KeyErrorSSML:                {"<speak>Es ist ein Fehler aufgetreten.</speak>"},
 		l10n.KeyErrorNoTranslationText:   {"Keine Übersetzung für '%s' gefunden!"},
+		l10n.KeyErrorNoTranslationSSML: {
+			l10n.Speak("Keine Übersetzung für '%s' gefunden!"),
+		},
 
 		// Type values
 		TypeAreaValues:   {"Europa", "Nordamerika", "Südamerika", "Asien"},
@@ -92,9 +95,12 @@ var deDE = &l10n.Locale{
 		SaySomethingUserText:  {"Mir gefällt dein neues Aussehen, %s."},
 		SaySomethingUserSSML:  {l10n.Speak("Mir <emphasis level=\"strong\">gefällt</emphasis> dein neues Aussehen, %s.")},
 		// Intent "AWSStatusIntent"
-		AWSStatusSamples: {"wie geht's A.W.S.", "sag mir den A.W.S. Status in {Area} {Region}", "nach dem A.W.S. Status in {Area} {Region}"},
-		AWSStatusTitle:   {"AWS Status"},
-		AWSStatusText:    {"AWS Status in %s, %s: okay"},
+		AWSStatusSamples: {
+			"wie geht's A.W.S.", "sag mir den A.W.S. Status in {Area} {Region}",
+			"nach dem A.W.S. Status in {Area} {Region}",
+		},
+		AWSStatusTitle: {"AWS Status"},
+		AWSStatusText:  {"AWS Status in %s, %s: okay"},
 		AWSStatusSSML: {
 			l10n.Speak("A.W.S. Status in Region %s, %s: SNAFU"),
 			l10n.Speak("A.W.S. Status in %s, %s: alles ok"),

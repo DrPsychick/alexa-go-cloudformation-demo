@@ -1,26 +1,24 @@
+// Package middleware for lambda requests
 package middleware
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda"
+	"strings"
+
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/hamba/pkg/stats"
-	"strings"
 )
 
-// WithRequestStats adds counter and timing stats to intent requests
+// WithRequestStats adds counter and timing stats to intent requests.
 func WithRequestStats(h alexa.Handler, sable stats.Statable) alexa.Handler {
 	return alexa.HandlerFunc(func(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope) {
-		tags := []interface{}{"locale", r.Request.Locale}
+		tags := []string{"locale", r.RequestLocale()}
 
 		if r.Request.Type == alexa.TypeIntentRequest {
-			tags = append(tags, "intent", r.Request.Intent.Name)
+			tags = append(tags, "intent", r.IntentName())
 		}
-		if len(r.Request.Intent.Slots) > 0 {
-			for _, s := range r.Request.Intent.Slots {
-				v := lambda.SlotValue(r, s.Name)
-				if v != "" {
-					tags = append(tags, strings.ToLower(s.Name), v)
-				}
+		for _, s := range r.Slots() {
+			if s.Value != "" {
+				tags = append(tags, strings.ToLower(s.Name), s.Value)
 			}
 		}
 
