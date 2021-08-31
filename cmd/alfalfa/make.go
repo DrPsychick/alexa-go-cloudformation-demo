@@ -46,13 +46,13 @@ func runMake(c *cli.Context) error {
 			log.Fatal(ctx, err)
 		}
 		res, _ := json.MarshalIndent(s, "", "  ")
-		if err := ioutil.WriteFile("./alexa/skill.json", res, 0o644); err != nil { //nolint:gosec
+		if err := ioutil.WriteFile("./alexa/skill.json", res, 0o644); err != nil {
 			log.Fatal(ctx, err)
 		}
 	}
 
 	if c.Bool("models") {
-		if err := os.MkdirAll("./alexa/interactionModels/custom", 0o755); err != nil { //nolint:gosec
+		if err := os.MkdirAll("./alexa/interactionModels/custom", 0o755); err != nil {
 			log.Fatal(ctx, "could not create directory ./alexa/interactionModels/custom")
 			return err
 		}
@@ -61,7 +61,7 @@ func runMake(c *cli.Context) error {
 			filename := "./alexa/interactionModels/custom/" + l + ".json"
 
 			res, _ := json.MarshalIndent(m, "", "  ")
-			if err := ioutil.WriteFile(filename, res, 0o644); err != nil { //nolint:gosec
+			if err := ioutil.WriteFile(filename, res, 0o644); err != nil {
 				log.Fatal(ctx, err)
 			}
 		}

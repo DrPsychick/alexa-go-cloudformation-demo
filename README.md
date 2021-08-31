@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/DrPsychick/alexa-go-cloudformation-demo.svg?branch=master)](https://travis-ci.org/DrPsychick/alexa-go-cloudformation-demo)
+[![Build Status](https://app.travis-ci.com/DrPsychick/alexa-go-cloudformation-demo.svg?branch=master)](https://app.travis-ci.com/DrPsychick/alexa-go-cloudformation-demo)
 [![Coverage Status](https://coveralls.io/repos/github/DrPsychick/alexa-go-cloudformation-demo/badge.svg?branch=master)](https://coveralls.io/github/DrPsychick/alexa-go-cloudformation-demo?branch=master)
 [![Contributors](https://img.shields.io/github/contributors/drpsychick/alexa-go-cloudformation-demo.svg)](https://github.com/drpsychick/alexa-go-cloudformation-demo/graphs/contributors)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/drpsychick/alexa-go-cloudformation-demo.svg)](https://github.com/drpsychick/alexa-go-cloudformation-demo/pulls)

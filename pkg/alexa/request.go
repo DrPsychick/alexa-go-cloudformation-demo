@@ -540,10 +540,10 @@ type ContextViewportType struct {
 
 // Context represents the Alexa skill request context.
 type Context struct {
-	System      *ContextSystem         `json:"System,omitempty"` //nolint:tagliatelle
+	System      *ContextSystem         `json:"System,omitempty"`
 	AudioPlayer *ContextAudioPlayer    `json:"audioPlayer,omitempty"`
-	Viewport    *ContextViewport       `json:"Viewport,omitempty"`  //nolint:tagliatelle
-	Viewports   []*ContextViewportType `json:"Viewports,omitempty"` //nolint:tagliatelle
+	Viewport    *ContextViewport       `json:"Viewport,omitempty"`
+	Viewports   []*ContextViewportType `json:"Viewports,omitempty"`
 }
 
 // RequestEnvelope represents the alexa request envelope.
