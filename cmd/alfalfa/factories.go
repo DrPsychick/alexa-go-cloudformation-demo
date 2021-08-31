@@ -1,15 +1,13 @@
 package main
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo"
+	alfalfa "github.com/drpsychick/alexa-go-cloudformation-demo"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/hamba/cmd"
 )
 
-// Application =============================
-
-func newApplication(c *cmd.Context) (*alfalfa.Application, error) {
+func newApplication(c *cmd.Context) (*alfalfa.Application, error) { //nolint:unparam
 	app := alfalfa.NewApplication(
 		c.Logger(),
 		c.Statter(),

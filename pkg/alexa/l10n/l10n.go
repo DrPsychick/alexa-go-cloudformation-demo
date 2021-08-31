@@ -1,3 +1,4 @@
+// Package l10n provides locale helpers (LocaleRegistry) and predefined standard keys for Alexa skills
 package l10n
 
 import (
@@ -7,7 +8,7 @@ import (
 	"time"
 )
 
-// Default keys
+// Default keys.
 const (
 	KeySkillName                string = "SKILL_Name"
 	KeySkillDescription         string = "SKILL_Description"
@@ -28,10 +29,20 @@ const (
 	KeyErrorTitle               string = "Error_Title"
 	KeyErrorText                string = "Error_Text"
 	KeyErrorSSML                string = "Error_SSML"
+	KeyErrorUnknown             string = "Error_Unknown"
+	KeyErrorUnknownTitle        string = "Error_Unknown_Title"
+	KeyErrorUnknownText         string = "Error_Unknown_Text"
+	KeyErrorUnknownSSML         string = "Error_Unknown_SSML"
 	KeyErrorMissingPlaceholder  string = "Error_MissingPlaceholder"
 	KeyErrorNoTranslationTitle  string = "Error_NoTranslation_Title"
 	KeyErrorNoTranslationText   string = "Error_NoTranslation_Text"
 	KeyErrorNoTranslationSSML   string = "Error_NoTranslation_SSML"
+	KeyLaunchTitle              string = "Launch_Title"
+	KeyLaunchText               string = "Launch_Text"
+	KeyLaunchSSML               string = "Launch_SSML"
+	KeyHelpTitle                string = "Help_Title"
+	KeyHelpText                 string = "Help_Text"
+	KeyHelpSSML                 string = "Help_SSML"
 	KeyStopTitle                string = "Stop_Title"
 	KeyStopText                 string = "Stop_Text"
 	KeyStopSSML                 string = "Stop_SSML"
@@ -62,25 +73,25 @@ type LocaleInstance interface {
 }
 
 // Speak wraps text in <speak> tags
-// TODO: move to `ssml` package
+// TODO: move to `ssml` package.
 func Speak(text string) string {
 	return "<speak>" + text + "</speak>"
 }
 
-// UseVoice wraps text in tags using a specific voice
-func UseVoice(voice string, text string) string {
+// UseVoice wraps text in tags using a specific voice.
+func UseVoice(voice, text string) string {
 	return `<voice name="` + voice + `">` + text + `</voice>`
 }
 
-// UseVoiceLang wraps text in tags using a specific voice and language
-func UseVoiceLang(voice string, language string, text string) string {
+// UseVoiceLang wraps text in tags using a specific voice and language.
+func UseVoiceLang(voice, language, text string) string {
 	return `<voice name="` + voice + `"><lang xml:lang="` + language + `">` + text + `</lang></voice>`
 }
 
 // DefaultRegistry is the standard registry used.
 var DefaultRegistry = NewRegistry()
 
-// Config contains the options for Locale registration
+// Config contains the options for Locale registration.
 type Config struct {
 	DefaultLocale bool
 	FallbackFor   string
@@ -127,18 +138,17 @@ func GetLocales() map[string]LocaleInstance {
 	return DefaultRegistry.GetLocales()
 }
 
-// Resolve returns the matching locale from the DefaultRegistry
+// Resolve returns the matching locale from the DefaultRegistry.
 func Resolve(name string) (LocaleInstance, error) {
 	return DefaultRegistry.Resolve(name)
 }
 
-// Register registers a new locale and fails if it already exists
+// Register registers a new locale and fails if it already exists.
 func (r *Registry) Register(l LocaleInstance, opts ...RegisterFunc) error {
 	if l.GetName() == "" {
 		return fmt.Errorf("cannot register locale with no name")
 	}
-	_, ok := r.locales[l.GetName()]
-	if ok {
+	if _, ok := r.locales[l.GetName()]; ok {
 		return fmt.Errorf("locale %s already registered", l.GetName())
 	}
 
@@ -178,7 +188,7 @@ func (r *Registry) GetLocales() map[string]LocaleInstance {
 	return r.locales
 }
 
-// Resolve returns the Locale matching the given name or an error
+// Resolve returns the Locale matching the given name or an error.
 func (r *Registry) Resolve(locale string) (LocaleInstance, error) {
 	l, ok := r.locales[locale]
 	if !ok {
@@ -186,8 +196,6 @@ func (r *Registry) Resolve(locale string) (LocaleInstance, error) {
 	}
 	return l, nil
 }
-
-///////////////////////////////////////////
 
 // Locale is a representation of keys in a specific language.
 type Locale struct {
@@ -249,7 +257,7 @@ func (l *Locale) GetErrors() []error {
 	return l.errors
 }
 
-// ResetErrors resets existing errors
+// ResetErrors resets existing errors.
 func (l *Locale) ResetErrors() {
 	l.errors = nil
 }
@@ -262,8 +270,6 @@ func (l *Locale) appendErrorMissingParam(key string, texts []string) {
 		}
 	}
 }
-
-////////////////////////////////////
 
 // Snippets is the actual representation of key -> array of translations in a locale.
 type Snippets map[string][]string
@@ -287,7 +293,7 @@ func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 		return fmt.Sprintf(s[key][0], args...), nil
 	}
 	l := len(s[key])
-	r := rand.Intn(l)
+	r := rand.Intn(l) //nolint:gosec
 	return fmt.Sprintf(s[key][r], args...), nil
 }
 
@@ -297,9 +303,9 @@ func (s Snippets) GetAll(key string, args ...interface{}) ([]string, error) {
 	if !ok || len(s[key]) == 0 {
 		return []string{}, fmt.Errorf("key not defined or empty: %s", key)
 	}
-	var r []string
-	for _, v := range s[key] {
-		r = append(r, fmt.Sprintf(v, args...))
+	r := make([]string, len(s[key]))
+	for i, v := range s[key] {
+		r[i] = fmt.Sprintf(v, args...)
 	}
 	return r, nil
 }

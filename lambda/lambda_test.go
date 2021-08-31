@@ -355,7 +355,7 @@ func TestLambda_HandleAWSStatus_WithSlots(t *testing.T) {
 						Value: "Europe",
 						// required!
 						Resolutions: &alexa.Resolutions{
-							PerAuthority: []*alexa.PerAuthority{
+							ResolutionsPerAuthority: []*alexa.PerAuthority{
 								{
 									Authority: "",
 									Status: &alexa.ResolutionStatus{
@@ -403,7 +403,7 @@ func TestLambda_HandleAWSStatus_WithSlots(t *testing.T) {
 		Value: "Frankfurt",
 		// required!
 		Resolutions: &alexa.Resolutions{
-			PerAuthority: []*alexa.PerAuthority{
+			ResolutionsPerAuthority: []*alexa.PerAuthority{
 				{
 					Authority: "",
 					Status: &alexa.ResolutionStatus{

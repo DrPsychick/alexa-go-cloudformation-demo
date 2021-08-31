@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/hamba/pkg/log"
-	"github.com/json-iterator/go"
-	"sync"
+	jsoniter "github.com/json-iterator/go"
 )
 
 // Handler represents an alexa request handler.
@@ -88,17 +89,17 @@ func (m *ServeMux) Handler(r *RequestEnvelope) (Handler, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	if h, ok := m.types[r.Request.Type]; ok {
+	if h, ok := m.types[r.RequestType()]; ok {
 		return h, nil
 	}
 
-	if r.Request.Type != TypeIntentRequest {
-		return nil, fmt.Errorf("server: unknown intent type %s", r.Request.Type)
+	if r.RequestType() != TypeIntentRequest {
+		return nil, fmt.Errorf("server: unknown intent type %s", r.RequestType())
 	}
 
-	h, ok := m.intents[r.Request.Intent.Name]
+	h, ok := m.intents[r.IntentName()]
 	if !ok {
-		return nil, fmt.Errorf("server: unknown intent %s", r.Request.Intent.Name)
+		return nil, fmt.Errorf("server: unknown intent %s", r.IntentName())
 	}
 
 	return h, nil
@@ -147,7 +148,7 @@ func (m *ServeMux) HandleIntentFunc(intent string, handler HandlerFunc) {
 	m.HandleIntent(intent, handler)
 }
 
-// fallbackHandler returns a fatal error card
+// fallbackHandler returns a fatal error card.
 func fallbackHandler(err error) HandlerFunc {
 	return HandlerFunc(func(b *ResponseBuilder, r *RequestEnvelope) {
 		b.WithSimpleCard("Fatal error", "error: "+err.Error()).
@@ -162,7 +163,6 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	h, err := m.Handler(r)
 	if err != nil {
 		h = fallbackHandler(err)
-		return
 	}
 
 	h.Serve(b, r)
@@ -170,7 +170,7 @@ func (m *ServeMux) Serve(b *ResponseBuilder, r *RequestEnvelope) {
 	m.logger.Debug(string(json))
 }
 
-//// DefaultServerMux is the default mux
+// DefaultServerMux is the default mux.
 var DefaultServerMux = NewServerMux(log.Null)
 
 // HandleRequestType registers the handler for the given request type on the DefaultServeMux.

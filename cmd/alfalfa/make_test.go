@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/drpsychick/alexa-go-cloudformation-demo"
 	"github.com/hamba/logger"
 	"github.com/hamba/statter/l2met"
@@ -19,8 +18,6 @@ func TestMakeSkill(t *testing.T) {
 
 	res, err := json.MarshalIndent(s, "", "  ")
 	assert.NotEmpty(t, string(res))
-
-	fmt.Printf("%s\n", string(res))
 }
 
 func TestMakeModels(t *testing.T) {
@@ -35,11 +32,9 @@ func TestMakeModels(t *testing.T) {
 	ms, err := createSkillModels(sb)
 	assert.NoError(t, err)
 
-	for l, m := range ms {
+	for _, m := range ms {
 		res, err := json.MarshalIndent(m, "", "  ")
 		assert.NoError(t, err)
 		assert.NotEmpty(t, string(res))
-
-		fmt.Printf("%s: %s\n", l, string(res))
 	}
 }

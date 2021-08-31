@@ -452,7 +452,7 @@ func TestModelTypeBuilder_ErrorsIfNoLocale(t *testing.T) {
 	assert.Error(t, err2)
 }
 
-// modelPromptBuilder new elicitation prompt is covered.
+// ModelPromptBuilder new elicitation prompt is covered.
 func TestNewElicitationPromptBuilder(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
@@ -468,7 +468,7 @@ func TestNewElicitationPromptBuilder(t *testing.T) {
 	assert.Equal(t, en.Get("SlotIntent_SlotName_Elicit_Text"), pvs[0].Value)
 }
 
-// modelPromptBuilder new confirmation prompt is covered.
+// ModelPromptBuilder new confirmation prompt is covered.
 func TestNewConfirmationPromptBuilder(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
@@ -484,7 +484,7 @@ func TestNewConfirmationPromptBuilder(t *testing.T) {
 	assert.Equal(t, en.Get("SlotIntent_SlotName_Confirm_SSML"), pvs[0].Value)
 }
 
-// modelPromptBuilder with variation is covered.
+// ModelPromptBuilder with variation is covered.
 func TestModelPromptBuilder_WithVariation(t *testing.T) {
 	assert.NotNil(t, registry)
 	mpb := gen.NewElicitationPromptBuilder("SlotIntent", "SlotName").
@@ -518,7 +518,7 @@ func TestModelPromptBuilder_WithVariation(t *testing.T) {
 	assert.Len(t, pvs3.Variations, 3)
 }
 
-// modelPromptBuilder errors if no variations is covered.
+// ModelPromptBuilder errors if no variations is covered.
 func TestModelPromptBuilder_ErrorsIfNoVariations(t *testing.T) {
 	assert.NotNil(t, registry)
 	mpb := gen.NewConfirmationPromptBuilder("MyIntent", "MySlot").
@@ -529,7 +529,7 @@ func TestModelPromptBuilder_ErrorsIfNoVariations(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// modelPromptBuilder errors if no locale is covered.
+// ModelPromptBuilder errors if no locale is covered.
 func TestModelPromptBuilder_ErrorsIfNoLocale(t *testing.T) {
 	mpb := gen.NewElicitationPromptBuilder("MyIntent", "MySlot").
 		WithVariation("PlainText")

@@ -1,10 +1,11 @@
+// Package loca contains all localization for the skill.
 package loca
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
-// keys of the project
+// keys of the project.
 const (
 	ByeBye       string = "byebye"
 	HelpTitle    string = "help_title"
@@ -13,12 +14,12 @@ const (
 	Stop         string = "stop"
 	GenericTitle string = "Alexa"
 
-	// Launch
+	// Launch.
 	LaunchTitle string = "Launch_Title"
 	LaunchText  string = "Launch_Text"
 	LaunchSSML  string = "Launch_SSML"
 
-	// Intents
+	// Intents.
 	SaySomething              string = "SaySomething"
 	SaySomethingSamples       string = "SaySomething_Samples"
 	SaySomethingTitle         string = "SaySomething_Title"
@@ -48,7 +49,7 @@ const (
 	AWSStatusAreaConfirmSSML  string = "AWSStatus_Area_Confirm_SSML"
 	RegionValidateText        string = "_Region_Validate_Text"
 
-	// Types
+	// Types.
 	TypeArea        string = "AWSArea"
 	TypeAreaName    string = "Area"
 	TypeAreaValues  string = "AWSArea_Values"
@@ -64,13 +65,13 @@ const (
 	AMAZONCancelSamples string = "AMAZON.CancelIntent_Samples"
 )
 
-// Registry is the global l10n registry
+// Registry is the global l10n registry.
 var Registry = l10n.NewRegistry()
 
 func init() {
 	// default first
-	var locales = []*l10n.Locale{
-		enUS, deDE, //frFR,
+	locales := []*l10n.Locale{
+		enUS, deDE, // frFR,
 	}
 	for _, l := range locales {
 		if err := Registry.Register(l); err != nil {
