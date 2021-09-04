@@ -2,6 +2,7 @@
 package l10n
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -26,30 +27,79 @@ const (
 	KeyPostfixTitle             string = "_Title"
 	KeyPostfixText              string = "_Text"
 	KeyPostfixSSML              string = "_SSML"
-	KeyErrorTitle               string = "Error_Title"
-	KeyErrorText                string = "Error_Text"
-	KeyErrorSSML                string = "Error_SSML"
-	KeyErrorUnknown             string = "Error_Unknown"
-	KeyErrorUnknownTitle        string = "Error_Unknown_Title"
-	KeyErrorUnknownText         string = "Error_Unknown_Text"
-	KeyErrorUnknownSSML         string = "Error_Unknown_SSML"
-	KeyErrorMissingPlaceholder  string = "Error_MissingPlaceholder"
-	KeyErrorNoTranslationTitle  string = "Error_NoTranslation_Title"
-	KeyErrorNoTranslationText   string = "Error_NoTranslation_Text"
-	KeyErrorNoTranslationSSML   string = "Error_NoTranslation_SSML"
-	KeyLaunchTitle              string = "Launch_Title"
-	KeyLaunchText               string = "Launch_Text"
-	KeyLaunchSSML               string = "Launch_SSML"
-	KeyHelpTitle                string = "Help_Title"
-	KeyHelpText                 string = "Help_Text"
-	KeyHelpSSML                 string = "Help_SSML"
-	KeyStopTitle                string = "Stop_Title"
-	KeyStopText                 string = "Stop_Text"
-	KeyStopSSML                 string = "Stop_SSML"
+	// fallback, standard error.
+	KeyErrorTitle string = "Error_Title"
+	KeyErrorText  string = "Error_Text"
+	KeyErrorSSML  string = "Error_SSML"
+	// unknown error.
+	KeyErrorUnknownTitle string = "Error_Unknown_Title"
+	KeyErrorUnknownText  string = "Error_Unknown_Text"
+	KeyErrorUnknownSSML  string = "Error_Unknown_SSML"
+	// not found error (slot, intent, ...), see request.go.
+	KeyErrorNotFoundTitle string = "Error_NotFound_Title"
+	KeyErrorNotFoundText  string = "Error_NotFound_Text"
+	KeyErrorNotFoundSSML  string = "Error_NotFound_SSML"
+	// missing locale error.
+	KeyErrorLocaleNotFoundTitle string = "Error_LocaleNotFound_Title"
+	KeyErrorLocaleNotFoundText  string = "Error_LocaleNotFound_Text"
+	KeyErrorLocaleNotFoundSSML  string = "Error_LocaleNotFound_SSML"
+	// missing translation error.
+	KeyErrorNoTranslationTitle string = "Error_NoTranslation_Title"
+	KeyErrorNoTranslationText  string = "Error_NoTranslation_Text"
+	KeyErrorNoTranslationSSML  string = "Error_NoTranslation_SSML"
+	// missing placeholder in translation error.
+	KeyErrorMissingPlaceholderTitle string = "Error_MissingPlaceholder_Title"
+	KeyErrorMissingPlaceholderText  string = "Error_MissingPlaceholder_Text"
+	KeyErrorMissingPlaceholderSSML  string = "Error_MissingPlaceholder_SSML"
+	KeyLaunchTitle                  string = "Launch_Title"
+	KeyLaunchText                   string = "Launch_Text"
+	KeyLaunchSSML                   string = "Launch_SSML"
+	KeyHelpTitle                    string = "Help_Title"
+	KeyHelpText                     string = "Help_Text"
+	KeyHelpSSML                     string = "Help_SSML"
+	KeyStopTitle                    string = "Stop_Title"
+	KeyStopText                     string = "Stop_Text"
+	KeyStopSSML                     string = "Stop_SSML"
 )
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+// LocaleNotFoundError defines a locale not found error.
+type LocaleNotFoundError struct {
+	Locale string
+}
+
+// Error returns a string representing the error including the locale missing.
+func (e LocaleNotFoundError) Error() string {
+	return fmt.Sprintf("locale '%s' not found", e.Locale)
+}
+
+// NoTranslationError defines a generic not found error.
+type NoTranslationError struct {
+	Locale string
+	Key    string
+}
+
+// Error returns a string representing the error including the key missing.
+func (e NoTranslationError) Error() string {
+	return fmt.Sprintf("locale %s: translation for key '%s' is missing", e.Locale, e.Key)
+}
+
+// MissingPlaceholderError defines a generic not found error.
+type MissingPlaceholderError struct {
+	Locale      string
+	Key         string
+	Placeholder string
+}
+
+// Error returns a string representing the error including the key (and placeholder) missing.
+func (e MissingPlaceholderError) Error() string {
+	if e.Placeholder == "" {
+		return fmt.Sprintf("locale %s: key '%s' is missing a placeholder in translation", e.Locale, e.Key)
+	}
+	return fmt.Sprintf("locale %s: key '%s' is missing placeholder '%s' in translation", e.Locale, e.Key, e.Placeholder)
 }
 
 // LocaleRegistry is the interface for an l10n registry.
@@ -175,9 +225,8 @@ func (r *Registry) GetDefault() LocaleInstance {
 
 // SetDefault sets the default locale which must be registered.
 func (r *Registry) SetDefault(locale string) error {
-	_, ok := r.locales[locale]
-	if !ok {
-		return fmt.Errorf("locale '%s' is not registered, cannot make it the default", locale)
+	if _, err := r.Resolve(locale); err != nil {
+		return err
 	}
 	r.defaultLocale = locale
 	return nil
@@ -192,7 +241,7 @@ func (r *Registry) GetLocales() map[string]LocaleInstance {
 func (r *Registry) Resolve(locale string) (LocaleInstance, error) {
 	l, ok := r.locales[locale]
 	if !ok {
-		return nil, fmt.Errorf("locale %s not found", locale)
+		return nil, LocaleNotFoundError{locale}
 	}
 	return l, nil
 }
@@ -226,7 +275,12 @@ func (l *Locale) Set(key string, values []string) {
 func (l *Locale) Get(key string, args ...interface{}) string {
 	t, err := l.TextSnippets.GetFirst(key, args...)
 	if err != nil {
-		l.errors = append(l.errors, err)
+		// set locale
+		var locaerr NoTranslationError
+		if errors.As(err, &locaerr) {
+			locaerr.Locale = l.GetName()
+			l.errors = append(l.errors, locaerr)
+		}
 	}
 	l.appendErrorMissingParam(key, []string{t})
 	return t
@@ -236,7 +290,11 @@ func (l *Locale) Get(key string, args ...interface{}) string {
 func (l *Locale) GetAny(key string, args ...interface{}) string {
 	t, err := l.TextSnippets.GetAny(key, args...)
 	if err != nil {
-		l.errors = append(l.errors, err)
+		var noTranslationError NoTranslationError
+		if errors.As(err, &noTranslationError) {
+			noTranslationError.Locale = l.GetName()
+			l.errors = append(l.errors, noTranslationError)
+		}
 	}
 	l.appendErrorMissingParam(key, []string{t})
 	return t
@@ -246,7 +304,11 @@ func (l *Locale) GetAny(key string, args ...interface{}) string {
 func (l *Locale) GetAll(key string, args ...interface{}) []string {
 	t, err := l.TextSnippets.GetAll(key, args...)
 	if err != nil {
-		l.errors = append(l.errors, err)
+		var noTranslationError NoTranslationError
+		if errors.As(err, &noTranslationError) {
+			noTranslationError.Locale = l.GetName()
+			l.errors = append(l.errors, noTranslationError)
+		}
 	}
 	l.appendErrorMissingParam(key, t)
 	return t
@@ -266,7 +328,7 @@ func (l *Locale) appendErrorMissingParam(key string, texts []string) {
 	for _, t := range texts {
 		if strings.Contains(t, "%!") &&
 			strings.Contains(t, "(MISSING)") {
-			l.errors = append(l.errors, fmt.Errorf("key '%s' requires parameter: %s", key, t))
+			l.errors = append(l.errors, &MissingPlaceholderError{l.Name, key, ""})
 		}
 	}
 }
@@ -278,7 +340,7 @@ type Snippets map[string][]string
 func (s Snippets) GetFirst(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
-		return "", fmt.Errorf("key not defined or empty: %s", key)
+		return "", NoTranslationError{"", key}
 	}
 	return fmt.Sprintf(s[key][0], args...), nil
 }
@@ -287,7 +349,7 @@ func (s Snippets) GetFirst(key string, args ...interface{}) (string, error) {
 func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
-		return "", fmt.Errorf("key not defined or empty: %s", key)
+		return "", NoTranslationError{"", key}
 	}
 	if len(s[key]) == 1 {
 		return fmt.Sprintf(s[key][0], args...), nil
@@ -301,7 +363,7 @@ func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 func (s Snippets) GetAll(key string, args ...interface{}) ([]string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
-		return []string{}, fmt.Errorf("key not defined or empty: %s", key)
+		return []string{}, NoTranslationError{"", key}
 	}
 	r := make([]string, len(s[key]))
 	for i, v := range s[key] {

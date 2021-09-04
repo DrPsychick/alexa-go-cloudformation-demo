@@ -21,9 +21,15 @@ func initLocaleRegistry(t *testing.T) {
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
 
+	loc.Set(l10n.KeyErrorTitle, []string{"error"})
+	loc.Set(l10n.KeyErrorText, []string{"An error occurred: %s"})
+	loc.Set(l10n.KeyErrorSSML, []string{l10n.Speak("An error occurred.")})
+	loc.Set(l10n.KeyErrorLocaleNotFoundTitle, []string{"error"})
+	loc.Set(l10n.KeyErrorLocaleNotFoundText, []string{"Locale '%s' not found!"})
+	loc.Set(l10n.KeyErrorLocaleNotFoundSSML, []string{"<speak>Locale '%s' not found!<speak>"})
 	loc.Set(l10n.KeyErrorNoTranslationTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorNoTranslationText, []string{"Key '%s' not found!"})
-
+	loc.Set(l10n.KeyErrorNoTranslationSSML, []string{"<speak>Key '%s' not found!<speak>"})
 }
 
 func TestLambda_HandleLaunch(t *testing.T) {
@@ -50,8 +56,10 @@ func TestLambda_HandleLaunch(t *testing.T) {
 	m.Serve(b, r)
 	resp := b.Build()
 
-	assert.NotEmpty(t, resp)
+	// locale not found
+	assert.NotEmpty(t, resp.Response.Card)
 	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.Contains(t, resp.Response.Card.Content, "de-DE")
 
 	// now with locale
 	r.Request.Locale = "en-US"
@@ -99,6 +107,7 @@ func TestLambda_HandleEnd(t *testing.T) {
 
 	assert.NotEmpty(t, resp)
 	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.Contains(t, resp.Response.Card.Content, "de-DE")
 
 	// with existing locale, but missing text
 	r.Request.Locale = "en-US"
@@ -258,7 +267,7 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 
 	assert.NotEmpty(t, resp)
 	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Equal(t, "Locale 'de-DE' is not supported!", resp.Response.Card.Content)
+	assert.Equal(t, "Locale 'de-DE' not found!", resp.Response.Card.Content)
 
 	// with existing locale, but missing text
 	r.Request.Locale = "en-US"
@@ -267,7 +276,7 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 
 	assert.NotEmpty(t, resp)
 	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Contains(t, resp.Response.Card.Content, "Error")
+	assert.Contains(t, resp.Response.Card.Content, loca.SaySomethingUserText)
 
 	// with translations
 	loc, err := loca.Registry.Resolve("en-US")
@@ -437,7 +446,7 @@ func TestLambda_HandleAWSStatus_WithSlots(t *testing.T) {
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Empty(t, resp.Response.Card.Content)
+	assert.Empty(t, resp.Response.Card.Text)
 	assert.Equal(t, loc.Get(loca.AWSStatusTitle), resp.Response.Card.Title)
-	assert.Equal(t, loc.Get(loca.AWSStatusText, "Europe", "Frankfurt"), resp.Response.Card.Text)
+	assert.Equal(t, loc.Get(loca.AWSStatusText, "Europe", "Frankfurt"), resp.Response.Card.Content)
 }
