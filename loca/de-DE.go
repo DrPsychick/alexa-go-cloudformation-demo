@@ -23,10 +23,18 @@ var deDE = &l10n.Locale{
 		l10n.KeySkillPrivacyPolicyURL: enUS.GetAll(l10n.KeySkillPrivacyPolicyURL),
 		// l10n.KeySkillTermsOfUse:          enUS.GetAll(l10n.KeySkillTermsOfUse),
 		l10n.KeySkillTestingInstructions: enUS.GetAll(l10n.KeySkillTestingInstructions),
+
+		// Errors
 		l10n.KeyErrorTitle:               {"Fehler"},
 		l10n.KeyErrorText:                {"Es ist folgender Fehler aufgetreten:\n%s"},
 		l10n.KeyErrorSSML:                {"<speak>Es ist ein Fehler aufgetreten.</speak>"},
-		l10n.KeyErrorNoTranslationText:   {"Keine Übersetzung für '%s' gefunden!"},
+		l10n.KeyErrorLocaleNotFoundTitle: {"Sprache fehlt"},
+		l10n.KeyErrorLocaleNotFoundText:  {"Sprache für '%s' nicht gefunden!"},
+		l10n.KeyErrorLocaleNotFoundSSML: {
+			l10n.Speak("Die Sprache '%s' wird nicht unterstützt."),
+		},
+		l10n.KeyErrorNoTranslationTitle: {"Übersetzung fehlt"},
+		l10n.KeyErrorNoTranslationText:  {"Keine Übersetzung für '%s' gefunden!"},
 		l10n.KeyErrorNoTranslationSSML: {
 			l10n.Speak("Keine Übersetzung für '%s' gefunden!"),
 		},

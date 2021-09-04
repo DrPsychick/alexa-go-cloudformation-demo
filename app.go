@@ -2,17 +2,11 @@
 package alfalfa
 
 import (
-	"errors"
-
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
 )
-
-// ErrNoTranslation is the text for missing translations.
-// TODO: define own errors that can take arguments.
-var ErrNoTranslation = errors.New("translation missing")
 
 // Config defines additional data that can be provided and used in requests.
 type Config struct {
@@ -100,7 +94,10 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 	}
 
 	if msg == "" {
-		return ApplicationResponse{}, ErrNoTranslation
+		if cfg.User != "" {
+			return ApplicationResponse{}, &l10n.NoTranslationError{Locale: loc.GetName(), Key: loca.SaySomethingUserText}
+		}
+		return ApplicationResponse{}, &l10n.NoTranslationError{Locale: loc.GetName(), Key: loca.SaySomethingText}
 	}
 
 	return ApplicationResponse{
@@ -127,17 +124,23 @@ func (a *Application) AWSStatus(loc l10n.LocaleInstance, area, region string) (A
 }
 
 // AWSStatusRegionElicit will ask for the Region value.
-func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (string, string, string) {
-	text := loca.AWSStatusRegionElicitText
-	ssml := loca.AWSStatusRegionElicitSSML
-	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text), l.GetAny(ssml)
+func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (ApplicationResponse, error) {
+	return ApplicationResponse{
+		Title:  l.GetAny(loca.AWSStatusTitle),
+		Text:   l.GetAny(loca.AWSStatusRegionElicitText),
+		Speech: l.GetAny(loca.AWSStatusRegionElicitSSML),
+		End:    false,
+	}, nil
 }
 
 // AWSStatusAreaElicit will ask for the Area value.
-func (a *Application) AWSStatusAreaElicit(l l10n.LocaleInstance, region string) (string, string, string) {
-	text := loca.AWSStatusAreaElicitText
-	ssml := loca.AWSStatusAreaElicitSSML
-	return l.GetAny(loca.AWSStatusTitle), l.GetAny(text), l.GetAny(ssml)
+func (a *Application) AWSStatusAreaElicit(l l10n.LocaleInstance, region string) (ApplicationResponse, error) {
+	return ApplicationResponse{
+		Title:  l.GetAny(loca.AWSStatusTitle),
+		Text:   l.GetAny(loca.AWSStatusAreaElicitText),
+		Speech: l.GetAny(loca.AWSStatusAreaElicitSSML),
+		End:    false,
+	}, nil
 }
 
 // Logger returns the application logger.
