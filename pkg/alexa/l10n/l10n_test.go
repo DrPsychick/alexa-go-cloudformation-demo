@@ -167,6 +167,7 @@ func TestRegistry_Resolve(t *testing.T) {
 
 	f2, err = l10n.Resolve("bar")
 	assert.Error(t, err)
+	assert.Equal(t, "locale 'bar' not found", err.Error())
 	assert.Nil(t, f2)
 }
 
@@ -240,6 +241,7 @@ func TestLocale_KeyNotExists(t *testing.T) {
 	txs := l.GetAll("not exists")
 	assert.Empty(t, txs)
 	assert.Len(t, l.GetErrors(), 3)
+	assert.Equal(t, "locale de-DE: translation for key 'not exists' is missing", l.GetErrors()[1].Error())
 }
 
 // Locale empty locale is covered.
@@ -260,4 +262,5 @@ func TestLocale_ErrorNoParam(t *testing.T) {
 	assert.Equal(t, "Hello %!s(MISSING)", l.Get(WithParam))
 	assert.Len(t, l.GetErrors(), 1)
 	assert.NotEmpty(t, l.GetErrors())
+	assert.Equal(t, "locale de-DE: key '"+WithParam+"' is missing a placeholder in translation", l.GetErrors()[0].Error())
 }

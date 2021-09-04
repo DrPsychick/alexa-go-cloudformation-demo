@@ -38,10 +38,22 @@ var enUS = &l10n.Locale{
 		l10n.KeySkillKeywords: {
 			"demo", "test", "SSML",
 		},
-		l10n.KeyErrorNoTranslationText: {"No translation found for '%s'!"},
+
+		// Errors
+		l10n.KeyErrorTitle:               {"Error"},
+		l10n.KeyErrorText:                {"The following error occurred:\n%s"},
+		l10n.KeyErrorSSML:                {"<speak>An error occurred.</speak>"},
+		l10n.KeyErrorLocaleNotFoundTitle: {"Locale missing"},
+		l10n.KeyErrorLocaleNotFoundText:  {"Locale for '%s' not found!"},
+		l10n.KeyErrorLocaleNotFoundSSML: {
+			l10n.Speak("The locale '%s' is not supported."),
+		},
+		l10n.KeyErrorNoTranslationTitle: {"Translation missing"},
+		l10n.KeyErrorNoTranslationText:  {"No translation found for '%s'!"},
 		l10n.KeyErrorNoTranslationSSML: {
 			l10n.Speak("No translation found for '%s'!"),
 		},
+
 		// Type values
 		TypeAreaValues:   {"Europe", "North America", "Asia Pacific", "South America"},
 		TypeRegionValues: {"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
