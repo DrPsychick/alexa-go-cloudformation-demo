@@ -23,13 +23,13 @@ func initLocaleRegistry(t *testing.T) {
 
 	loc.Set(l10n.KeyErrorTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorText, []string{"An error occurred: %s"})
-	loc.Set(l10n.KeyErrorSSML, []string{"An error occurred."})
+	loc.Set(l10n.KeyErrorSSML, []string{l10n.Speak("An error occurred.")})
 	loc.Set(l10n.KeyErrorLocaleNotFoundTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorLocaleNotFoundText, []string{"Locale '%s' not found!"})
-	loc.Set(l10n.KeyErrorLocaleNotFoundSSML, []string{"Locale '%s' not found!"})
+	loc.Set(l10n.KeyErrorLocaleNotFoundSSML, []string{"<speak>Locale '%s' not found!<speak>"})
 	loc.Set(l10n.KeyErrorNoTranslationTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorNoTranslationText, []string{"Key '%s' not found!"})
-	loc.Set(l10n.KeyErrorNoTranslationSSML, []string{"Key '%s' not found!"})
+	loc.Set(l10n.KeyErrorNoTranslationSSML, []string{"<speak>Key '%s' not found!<speak>"})
 }
 
 func TestLambda_HandleLaunch(t *testing.T) {

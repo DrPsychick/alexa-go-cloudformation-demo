@@ -191,7 +191,7 @@ func handleSaySomethingResponse(app Application, sb *gen.SkillBuilder) alexa.Han
 	})
 }
 
-func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler { //nolint:funlen,cyclop
+func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler { //nolint:funlen
 	// TODO: the mux should know about slots and "pass" it to the handler via request
 	// register intent, slots, types with the model
 	sb.Model().WithIntent(loca.AWSStatus)
@@ -280,7 +280,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler { //no
 	})
 }
 
-func handleError(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope, err error) bool {
+func handleError(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope, err error) bool { //nolint:funlen
 	var resp alfalfa.ApplicationResponse
 	// locale error is already handled (err will not be nil)
 	loc, _ := loca.Registry.Resolve(r.RequestLocale())
@@ -288,7 +288,7 @@ func handleError(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope, err error) 
 		loc = loca.Registry.GetDefault()
 	}
 
-	if err != nil {
+	if err != nil { //nolint:nestif
 		// ignore previous locale errors as we're handling an error
 		loc.ResetErrors()
 
@@ -300,35 +300,39 @@ func handleError(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope, err error) 
 				End:    true,
 			}
 		}
-		if err, ok := err.(*alexa.NotFoundError); ok {
+		var notFoundError alexa.NotFoundError
+		if errors.As(err, &notFoundError) {
 			resp = alfalfa.ApplicationResponse{
 				Title:  loc.GetAny(l10n.KeyErrorNotFoundTitle),
-				Text:   loc.GetAny(l10n.KeyErrorNotFoundText, err.Error()),
+				Text:   loc.GetAny(l10n.KeyErrorNotFoundText, notFoundError.Error()),
 				Speech: loc.GetAny(l10n.KeyErrorNotFoundSSML),
 				End:    true,
 			}
 		}
-		if err, ok := err.(*l10n.LocaleNotFoundError); ok {
+		var localeNotFoundError l10n.LocaleNotFoundError
+		if errors.As(err, &localeNotFoundError) {
 			resp = alfalfa.ApplicationResponse{
 				Title:  loc.GetAny(l10n.KeyErrorLocaleNotFoundTitle),
-				Text:   loc.GetAny(l10n.KeyErrorLocaleNotFoundText, err.Locale),
-				Speech: loc.GetAny(l10n.KeyErrorLocaleNotFoundSSML, err.Locale),
+				Text:   loc.GetAny(l10n.KeyErrorLocaleNotFoundText, localeNotFoundError.Locale),
+				Speech: loc.GetAny(l10n.KeyErrorLocaleNotFoundSSML, localeNotFoundError.Locale),
 				End:    true,
 			}
 		}
-		if err, ok := err.(*l10n.NoTranslationError); ok {
+		var noTranslationError l10n.NoTranslationError
+		if errors.As(err, &noTranslationError) {
 			resp = alfalfa.ApplicationResponse{
 				Title:  loc.GetAny(l10n.KeyErrorNoTranslationTitle),
-				Text:   loc.GetAny(l10n.KeyErrorNoTranslationText, err.Key),
-				Speech: loc.GetAny(l10n.KeyErrorNoTranslationSSML, err.Key),
+				Text:   loc.GetAny(l10n.KeyErrorNoTranslationText, noTranslationError.Key),
+				Speech: loc.GetAny(l10n.KeyErrorNoTranslationSSML, noTranslationError.Key),
 				End:    true,
 			}
 		}
-		if err, ok := err.(*l10n.MissingPlaceholderError); ok {
+		var placeholderError l10n.MissingPlaceholderError
+		if errors.As(err, &placeholderError) {
 			resp = alfalfa.ApplicationResponse{
 				Title:  loc.GetAny(l10n.KeyErrorMissingPlaceholderTitle),
-				Text:   loc.GetAny(l10n.KeyErrorMissingPlaceholderText, err.Key),
-				Speech: loc.GetAny(l10n.KeyErrorMissingPlaceholderSSML, err.Key),
+				Text:   loc.GetAny(l10n.KeyErrorMissingPlaceholderText, placeholderError.Key),
+				Speech: loc.GetAny(l10n.KeyErrorMissingPlaceholderSSML, placeholderError.Key),
 				End:    true,
 			}
 		}

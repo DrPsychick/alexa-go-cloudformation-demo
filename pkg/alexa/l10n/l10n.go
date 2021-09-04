@@ -2,6 +2,7 @@
 package l10n
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -26,27 +27,27 @@ const (
 	KeyPostfixTitle             string = "_Title"
 	KeyPostfixText              string = "_Text"
 	KeyPostfixSSML              string = "_SSML"
-	// fallback, standard error
+	// fallback, standard error.
 	KeyErrorTitle string = "Error_Title"
 	KeyErrorText  string = "Error_Text"
 	KeyErrorSSML  string = "Error_SSML"
-	// unkown error
+	// unknown error.
 	KeyErrorUnknownTitle string = "Error_Unknown_Title"
 	KeyErrorUnknownText  string = "Error_Unknown_Text"
 	KeyErrorUnknownSSML  string = "Error_Unknown_SSML"
-	// not found error (slot, intent, ...), see request.go
+	// not found error (slot, intent, ...), see request.go.
 	KeyErrorNotFoundTitle string = "Error_NotFound_Title"
 	KeyErrorNotFoundText  string = "Error_NotFound_Text"
 	KeyErrorNotFoundSSML  string = "Error_NotFound_SSML"
-	// missing locale error
+	// missing locale error.
 	KeyErrorLocaleNotFoundTitle string = "Error_LocaleNotFound_Title"
 	KeyErrorLocaleNotFoundText  string = "Error_LocaleNotFound_Text"
 	KeyErrorLocaleNotFoundSSML  string = "Error_LocaleNotFound_SSML"
-	// missing translation error
+	// missing translation error.
 	KeyErrorNoTranslationTitle string = "Error_NoTranslation_Title"
 	KeyErrorNoTranslationText  string = "Error_NoTranslation_Text"
 	KeyErrorNoTranslationSSML  string = "Error_NoTranslation_SSML"
-	// missing placeholder in translation error
+	// missing placeholder in translation error.
 	KeyErrorMissingPlaceholderTitle string = "Error_MissingPlaceholder_Title"
 	KeyErrorMissingPlaceholderText  string = "Error_MissingPlaceholder_Text"
 	KeyErrorMissingPlaceholderSSML  string = "Error_MissingPlaceholder_SSML"
@@ -224,8 +225,7 @@ func (r *Registry) GetDefault() LocaleInstance {
 
 // SetDefault sets the default locale which must be registered.
 func (r *Registry) SetDefault(locale string) error {
-	_, err := r.Resolve(locale)
-	if err != nil {
+	if _, err := r.Resolve(locale); err != nil {
 		return err
 	}
 	r.defaultLocale = locale
@@ -241,7 +241,7 @@ func (r *Registry) GetLocales() map[string]LocaleInstance {
 func (r *Registry) Resolve(locale string) (LocaleInstance, error) {
 	l, ok := r.locales[locale]
 	if !ok {
-		return nil, &LocaleNotFoundError{locale}
+		return nil, LocaleNotFoundError{locale}
 	}
 	return l, nil
 }
@@ -275,8 +275,12 @@ func (l *Locale) Set(key string, values []string) {
 func (l *Locale) Get(key string, args ...interface{}) string {
 	t, err := l.TextSnippets.GetFirst(key, args...)
 	if err != nil {
-		err.Locale = l.GetName()
-		l.errors = append(l.errors, err)
+		// set locale
+		var locaerr NoTranslationError
+		if errors.As(err, &locaerr) {
+			locaerr.Locale = l.GetName()
+			l.errors = append(l.errors, locaerr)
+		}
 	}
 	l.appendErrorMissingParam(key, []string{t})
 	return t
@@ -286,8 +290,11 @@ func (l *Locale) Get(key string, args ...interface{}) string {
 func (l *Locale) GetAny(key string, args ...interface{}) string {
 	t, err := l.TextSnippets.GetAny(key, args...)
 	if err != nil {
-		err.Locale = l.GetName()
-		l.errors = append(l.errors, err)
+		var noTranslationError NoTranslationError
+		if errors.As(err, &noTranslationError) {
+			noTranslationError.Locale = l.GetName()
+			l.errors = append(l.errors, noTranslationError)
+		}
 	}
 	l.appendErrorMissingParam(key, []string{t})
 	return t
@@ -297,8 +304,11 @@ func (l *Locale) GetAny(key string, args ...interface{}) string {
 func (l *Locale) GetAll(key string, args ...interface{}) []string {
 	t, err := l.TextSnippets.GetAll(key, args...)
 	if err != nil {
-		err.Locale = l.GetName()
-		l.errors = append(l.errors, err)
+		var noTranslationError NoTranslationError
+		if errors.As(err, &noTranslationError) {
+			noTranslationError.Locale = l.GetName()
+			l.errors = append(l.errors, noTranslationError)
+		}
 	}
 	l.appendErrorMissingParam(key, t)
 	return t
@@ -327,19 +337,19 @@ func (l *Locale) appendErrorMissingParam(key string, texts []string) {
 type Snippets map[string][]string
 
 // GetFirst returns the first translation for the snippet.
-func (s Snippets) GetFirst(key string, args ...interface{}) (string, *NoTranslationError) {
+func (s Snippets) GetFirst(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
-		return "", &NoTranslationError{"", key}
+		return "", NoTranslationError{"", key}
 	}
 	return fmt.Sprintf(s[key][0], args...), nil
 }
 
 // GetAny returns a random translation for the snippet.
-func (s Snippets) GetAny(key string, args ...interface{}) (string, *NoTranslationError) {
+func (s Snippets) GetAny(key string, args ...interface{}) (string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
-		return "", &NoTranslationError{"", key}
+		return "", NoTranslationError{"", key}
 	}
 	if len(s[key]) == 1 {
 		return fmt.Sprintf(s[key][0], args...), nil
@@ -350,10 +360,10 @@ func (s Snippets) GetAny(key string, args ...interface{}) (string, *NoTranslatio
 }
 
 // GetAll returns all translations of the snippet.
-func (s Snippets) GetAll(key string, args ...interface{}) ([]string, *NoTranslationError) {
+func (s Snippets) GetAll(key string, args ...interface{}) ([]string, error) {
 	_, ok := s[key]
 	if !ok || len(s[key]) == 0 {
-		return []string{}, &NoTranslationError{"", key}
+		return []string{}, NoTranslationError{"", key}
 	}
 	r := make([]string, len(s[key]))
 	for i, v := range s[key] {
