@@ -124,6 +124,41 @@ type LocaleInstance interface {
 
 // Speak wraps text in <speak> tags
 // TODO: move to `ssml` package.
+
+// PollyVoice defines the voice name for speach.
+type PollyVoice string
+
+const (
+	// https://developer.amazon.com/en-US/docs/alexa/custom-skills/speech-synthesis-markup-language-ssml-reference.html#supported-voices
+	// US : Ivy, Joanna, Joey, Justin, Kendra, Kimberly, Matthew, Salli.
+	USVoiceIvy      PollyVoice = "Ivy"
+	USVoiceJoanna   PollyVoice = "Joanna"
+	USVoiceJustin   PollyVoice = "Justin"
+	USVoiceKendra   PollyVoice = "Kendra"
+	USVoiceKimberly PollyVoice = "Kimberly"
+	USVoiceMatthew  PollyVoice = "Matthew"
+	USVoiceSalli    PollyVoice = "Salli"
+	// AU : Nicole, Russell.
+	AUVoiceNicole PollyVoice = "Nicole"
+	AUVoiceRussel PollyVoice = "Russel"
+	// GB : Amy, Brian, Emma
+	// IN : Aditi, Raveena
+	// CA : Chantal.
+	FRVoiceChantal PollyVoice = "Chantal"
+	// FR : Celine, Lea, Mathieu
+	// DE : Hans, Marlene, Vicki.
+	DEVoiceHans    PollyVoice = "Hans"
+	DEVoiceMarlene PollyVoice = "Marlene"
+	DEVoiceVicki   PollyVoice = "Vicki"
+	// HI : Aditi
+	// IT : Carla, Giorgio, Bianca
+	// JP : Mizuki, Takumi
+	// BR : Vitoria, Camila, Ricardo
+	// es-US : Penelope, Lupe, Miguel
+	// ES : Conchita, Enrique, Lucia
+	// MX : Mia.
+)
+
 func Speak(text string) string {
 	return "<speak>" + text + "</speak>"
 }

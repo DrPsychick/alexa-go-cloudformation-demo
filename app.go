@@ -25,6 +25,8 @@ func WithUser(user string) ResponseFunc {
 	}
 }
 
+// TODO: make this generic
+// add "Reprompt: bool" if true -> speech should go into reprompt
 // ApplicationResponse defines the response returned to lambda.
 type ApplicationResponse struct {
 	Title  string
