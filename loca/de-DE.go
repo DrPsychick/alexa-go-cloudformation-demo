@@ -2,6 +2,7 @@ package loca
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/ssml"
 )
 
 var deDE = &l10n.Locale{
@@ -31,12 +32,12 @@ var deDE = &l10n.Locale{
 		l10n.KeyErrorLocaleNotFoundTitle: {"Sprache fehlt"},
 		l10n.KeyErrorLocaleNotFoundText:  {"Sprache für '%s' nicht gefunden!"},
 		l10n.KeyErrorLocaleNotFoundSSML: {
-			l10n.Speak("Die Sprache '%s' wird nicht unterstützt."),
+			ssml.Speak("Die Sprache '%s' wird nicht unterstützt."),
 		},
 		l10n.KeyErrorNoTranslationTitle: {"Übersetzung fehlt"},
 		l10n.KeyErrorNoTranslationText:  {"Keine Übersetzung für '%s' gefunden!"},
 		l10n.KeyErrorNoTranslationSSML: {
-			l10n.Speak("Keine Übersetzung für '%s' gefunden!"),
+			ssml.Speak("Keine Übersetzung für '%s' gefunden!"),
 		},
 
 		// Type values
@@ -54,9 +55,9 @@ var deDE = &l10n.Locale{
 			"Willkommen bei der Voice Demo!",
 		},
 		LaunchSSML: {
-			l10n.Speak(l10n.UseVoice("Marlene", "Hallo!")),
-			l10n.Speak("Guten <emphasis level=\"strong\">Tag!</emphasis>"),
-			l10n.Speak(l10n.UseVoice("Marlene", "Willkommen bei der <emphasis level=\"strong\">Voice</emphasis> Demo!")),
+			ssml.Speak(ssml.UseVoice("Marlene", "Hallo!")),
+			ssml.Speak("Guten <emphasis level=\"strong\">Tag!</emphasis>"),
+			ssml.Speak(ssml.UseVoice("Marlene", "Willkommen bei der <emphasis level=\"strong\">Voice</emphasis> Demo!")),
 		},
 
 		// Intent "AMAZON.StopIntent"
@@ -73,11 +74,11 @@ var deDE = &l10n.Locale{
 			"Jawoll",
 		},
 		DemoIntentSSML: {
-			l10n.Speak(
-				l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">pace</emphasis> ") +
-					l10n.UseVoice("Marlene", "iss <emphasis level=\"strong\">geil!</emphasis>"),
+			ssml.Speak(
+				ssml.UseVoiceLang(ssml.USVoiceKendra, "en-US", "<emphasis level=\"strong\">pace</emphasis> ") +
+					ssml.UseVoice(ssml.USVoiceSalli, "iss <emphasis level=\"strong\">geil!</emphasis>"),
 			),
-			l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
+			ssml.Speak(ssml.UseVoiceLang(ssml.USVoiceKendra, "en-US", "<emphasis level=\"strong\">geil</emphasis>")),
 		},
 		// Intent: "SaySomething"
 		SaySomethingSamples: {"sag' etwas", "erzähl' mir was"},
@@ -101,7 +102,7 @@ var deDE = &l10n.Locale{
 		},
 		SaySomethingUserTitle: {"Hey %s!"},
 		SaySomethingUserText:  {"Mir gefällt dein neues Aussehen, %s."},
-		SaySomethingUserSSML:  {l10n.Speak("Mir <emphasis level=\"strong\">gefällt</emphasis> dein neues Aussehen, %s.")},
+		SaySomethingUserSSML:  {ssml.Speak("Mir <emphasis level=\"strong\">gefällt</emphasis> dein neues Aussehen, %s.")},
 		// Intent "AWSStatusIntent"
 		AWSStatusSamples: {
 			"wie geht's A.W.S.", "sag mir den A.W.S. Status in {Area} {Region}",
@@ -110,16 +111,16 @@ var deDE = &l10n.Locale{
 		AWSStatusTitle: {"AWS Status"},
 		AWSStatusText:  {"AWS Status in %s, %s: okay"},
 		AWSStatusSSML: {
-			l10n.Speak("A.W.S. Status in Region %s, %s: SNAFU"),
-			l10n.Speak("A.W.S. Status in %s, %s: alles ok"),
+			ssml.Speak("A.W.S. Status in Region %s, %s: SNAFU"),
+			ssml.Speak("A.W.S. Status in %s, %s: alles ok"),
 		},
 		AWSStatusTextGood: {
 			"AWS Status in %s: alles bestens",
 			"In %s läuft alles rund",
 		},
 		AWSStatusSSMLGood: {
-			l10n.Speak("A.W.S. Status in %s: alles <emphasis level=\"strong\">super</emphasis>"),
-			l10n.Speak("In %s: alles " + l10n.UseVoiceLang("Kendra", "en-US", "geil")),
+			ssml.Speak("A.W.S. Status in %s: alles <emphasis level=\"strong\">super</emphasis>"),
+			ssml.Speak("In %s: alles " + ssml.UseVoiceLang("Kendra", "en-US", "geil")),
 		},
 		AWSStatusAreaSamples: {"in {Area}", "von {Area}"},
 		AWSStatusAreaElicitText: {
@@ -127,11 +128,11 @@ var deDE = &l10n.Locale{
 			"Welches Gebiet interessiert dich? (Europa, Nordamerika, ...)",
 		},
 		AWSStatusAreaElicitSSML: {
-			l10n.Speak("In welchem Gebiet?"),
-			l10n.Speak("Zu welchem Gebiet möchtest du den Status wissen?"),
+			ssml.Speak("In welchem Gebiet?"),
+			ssml.Speak("Zu welchem Gebiet möchtest du den Status wissen?"),
 		},
 		AWSStatusAreaConfirmSSML: {
-			l10n.Speak("Sicher in {Area}?"),
+			ssml.Speak("Sicher in {Area}?"),
 		},
 		AWSStatusRegionSamples: {"in {Region}", "der {Region}"},
 		AWSStatusRegionElicitText: {
@@ -139,8 +140,8 @@ var deDE = &l10n.Locale{
 			"Zu welcher Region möchtest du den Status wissen? (Frankfurt, Nord Virginia, ...)",
 		},
 		AWSStatusRegionElicitSSML: {
-			l10n.Speak("In welcher Region?"), // not working?
-			l10n.Speak("Zu welcher Region möchtest du den Status wissen?"),
+			ssml.Speak("In welcher Region?"), // not working?
+			ssml.Speak("Zu welcher Region möchtest du den Status wissen?"),
 		},
 		RegionValidateText: {
 			"Bitte wähle eine gültige Region, zum Beispiel Frankfurt, Irland, Nord Virginia.",

@@ -8,6 +8,7 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/ssml"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +24,7 @@ func initLocaleRegistry(t *testing.T) {
 
 	loc.Set(l10n.KeyErrorTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorText, []string{"An error occurred: %s"})
-	loc.Set(l10n.KeyErrorSSML, []string{l10n.Speak("An error occurred.")})
+	loc.Set(l10n.KeyErrorSSML, []string{ssml.Speak("An error occurred.")})
 	loc.Set(l10n.KeyErrorLocaleNotFoundTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorLocaleNotFoundText, []string{"Locale '%s' not found!"})
 	loc.Set(l10n.KeyErrorLocaleNotFoundSSML, []string{"<speak>Locale '%s' not found!<speak>"})
@@ -283,7 +284,7 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 	assert.NoError(t, err)
 	loc.Set(loca.SaySomethingUserTitle, []string{"Hi %s!"})
 	loc.Set(loca.SaySomethingUserText, []string{"Sadly, I have nothing to tell you %s."})
-	loc.Set(loca.SaySomethingUserSSML, []string{l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "%s do you like the Autobahn?"))})
+	loc.Set(loca.SaySomethingUserSSML, []string{ssml.Speak(ssml.UseVoiceLang("Kendra", "en-US", "%s do you like the Autobahn?"))})
 
 	m.Serve(b, r)
 	resp = b.Build()

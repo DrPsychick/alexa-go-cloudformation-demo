@@ -122,57 +122,6 @@ type LocaleInstance interface {
 	ResetErrors()
 }
 
-// Speak wraps text in <speak> tags
-// TODO: move to `ssml` package.
-
-// PollyVoice defines the voice name for speach.
-type PollyVoice string
-
-const (
-	// https://developer.amazon.com/en-US/docs/alexa/custom-skills/speech-synthesis-markup-language-ssml-reference.html#supported-voices
-	// US : Ivy, Joanna, Joey, Justin, Kendra, Kimberly, Matthew, Salli.
-	USVoiceIvy      PollyVoice = "Ivy"
-	USVoiceJoanna   PollyVoice = "Joanna"
-	USVoiceJustin   PollyVoice = "Justin"
-	USVoiceKendra   PollyVoice = "Kendra"
-	USVoiceKimberly PollyVoice = "Kimberly"
-	USVoiceMatthew  PollyVoice = "Matthew"
-	USVoiceSalli    PollyVoice = "Salli"
-	// AU : Nicole, Russell.
-	AUVoiceNicole PollyVoice = "Nicole"
-	AUVoiceRussel PollyVoice = "Russel"
-	// GB : Amy, Brian, Emma
-	// IN : Aditi, Raveena
-	// CA : Chantal.
-	FRVoiceChantal PollyVoice = "Chantal"
-	// FR : Celine, Lea, Mathieu
-	// DE : Hans, Marlene, Vicki.
-	DEVoiceHans    PollyVoice = "Hans"
-	DEVoiceMarlene PollyVoice = "Marlene"
-	DEVoiceVicki   PollyVoice = "Vicki"
-	// HI : Aditi
-	// IT : Carla, Giorgio, Bianca
-	// JP : Mizuki, Takumi
-	// BR : Vitoria, Camila, Ricardo
-	// es-US : Penelope, Lupe, Miguel
-	// ES : Conchita, Enrique, Lucia
-	// MX : Mia.
-)
-
-func Speak(text string) string {
-	return "<speak>" + text + "</speak>"
-}
-
-// UseVoice wraps text in tags using a specific voice.
-func UseVoice(voice, text string) string {
-	return `<voice name="` + voice + `">` + text + `</voice>`
-}
-
-// UseVoiceLang wraps text in tags using a specific voice and language.
-func UseVoiceLang(voice, language, text string) string {
-	return `<voice name="` + voice + `"><lang xml:lang="` + language + `">` + text + `</lang></voice>`
-}
-
 // DefaultRegistry is the standard registry used.
 var DefaultRegistry = NewRegistry()
 

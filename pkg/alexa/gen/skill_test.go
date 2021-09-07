@@ -6,6 +6,7 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/ssml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -42,14 +43,14 @@ var enUS = &l10n.Locale{
 		"MyIntent_Samples":                 {"say one", "say two"},
 		"MyIntent_Title":                   {"Title"},
 		"MyIntent_Text":                    {"Text1", "Text2"},
-		"MyIntent_SSML":                    {l10n.Speak("SSML one"), l10n.Speak("SSML two")},
+		"MyIntent_SSML":                    {ssml.Speak("SSML one"), ssml.Speak("SSML two")},
 		"SlotIntent_Samples":               {"what about slot {SlotName}"},
 		"SlotIntent_Title":                 {"Test intent with slot"},
 		"SlotIntent_Text":                  {"it seems to work"},
 		"SlotIntent_SlotName_Samples":      {"of {SlotName}", "{SlotName}"},
 		"SlotIntent_SlotName_Elicit_Text":  {"Which slot did you mean?", "I did not understand, which slot?"},
-		"SlotIntent_SlotName_Elicit_SSML":  {l10n.Speak("I'm sorry, which slot did you mean?")},
-		"SlotIntent_SlotName_Confirm_SSML": {l10n.Speak("Are you sure you know what you're doing?")},
+		"SlotIntent_SlotName_Elicit_SSML":  {ssml.Speak("I'm sorry, which slot did you mean?")},
+		"SlotIntent_SlotName_Confirm_SSML": {ssml.Speak("Are you sure you know what you're doing?")},
 		// Types
 		"MyType_Values": {"Value 1", "Value 2"},
 	},

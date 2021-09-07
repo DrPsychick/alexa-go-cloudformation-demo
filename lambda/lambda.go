@@ -287,7 +287,7 @@ func handleAWSStatus(app Application, sb *gen.SkillBuilder) alexa.Handler { //no
 // TODO: generic ApplicationResponse!
 // you could register objects with the mux that handle an error
 // you would then call them one by one and if they return true, you stop handling
-// this would be the simplest way
+// this would be the simplest way.
 func handleError(b *alexa.ResponseBuilder, r *alexa.RequestEnvelope, err error) bool { //nolint:funlen
 	var resp alfalfa.ApplicationResponse
 	// locale error is already handled (err will not be nil)
