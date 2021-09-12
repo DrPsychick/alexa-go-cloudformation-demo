@@ -99,7 +99,7 @@ func CheckForLocaleError(loc l10n.LocaleInstance) error {
 		return nil
 	}
 
-	lastErr := errs[len(errs)-1]
+	lastErr := errs[len(errs)-1] //nolint:ifshort
 	var l10nErr l10n.LocaleError
 	if errors.As(lastErr, &l10nErr) {
 		return TranslationError{l10nErr.GetLocale(), l10nErr.GetKey()}
