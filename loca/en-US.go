@@ -49,11 +49,19 @@ var enUS = &l10n.Locale{
 		l10n.KeyErrorLocaleNotFoundSSML: {
 			ssml.Speak("The locale '%s' is not supported."),
 		},
+		l10n.KeyErrorTranslationTitle: {"Translation missing"},
+		l10n.KeyErrorTranslationText:  {"There was an error in translation. The developer is informed."},
+		l10n.KeyErrorTranslationSSML: {ssml.Speak(
+			"An error occurred during translation. The developer gets informed about this.",
+		)},
 		l10n.KeyErrorNoTranslationTitle: {"Translation missing"},
 		l10n.KeyErrorNoTranslationText:  {"No translation found for '%s'!"},
 		l10n.KeyErrorNoTranslationSSML: {
 			ssml.Speak("No translation found for '%s'!"),
 		},
+		l10n.KeyErrorMissingPlaceholderTitle: {"Placeholder missing"},
+		l10n.KeyErrorMissingPlaceholderText:  {"Placeholder missing in '%s'!"},
+		l10n.KeyErrorMissingPlaceholderSSML:  {ssml.Speak("Placeholder missing in %s!")},
 
 		// Type values
 		TypeAreaValues:   {"Europe", "North America", "Asia Pacific", "South America"},
@@ -74,10 +82,12 @@ var enUS = &l10n.Locale{
 		},
 
 		// default intents
-		StopTitle: {"Ending"},
-		Stop:      {"End.", "Good bye.", "See U!"},
-		HelpTitle: {"Help"},
-		Help:      {"Try saying 'here we go' or 'go ahead'"},
+		l10n.KeyStopTitle: {"Ending"},
+		l10n.KeyStopText:  {"End.", "Good bye.", "See U!"},
+		l10n.KeyStopSSML:  {ssml.Speak("Bye."), ssml.Speak("Ok, I'll stop.")},
+		l10n.KeyHelpTitle: {"Help"},
+		l10n.KeyHelpText:  {"Try saying 'here we go' or 'go ahead'"},
+		l10n.KeyHelpSSML:  {ssml.Speak("Try saying 'here we go' or 'go ahead'")},
 
 		// Intent: "DemoIntent"
 		DemoIntentSamples: {"here we go", "go ahead"},

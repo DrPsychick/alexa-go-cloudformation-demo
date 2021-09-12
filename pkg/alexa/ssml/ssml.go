@@ -64,7 +64,7 @@ func UseEmotion(name AmazonEmotion, intensity AmazonEmotionIntensity, text strin
 
 // UseAudio uses an URL for an MP3 file to play.
 // https://developer.amazon.com/en-US/docs/alexa/custom-skills/speech-synthesis-markup-language-ssml-reference.html#audio
-// <audio src="soundbank://soundlibrary/transportation/amzn_sfx_car_accelerate_01" />
+// <audio src="soundbank://soundlibrary/transportation/amzn_sfx_car_accelerate_01" />.
 func UseAudio(src string) string {
 	return `<audio src="` + src + `"/>`
 }

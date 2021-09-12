@@ -1,4 +1,4 @@
-package alexa
+package skill
 
 import (
 	"encoding/json"
