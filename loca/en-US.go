@@ -68,15 +68,15 @@ var enUS = &l10n.Locale{
 		TypeRegionValues: {"Frankfurt", "Ireland", "London", "Paris", "Stockholm", "North Virginia"},
 
 		// Launch request
-		LaunchTitle: {
+		l10n.KeyLaunchTitle: {
 			"Greeting",
 		},
-		LaunchText: {
+		l10n.KeyLaunchText: {
 			"Hello!",
 			"Hi!",
 			"Yes?",
 		},
-		LaunchSSML: {
+		l10n.KeyLaunchSSML: {
 			ssml.Speak("<voice name=\"Marlene\">Hello!</voice>"),
 			ssml.Speak("<emphasis level=\"strong\">Hi!</emphasis>"),
 		},

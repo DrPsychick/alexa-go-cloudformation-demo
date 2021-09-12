@@ -34,37 +34,47 @@ var deDE = &l10n.Locale{
 		l10n.KeyErrorLocaleNotFoundSSML: {
 			ssml.Speak("Die Sprache '%s' wird nicht unterstützt."),
 		},
+		l10n.KeyErrorTranslationTitle: {"Übersetzung fehlt"},
+		l10n.KeyErrorTranslationText:  {"Es gab einen Fehler in der Übersetzung. Der Entwickler wurde informiert."},
+		l10n.KeyErrorTranslationSSML: {ssml.Speak(
+			"Bei der Übersetzung ist ein Fehler aufgetreten. Der Entwickler wurde darüber informiert.",
+		)},
 		l10n.KeyErrorNoTranslationTitle: {"Übersetzung fehlt"},
 		l10n.KeyErrorNoTranslationText:  {"Keine Übersetzung für '%s' gefunden!"},
 		l10n.KeyErrorNoTranslationSSML: {
 			ssml.Speak("Keine Übersetzung für '%s' gefunden!"),
 		},
+		l10n.KeyErrorMissingPlaceholderTitle: {"Platzhalter fehlt"},
+		l10n.KeyErrorMissingPlaceholderText:  {"Ein Platzhalter fehlt in '%s'!"},
+		l10n.KeyErrorMissingPlaceholderSSML:  {ssml.Speak("Der Platzhalter fehlt in %s!")},
 
 		// Type values
 		TypeAreaValues:   {"Europa", "Nordamerika", "Südamerika", "Asien"},
 		TypeRegionValues: {"Frankfurt", "Irland", "London", "Paris", "Stockholm", "Nord Virginia"},
 
 		// Launch request
-		LaunchTitle: {
+		l10n.KeyLaunchTitle: {
 			"Begrüßung",
 			"Willkommen",
 		},
-		LaunchText: {
+		l10n.KeyLaunchText: {
 			"Hallo!",
 			"Guten Tag!",
 			"Willkommen bei der Voice Demo!",
 		},
-		LaunchSSML: {
+		l10n.KeyLaunchSSML: {
 			ssml.Speak(ssml.UseVoice("Marlene", "Hallo!")),
 			ssml.Speak("Guten <emphasis level=\"strong\">Tag!</emphasis>"),
 			ssml.Speak(ssml.UseVoice("Marlene", "Willkommen bei der <emphasis level=\"strong\">Voice</emphasis> Demo!")),
 		},
 
 		// Intent "AMAZON.StopIntent"
-		StopTitle: {"Ende Gelände"},
-		Stop:      {"Ende.", "Tschüss.", "Bis bald."},
-		HelpTitle: {"Hilfe"},
-		Help:      {"Probier mal 'hopp hopp' oder 'sag etwas' oder 'erzähl mir was'"},
+		l10n.KeyStopTitle: {"Ende Gelände"},
+		l10n.KeyStopText:  {"Ende.", "Tschüss.", "Bis bald."},
+		l10n.KeyStopSSML:  {ssml.Speak("Ok, bis bald.")},
+		l10n.KeyHelpTitle: {"Hilfe"},
+		l10n.KeyHelpText:  {"Probier mal 'hopp hopp' oder 'sag etwas' oder 'erzähl mir was'"},
+		l10n.KeyHelpSSML:  {ssml.Speak("Versuch' es mit 'hopp hopp' oder 'sag etwas'")},
 
 		// Intent: "DemoIntent"
 		DemoIntentSamples: {"schiess' los", "auf geht's", "hopp hopp"},

@@ -73,9 +73,9 @@ func (a *Application) Stop(l l10n.LocaleInstance) (alexa.Response, error) {
 // SSMLDemo is the intent to demonstrate SSML output with Alexa.
 func (a *Application) SSMLDemo(l l10n.LocaleInstance) (alexa.Response, error) {
 	return alexa.Response{
-		Title:  l.GetAny(loca.LaunchTitle),
-		Text:   l.GetAny(loca.LaunchText),
-		Speech: l.GetAny(loca.LaunchSSML),
+		Title:  l.GetAny(l10n.KeyLaunchTitle),
+		Text:   l.GetAny(l10n.KeyLaunchText),
+		Speech: l.GetAny(l10n.KeyLaunchSSML),
 		End:    true,
 	}, nil
 }

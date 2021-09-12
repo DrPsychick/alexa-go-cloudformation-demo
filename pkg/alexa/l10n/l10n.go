@@ -55,15 +55,16 @@ const (
 	KeyErrorMissingPlaceholderTitle string = "Error_MissingPlaceholder_Title"
 	KeyErrorMissingPlaceholderText  string = "Error_MissingPlaceholder_Text"
 	KeyErrorMissingPlaceholderSSML  string = "Error_MissingPlaceholder_SSML"
-	KeyLaunchTitle                  string = "Launch_Title"
-	KeyLaunchText                   string = "Launch_Text"
-	KeyLaunchSSML                   string = "Launch_SSML"
-	KeyHelpTitle                    string = "Help_Title"
-	KeyHelpText                     string = "Help_Text"
-	KeyHelpSSML                     string = "Help_SSML"
-	KeyStopTitle                    string = "Stop_Title"
-	KeyStopText                     string = "Stop_Text"
-	KeyStopSSML                     string = "Stop_SSML"
+	// default intents.
+	KeyLaunchTitle string = "Launch_Title"
+	KeyLaunchText  string = "Launch_Text"
+	KeyLaunchSSML  string = "Launch_SSML"
+	KeyHelpTitle   string = "Help_Title"
+	KeyHelpText    string = "Help_Text"
+	KeyHelpSSML    string = "Help_SSML"
+	KeyStopTitle   string = "Stop_Title"
+	KeyStopText    string = "Stop_Text"
+	KeyStopSSML    string = "Stop_SSML"
 )
 
 func init() {
