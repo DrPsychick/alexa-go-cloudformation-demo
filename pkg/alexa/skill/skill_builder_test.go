@@ -1,11 +1,11 @@
-package gen_test
+package skill_test
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/ssml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -42,14 +42,14 @@ var enUS = &l10n.Locale{
 		"MyIntent_Samples":                 {"say one", "say two"},
 		"MyIntent_Title":                   {"Title"},
 		"MyIntent_Text":                    {"Text1", "Text2"},
-		"MyIntent_SSML":                    {l10n.Speak("SSML one"), l10n.Speak("SSML two")},
+		"MyIntent_SSML":                    {ssml.Speak("SSML one"), ssml.Speak("SSML two")},
 		"SlotIntent_Samples":               {"what about slot {SlotName}"},
 		"SlotIntent_Title":                 {"Test intent with slot"},
 		"SlotIntent_Text":                  {"it seems to work"},
 		"SlotIntent_SlotName_Samples":      {"of {SlotName}", "{SlotName}"},
 		"SlotIntent_SlotName_Elicit_Text":  {"Which slot did you mean?", "I did not understand, which slot?"},
-		"SlotIntent_SlotName_Elicit_SSML":  {l10n.Speak("I'm sorry, which slot did you mean?")},
-		"SlotIntent_SlotName_Confirm_SSML": {l10n.Speak("Are you sure you know what you're doing?")},
+		"SlotIntent_SlotName_Elicit_SSML":  {ssml.Speak("I'm sorry, which slot did you mean?")},
+		"SlotIntent_SlotName_Confirm_SSML": {ssml.Speak("Are you sure you know what you're doing?")},
 		// Types
 		"MyType_Values": {"Value 1", "Value 2"},
 	},
@@ -69,9 +69,9 @@ func TestSetup(t *testing.T) {
 
 // SkillBuilder Build with registry is covered.
 func TestSkillBuilder_WithLocaleRegistry(t *testing.T) {
-	sb := gen.NewSkillBuilder().
+	sb := skill.NewSkillBuilder().
 		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryKnowledgeAndTrivia)
+		WithCategory(skill.CategoryKnowledgeAndTrivia)
 
 	_, err := sb.Build()
 	assert.NoError(t, err)
@@ -81,9 +81,9 @@ func TestSkillBuilder_WithLocaleRegistry(t *testing.T) {
 // SkillBuilder Lookup locale keys is covered.
 func TestSkillBuilder_LocaleKeyLookups(t *testing.T) {
 	// setup
-	sb := gen.NewSkillBuilder().
+	sb := skill.NewSkillBuilder().
 		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryNews)
+		WithCategory(skill.CategoryNews)
 	us := enUS.TextSnippets
 
 	// takes default keys
@@ -103,8 +103,8 @@ func TestSkillBuilder_LocaleKeyLookups(t *testing.T) {
 // SkillBuilder Defining default locale is covered.
 func TestSkillBuilder_DefineDefaultLocale(t *testing.T) {
 	// setup: skill with first local as default
-	sb := gen.NewSkillBuilder().
-		WithCategory(alexa.CategoryDeviceTracking).
+	sb := skill.NewSkillBuilder().
+		WithCategory(skill.CategoryDeviceTracking).
 		AddLocale("en-US").
 		WithDefaultLocaleTestingInstructions("test it")
 	sb.Locale("en-US").
@@ -155,9 +155,9 @@ func TestSkillBuilder_DefineDefaultLocale(t *testing.T) {
 // SkillBuilder Defining countries is covered.
 func TestSkillBuilder_DefineCountries(t *testing.T) {
 	// setup
-	sb := gen.NewSkillBuilder().
+	sb := skill.NewSkillBuilder().
 		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryTvGuides)
+		WithCategory(skill.CategoryTvGuides)
 
 	// add
 	sb.AddCountry("US").AddCountries([]string{"US", "CA"})
@@ -177,14 +177,14 @@ func TestSkillBuilder_DefineCountries(t *testing.T) {
 // SkillBuilder Privacy flags are covered.
 func TestSkillBuilder_WithPrivacyFlag(t *testing.T) {
 	// setup
-	sb := gen.NewSkillBuilder().
+	sb := skill.NewSkillBuilder().
 		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryUnitConverters).
-		WithPrivacyFlag(gen.FlagIsExportCompliant, true).
-		WithPrivacyFlag(gen.FlagContainsAds, true).
-		WithPrivacyFlag(gen.FlagIsChildDirected, true).
-		WithPrivacyFlag(gen.FlagAllowsPurchases, true).
-		WithPrivacyFlag(gen.FlagUsesPersonalInfo, true)
+		WithCategory(skill.CategoryUnitConverters).
+		WithPrivacyFlag(skill.FlagIsExportCompliant, true).
+		WithPrivacyFlag(skill.FlagContainsAds, true).
+		WithPrivacyFlag(skill.FlagIsChildDirected, true).
+		WithPrivacyFlag(skill.FlagAllowsPurchases, true).
+		WithPrivacyFlag(skill.FlagUsesPersonalInfo, true)
 
 	sk, err := sb.Build()
 	assert.NoError(t, err)
@@ -198,7 +198,7 @@ func TestSkillBuilder_WithPrivacyFlag(t *testing.T) {
 
 // SkillBuilder Model is covered.
 func TestSkillBuilder_WithModel(t *testing.T) {
-	sb := gen.NewSkillBuilder().
+	sb := skill.NewSkillBuilder().
 		WithLocaleRegistry(registry).
 		WithModel()
 
@@ -213,7 +213,7 @@ func TestSkillBuilder_WithModel(t *testing.T) {
 // SkillBuilder Missing elements are covered.
 func TestSkillBuilder_ErrorsIfElementsAreMissing(t *testing.T) {
 	// setup
-	sb := gen.NewSkillBuilder().
+	sb := skill.NewSkillBuilder().
 		AddLocale("en-US")
 
 	// no category
@@ -224,8 +224,8 @@ func TestSkillBuilder_ErrorsIfElementsAreMissing(t *testing.T) {
 // SkillBuilder To many elements are covered.
 func TestSkillBuilder_ErrorsIfTooManyElements(t *testing.T) {
 	// setup
-	sb := gen.NewSkillBuilder().
-		WithCategory(alexa.CategoryFriendsAndFamily).
+	sb := skill.NewSkillBuilder().
+		WithCategory(skill.CategoryFriendsAndFamily).
 		AddLocale("en-US").
 		WithDefaultLocaleTestingInstructions("test it")
 	sb.Locale("en-US").
@@ -264,8 +264,8 @@ func TestSkillBuilder_ErrorsIfTooManyElements(t *testing.T) {
 
 // SkillBuilder Incomplete locale errors are covered.
 func TestSkillBuilder_ErrorsIfLocaleIsIncomplete(t *testing.T) {
-	sb := gen.NewSkillBuilder().
-		WithCategory(alexa.CategoryCookingAndRecipe)
+	sb := skill.NewSkillBuilder().
+		WithCategory(skill.CategoryCookingAndRecipe)
 
 	// no locales
 	_, err := sb.Build()
@@ -308,38 +308,38 @@ func TestSkillBuilder_ErrorsIfLocaleIsIncomplete(t *testing.T) {
 
 // SkillBuilder Adding locale twice is covered.
 func TestSkillBuilder_ErrorsAddingLocaleTwice(t *testing.T) {
-	sb := gen.NewSkillBuilder().
-		WithCategory(alexa.CategoryKnowledgeAndTrivia).
+	sb := skill.NewSkillBuilder().
+		WithCategory(skill.CategoryKnowledgeAndTrivia).
 		AddLocale("en-US").
 		WithDefaultLocaleTestingInstructions("test it...").
 		AddLocale("en-US")
-	assert.IsType(t, &gen.SkillBuilder{}, sb)
+	assert.IsType(t, &skill.SkillBuilder{}, sb)
 	slb := sb.Locale("en-US")
-	assert.IsType(t, &gen.SkillLocaleBuilder{}, slb)
+	assert.IsType(t, &skill.SkillLocaleBuilder{}, slb)
 	_, err := sb.Build()
 	assert.Error(t, err)
 }
 
 // SkillBuilder No default locale is covered.
 func TestSkillBuilder_ErrorsIfNoDefaultLocale(t *testing.T) {
-	sb := gen.NewSkillBuilder().WithDefaultLocale("fr-FR")
+	sb := skill.NewSkillBuilder().WithDefaultLocale("fr-FR")
 	_, err := sb.Build()
 	assert.Error(t, err)
 
-	sb = gen.NewSkillBuilder().WithDefaultLocaleTestingInstructions("foo bar")
+	sb = skill.NewSkillBuilder().WithDefaultLocaleTestingInstructions("foo bar")
 	_, err = sb.Build()
 	assert.Error(t, err)
 
-	sb = gen.NewSkillBuilder()
+	sb = skill.NewSkillBuilder()
 	slb := sb.Locale("fr-FR")
 	_, err = sb.Build()
 	assert.Error(t, err)
-	assert.Equal(t, &gen.SkillLocaleBuilder{}, slb)
+	assert.Equal(t, &skill.SkillLocaleBuilder{}, slb)
 }
 
 // SkillBuilder No model is covered.
 func TestSkillBuilder_ErrorsIfNoModel(t *testing.T) {
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	_, err := sb.BuildModels()
 	assert.Error(t, err)
 
@@ -367,9 +367,9 @@ func TestSkillBuilder_ErrorsIfSecondLocaleIsIncomplete(t *testing.T) {
 	}
 	err := registry.Register(deDE)
 	assert.NoError(t, err)
-	sb := gen.NewSkillBuilder().
+	sb := skill.NewSkillBuilder().
 		WithLocaleRegistry(registry).
-		WithCategory(alexa.CategoryNews)
+		WithCategory(skill.CategoryNews)
 
 	// some keys missing for 'de-DE'
 	_, err = sb.Build()
@@ -379,7 +379,7 @@ func TestSkillBuilder_ErrorsIfSecondLocaleIsIncomplete(t *testing.T) {
 // SkillLocaleBuilder No locale is covered.
 func TestSkillLocaleBuilder_ErrorsIfNoLocale(t *testing.T) {
 	// overwrite with empty registry
-	l := gen.NewSkillLocaleBuilder("en-US").
+	l := skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry())
 	_, err := l.BuildPublishingLocale()
 	assert.Error(t, err)
@@ -388,62 +388,62 @@ func TestSkillLocaleBuilder_ErrorsIfNoLocale(t *testing.T) {
 	assert.Equal(t, err, err2)
 
 	// each setup fails (sets error on SkillLocaleBuilder)
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleName("foo")
 	_, err = l.BuildPublishingLocale()
 	assert.Error(t, err)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleSummary("foo")
 	_, err2 = l.BuildPublishingLocale()
 	assert.Error(t, err2)
 	assert.Equal(t, err, err2)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleDescription("foo")
 	_, err2 = l.BuildPublishingLocale()
 	assert.Error(t, err2)
 	assert.Equal(t, err, err2)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleExamples([]string{"foo", "bar"})
 	_, err2 = l.BuildPublishingLocale()
 	assert.Error(t, err2)
 	assert.Equal(t, err, err2)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleKeywords([]string{"foo", "bar"})
 	_, err2 = l.BuildPublishingLocale()
 	assert.Error(t, err2)
 	assert.Equal(t, err, err2)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleSmallIcon("https://foo")
 	_, err2 = l.BuildPublishingLocale()
 	assert.Error(t, err2)
 	assert.Equal(t, err, err2)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleLargeIcon("https://bar")
 	_, err2 = l.BuildPublishingLocale()
 	assert.Error(t, err2)
 	assert.Equal(t, err, err2)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocalePrivacyURL("https://foo")
 	_, err2 = l.BuildPublishingLocale()
 	assert.Error(t, err2)
 	assert.Equal(t, err, err2)
 
-	l = gen.NewSkillLocaleBuilder("en-US").
+	l = skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(l10n.NewRegistry()).
 		WithLocaleTermsURL("https://bar")
 	pl, err := l.BuildPublishingLocale()
@@ -461,7 +461,7 @@ func TestSkillLocaleBuilder_ErrorsIfNoLocale(t *testing.T) {
 // SkillLocaleBuilder Build with registry is covered.
 func TestSkillLocaleBuilder_WithLocaleRegistry(t *testing.T) {
 	// setup
-	slb := gen.NewSkillLocaleBuilder("en-US").
+	slb := skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(registry)
 
 	// builds without errors
@@ -475,7 +475,7 @@ func TestSkillLocaleBuilder_WithLocaleRegistry(t *testing.T) {
 // SkillLocaleBuilder Lookup locale keys is covered.
 func TestSkillLocaleBuilder_LocaleKeyLookups(t *testing.T) {
 	// setup
-	slb := gen.NewSkillLocaleBuilder("en-US").
+	slb := skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleRegistry(registry)
 	us := enUS.TextSnippets
 
@@ -529,7 +529,7 @@ func TestSkillLocaleBuilder_WithLocale(t *testing.T) {
 	// setup
 	us := enUS.TextSnippets
 	// set translations of default keys
-	slb := gen.NewSkillLocaleBuilder("en-US").
+	slb := skill.NewSkillLocaleBuilder("en-US").
 		WithLocaleName(us["Name"][0]).
 		WithLocaleSummary(us["Summary"][0]).
 		WithLocaleDescription(us["Description"][0]).
@@ -557,7 +557,7 @@ func TestSkillLocaleBuilder_WithLocale(t *testing.T) {
 }
 
 // helper to compare two builds
-func testBuilderImmutability(s *gen.SkillBuilder) error {
+func testBuilderImmutability(s *skill.SkillBuilder) error {
 	s1, err := s.Build()
 	if err != nil {
 		return err
@@ -582,7 +582,7 @@ func testBuilderImmutability(s *gen.SkillBuilder) error {
 }
 
 // helper to compare two builds
-func testLocalBuilderImmutability(l *gen.SkillLocaleBuilder) error {
+func testLocalBuilderImmutability(l *skill.SkillLocaleBuilder) error {
 	pbl1, err := l.BuildPublishingLocale()
 	if err != nil {
 		return err

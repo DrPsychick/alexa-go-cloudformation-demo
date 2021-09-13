@@ -1,9 +1,8 @@
-package gen
+package skill
 
 import (
 	"fmt"
 
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
@@ -23,10 +22,10 @@ type IntentProvider interface {
 }
 
 // SkillBuilder helps to build the SKILL.json.
-type SkillBuilder struct {
+type SkillBuilder struct { //nolint:revive
 	error        error
 	registry     l10n.LocaleRegistry
-	category     alexa.Category
+	category     Category
 	countries    []string
 	instructions string
 	privacyFlags map[string]bool
@@ -52,7 +51,7 @@ func (s *SkillBuilder) WithLocaleRegistry(registry l10n.LocaleRegistry) *SkillBu
 }
 
 // WithCategory sets the category of the skill.
-func (s *SkillBuilder) WithCategory(category alexa.Category) *SkillBuilder {
+func (s *SkillBuilder) WithCategory(category Category) *SkillBuilder {
 	s.category = category
 	return s
 }
@@ -148,7 +147,7 @@ func (s *SkillBuilder) Model() *modelBuilder {
 }
 
 // Build builds an alexa.Skill object.
-func (s *SkillBuilder) Build() (*alexa.Skill, error) { //nolint:funlen,cyclop
+func (s *SkillBuilder) Build() (*Skill, error) { //nolint:funlen,cyclop
 	if s.error != nil {
 		return nil, s.error
 	}
@@ -169,10 +168,10 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) { //nolint:funlen,cyclop
 		return nil, fmt.Errorf("no default locale defined")
 	}
 
-	skill := &alexa.Skill{
-		Manifest: alexa.Manifest{
+	skill := &Skill{
+		Manifest: Manifest{
 			Version:    "1.0",
-			Publishing: alexa.Publishing{},
+			Publishing: Publishing{},
 		},
 	}
 	if s.category == "" {
@@ -191,10 +190,10 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) { //nolint:funlen,cyclop
 	skill.Manifest.Publishing.TestingInstructions = dl.Get(s.instructions)
 
 	// TODO: Permissions are required.
-	skill.Manifest.Permissions = []alexa.Permission{}
+	skill.Manifest.Permissions = []Permission{}
 
 	// PrivacyAndCompliance is required.
-	skill.Manifest.Privacy = &alexa.Privacy{}
+	skill.Manifest.Privacy = &Privacy{}
 	if s.privacyFlags[FlagIsExportCompliant] {
 		skill.Manifest.Privacy.IsExportCompliant = true
 	}
@@ -212,8 +211,8 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) { //nolint:funlen,cyclop
 	}
 
 	// Add elements for every locale.
-	skill.Manifest.Publishing.Locales = map[string]alexa.LocaleDef{}
-	skill.Manifest.Privacy.Locales = map[string]alexa.PrivacyLocaleDef{}
+	skill.Manifest.Publishing.Locales = map[string]LocaleDef{}
+	skill.Manifest.Privacy.Locales = map[string]PrivacyLocaleDef{}
 	for n, lb := range s.locales {
 		l1, err := lb.BuildPublishingLocale()
 		if err != nil {
@@ -232,7 +231,7 @@ func (s *SkillBuilder) Build() (*alexa.Skill, error) { //nolint:funlen,cyclop
 }
 
 // BuildModels builds an alexa.Model for each locale.
-func (s *SkillBuilder) BuildModels() (map[string]*alexa.Model, error) {
+func (s *SkillBuilder) BuildModels() (map[string]*Model, error) {
 	if s.error != nil {
 		return nil, s.error
 	}
@@ -243,7 +242,7 @@ func (s *SkillBuilder) BuildModels() (map[string]*alexa.Model, error) {
 }
 
 // SkillLocaleBuilder represents elements for a specific locale.
-type SkillLocaleBuilder struct {
+type SkillLocaleBuilder struct { //nolint:revive
 	error            error
 	registry         l10n.LocaleRegistry
 	locale           string
@@ -442,13 +441,13 @@ func (l *SkillLocaleBuilder) WithLocaleTermsURL(termsURL string) *SkillLocaleBui
 }
 
 // BuildPublishingLocale builds "publishingInformation" entry for the locale.
-func (l *SkillLocaleBuilder) BuildPublishingLocale() (alexa.LocaleDef, error) {
+func (l *SkillLocaleBuilder) BuildPublishingLocale() (LocaleDef, error) {
 	if l.error != nil {
-		return alexa.LocaleDef{}, l.error
+		return LocaleDef{}, l.error
 	}
 	loc, err := l.registry.Resolve(l.locale)
 	if err != nil {
-		return alexa.LocaleDef{}, err
+		return LocaleDef{}, err
 	}
 	// sanity checks
 	if loc.Get(l.skillName) == "" ||
@@ -456,18 +455,18 @@ func (l *SkillLocaleBuilder) BuildPublishingLocale() (alexa.LocaleDef, error) {
 		loc.Get(l.skillDescription) == "" ||
 		loc.Get(l.skillSmallIcon) == "" ||
 		loc.Get(l.skillLargeIcon) == "" {
-		return alexa.LocaleDef{}, fmt.Errorf(
+		return LocaleDef{}, fmt.Errorf(
 			"skill requires a name, description, summary, small icon and large icon... but for '%s' at least one was empty",
 			l.locale,
 		)
 	}
 	if len(loc.GetAll(l.skillExamples)) > 3 {
-		return alexa.LocaleDef{}, fmt.Errorf("only 3 examplePhrases are allowed (%s)", l.locale)
+		return LocaleDef{}, fmt.Errorf("only 3 examplePhrases are allowed (%s)", l.locale)
 	}
 	if len(loc.GetAll(l.skillKeywords)) > 3 {
-		return alexa.LocaleDef{}, fmt.Errorf("only 3 keywords are allowed (%s)", l.locale)
+		return LocaleDef{}, fmt.Errorf("only 3 keywords are allowed (%s)", l.locale)
 	}
-	return alexa.LocaleDef{
+	return LocaleDef{
 		Name:         loc.Get(l.skillName),
 		Summary:      loc.Get(l.skillSummary),
 		Description:  loc.Get(l.skillDescription),
@@ -479,22 +478,22 @@ func (l *SkillLocaleBuilder) BuildPublishingLocale() (alexa.LocaleDef, error) {
 }
 
 // BuildPrivacyLocale builds "privacyAndCompliance" section for the locale.
-func (l *SkillLocaleBuilder) BuildPrivacyLocale() (alexa.PrivacyLocaleDef, error) {
+func (l *SkillLocaleBuilder) BuildPrivacyLocale() (PrivacyLocaleDef, error) {
 	if l.error != nil {
-		return alexa.PrivacyLocaleDef{}, l.error
+		return PrivacyLocaleDef{}, l.error
 	}
 	loc, err := l.registry.Resolve(l.locale)
 	if err != nil {
-		return alexa.PrivacyLocaleDef{}, err
+		return PrivacyLocaleDef{}, err
 	}
-	p := alexa.PrivacyLocaleDef{
+	p := PrivacyLocaleDef{
 		PrivacyPolicyURL: loc.Get(l.skillPrivacyURL),
 	}
 	// seems not (yet) supported ?!?
 	// Error: privacyAndCompliance.locales.en-US
 	// - object instance has properties which are not allowed by the schema: ["termsOfUse"]
 	if loc.Get(l.skillTermsURL) != "" {
-		return alexa.PrivacyLocaleDef{}, fmt.Errorf("'termsOfUse' makes Skill deployment fail! (%s)", l.locale)
+		return PrivacyLocaleDef{}, fmt.Errorf("'termsOfUse' makes Skill deployment fail! (%s)", l.locale)
 		// p.TermsOfUse = loc.Get(l.skillTermsURL)
 	}
 	return p, nil

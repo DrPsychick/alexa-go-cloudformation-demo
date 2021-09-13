@@ -1,10 +1,9 @@
-// Package gen contains the builders for the skill manifest and interaction models.
-package gen
+// Package skill contains the builders for the skill manifest and interaction models.
+package skill
 
 import (
 	"fmt"
 
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 )
 
@@ -24,7 +23,7 @@ func NewModelBuilder() *modelBuilder { //nolint:revive
 	return &modelBuilder{
 		registry:   l10n.NewRegistry(),
 		invocation: l10n.KeySkillInvocation,
-		delegation: alexa.DelegationAlways,
+		delegation: DelegationAlways,
 		intents:    map[string]*modelIntentBuilder{},
 		types:      map[string]*modelTypeBuilder{},
 		prompts:    map[string]*ModelPromptBuilder{},
@@ -45,7 +44,7 @@ func (m *modelBuilder) WithInvocation(invocation string) *modelBuilder {
 
 // WithDelegationStrategy sets the model delegation strategy.
 func (m *modelBuilder) WithDelegationStrategy(strategy string) *modelBuilder {
-	if strategy != alexa.DelegationAlways && strategy != alexa.DelegationSkillResponse {
+	if strategy != DelegationAlways && strategy != DelegationSkillResponse {
 		m.error = fmt.Errorf("unsupported 'delegation': %s", strategy)
 		return m
 	}
@@ -188,11 +187,11 @@ func (m *modelBuilder) ValidationPrompt(intent, slot string) *ModelPromptBuilder
 }
 
 // Build generates a Model for each locale.
-func (m *modelBuilder) Build() (map[string]*alexa.Model, error) {
+func (m *modelBuilder) Build() (map[string]*Model, error) {
 	if m.error != nil {
 		return nil, m.error
 	}
-	ams := make(map[string]*alexa.Model)
+	ams := make(map[string]*Model)
 
 	// build model for each locale registered
 	for _, l := range m.registry.GetLocales() {
@@ -206,28 +205,28 @@ func (m *modelBuilder) Build() (map[string]*alexa.Model, error) {
 }
 
 // BuildLocale generates a Model for the locale.
-func (m *modelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
+func (m *modelBuilder) BuildLocale(locale string) (*Model, error) {
 	if m.error != nil {
 		return nil, m.error
 	}
 	loc, err := m.registry.Resolve(locale)
 	if err != nil {
-		return &alexa.Model{}, err
+		return &Model{}, err
 	}
 	// create basic model
-	am := &alexa.Model{
-		Model: alexa.InteractionModel{
-			Language: alexa.LanguageModel{
+	am := &Model{
+		Model: InteractionModel{
+			Language: LanguageModel{
 				Invocation: loc.Get(m.invocation),
 			},
 		},
 	}
 
-	mts := []alexa.ModelType{}
+	mts := []ModelType{}
 	for _, t := range m.types {
 		mt, err := t.Build(locale)
 		if err != nil {
-			return &alexa.Model{}, err
+			return &Model{}, err
 		}
 		mts = append(mts, mt)
 	}
@@ -235,25 +234,25 @@ func (m *modelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 
 	// add prompts - only if we have intents with slots
 	// TODO: "Add...Prompt" should not fail, it should fail during build()!
-	am.Model.Prompts = []alexa.ModelPrompt{}
+	am.Model.Prompts = []ModelPrompt{}
 	for _, p := range m.prompts {
 		mp, err := p.BuildLocale(locale)
 		if err != nil {
-			return &alexa.Model{}, err
+			return &Model{}, err
 		}
 		am.Model.Prompts = append(am.Model.Prompts, mp)
 	}
 
 	// add intents
 	// TODO: ensure that slot types are defined, if not: fail
-	am.Model.Dialog = &alexa.Dialog{}
+	am.Model.Dialog = &Dialog{}
 	if m.delegation != "" {
 		am.Model.Dialog.Delegation = m.delegation
 	}
 	for _, i := range m.intents {
 		li, err := i.BuildLanguageIntent(locale)
 		if err != nil {
-			return &alexa.Model{}, err
+			return &Model{}, err
 		}
 		am.Model.Language.Intents = append(am.Model.Language.Intents, li)
 
@@ -261,7 +260,7 @@ func (m *modelBuilder) BuildLocale(locale string) (*alexa.Model, error) {
 		if len(i.slots) > 0 {
 			di, err := i.BuildDialogIntent(locale)
 			if err != nil {
-				return &alexa.Model{}, err
+				return &Model{}, err
 			}
 			am.Model.Dialog.Intents = append(am.Model.Dialog.Intents, di)
 		}
@@ -285,8 +284,8 @@ func NewModelIntentBuilder(name string) *modelIntentBuilder { //nolint:revive
 		registry:     l10n.NewRegistry(),
 		name:         name,
 		samplesName:  name + l10n.KeyPostfixSamples,
-		delegation:   alexa.DelegationAlways, // lets alexa or lambda handle the dialog for intent slots
-		confirmation: false,                  // should alexa ask to confirm the intent?
+		delegation:   DelegationAlways, // lets alexa or lambda handle the dialog for intent slots
+		confirmation: false,            // should alexa ask to confirm the intent?
 		slots:        map[string]*modelSlotBuilder{},
 	}
 }
@@ -329,7 +328,7 @@ func (i *modelIntentBuilder) Slot(name string) *modelSlotBuilder {
 
 // WithDelegation sets the dialog delegation for the intent.
 func (i *modelIntentBuilder) WithDelegation(d string) *modelIntentBuilder {
-	if d != alexa.DelegationAlways && d != alexa.DelegationSkillResponse {
+	if d != DelegationAlways && d != DelegationSkillResponse {
 		i.error = fmt.Errorf("unsupported 'delegation': %s", d)
 		return i
 	}
@@ -344,22 +343,22 @@ func (i *modelIntentBuilder) WithConfirmation(c bool) *modelIntentBuilder {
 }
 
 // BuildLanguageIntent generates a ModelIntent for the locale.
-func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelIntent, error) {
+func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (ModelIntent, error) {
 	loc, err := i.registry.Resolve(locale)
 	if err != nil {
-		return alexa.ModelIntent{}, err
+		return ModelIntent{}, err
 	}
 
-	mi := alexa.ModelIntent{
+	mi := ModelIntent{
 		Name:    i.name,
 		Samples: loc.GetAll(i.samplesName),
 	}
 
-	mss := []alexa.ModelSlot{}
+	mss := []ModelSlot{}
 	for _, s := range i.slots {
 		is, err := s.BuildIntentSlot(locale)
 		if err != nil {
-			return alexa.ModelIntent{}, err
+			return ModelIntent{}, err
 		}
 		mss = append(mss, is)
 	}
@@ -369,17 +368,17 @@ func (i *modelIntentBuilder) BuildLanguageIntent(locale string) (alexa.ModelInte
 }
 
 // BuildDialogIntent generates a DialogIntent for the locale.
-func (i *modelIntentBuilder) BuildDialogIntent(locale string) (alexa.DialogIntent, error) {
-	di := alexa.DialogIntent{
+func (i *modelIntentBuilder) BuildDialogIntent(locale string) (DialogIntent, error) {
+	di := DialogIntent{
 		Name:         i.name,
 		Delegation:   i.delegation,
 		Confirmation: i.confirmation,
 	}
-	dis := []alexa.DialogIntentSlot{}
+	dis := []DialogIntentSlot{}
 	for _, s := range i.slots {
 		ds, err := s.BuildDialogSlot(locale)
 		if err != nil {
-			return alexa.DialogIntent{}, err
+			return DialogIntent{}, err
 		}
 		dis = append(dis, ds)
 	}
@@ -479,12 +478,12 @@ func (s *modelSlotBuilder) WithValidationRule(t, prompt string, valuesKey ...str
 }
 
 // BuildIntentSlot generates a ModelSlot for the locale.
-func (s *modelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, error) {
+func (s *modelSlotBuilder) BuildIntentSlot(locale string) (ModelSlot, error) {
 	l, err := s.registry.Resolve(locale)
 	if err != nil {
-		return alexa.ModelSlot{}, err
+		return ModelSlot{}, err
 	}
-	ms := alexa.ModelSlot{
+	ms := ModelSlot{
 		Name: s.name,
 		Type: s.typeName,
 	}
@@ -493,11 +492,11 @@ func (s *modelSlotBuilder) BuildIntentSlot(locale string) (alexa.ModelSlot, erro
 }
 
 // BuildDialogSlot generates a DialogIntentSlot for the locale.
-func (s *modelSlotBuilder) BuildDialogSlot(locale string) (alexa.DialogIntentSlot, error) {
+func (s *modelSlotBuilder) BuildDialogSlot(locale string) (DialogIntentSlot, error) {
 	if _, err := s.registry.Resolve(locale); err != nil {
-		return alexa.DialogIntentSlot{}, err
+		return DialogIntentSlot{}, err
 	}
-	ds := alexa.DialogIntentSlot{
+	ds := DialogIntentSlot{
 		Name:         s.name,
 		Type:         s.typeName,
 		Confirmation: s.withConfirmation,
@@ -558,16 +557,16 @@ func (t *modelTypeBuilder) WithLocaleValues(locale string, values []string) *mod
 }
 
 // Build generates a ModelType.
-func (t *modelTypeBuilder) Build(locale string) (alexa.ModelType, error) {
+func (t *modelTypeBuilder) Build(locale string) (ModelType, error) {
 	loc, err := t.registry.Resolve(locale)
 	if err != nil {
-		return alexa.ModelType{}, err
+		return ModelType{}, err
 	}
-	tvs := []alexa.TypeValue{}
+	tvs := []TypeValue{}
 	for _, v := range loc.GetAll(t.valuesName) {
-		tvs = append(tvs, alexa.TypeValue{Name: alexa.NameValue{Value: v}})
+		tvs = append(tvs, TypeValue{Name: NameValue{Value: v}})
 	}
-	return alexa.ModelType{Name: t.name, Values: tvs}, nil
+	return ModelType{Name: t.name, Values: tvs}, nil
 }
 
 type modelValidationRulesBuilder struct {
@@ -608,8 +607,8 @@ func (v *modelValidationRulesBuilder) WithRule(t, p string, valuesKey ...string)
 	return v
 }
 
-func (v *modelValidationRulesBuilder) BuildRules(locale string) ([]alexa.SlotValidation, error) {
-	sv := []alexa.SlotValidation{}
+func (v *modelValidationRulesBuilder) BuildRules(locale string) ([]SlotValidation, error) {
+	sv := []SlotValidation{}
 	loc, err := v.registry.Resolve(locale)
 	if err != nil {
 		return sv, err
@@ -617,7 +616,7 @@ func (v *modelValidationRulesBuilder) BuildRules(locale string) ([]alexa.SlotVal
 
 	// create and append SlotValidations
 	for _, r := range v.rules {
-		val := alexa.SlotValidation{
+		val := SlotValidation{
 			Type:   r.validationType,
 			Prompt: r.prompt,
 		}
@@ -629,7 +628,7 @@ func (v *modelValidationRulesBuilder) BuildRules(locale string) ([]alexa.SlotVal
 		// TODO: implement value:
 		// https://developer.amazon.com/docs/smapi/interaction-model-schema.html#dialog_slot_validations
 		// types isInSet/isNotInSet/... require values
-		if (val.Type == alexa.ValidationTypeInSet || val.Type == alexa.ValidationTypeNotInSet) &&
+		if (val.Type == ValidationTypeInSet || val.Type == ValidationTypeNotInSet) &&
 			(val.Values == nil || len(val.Values) == 0) {
 			return sv, fmt.Errorf("validation type requires values (%s: %s)", locale, val.Prompt)
 		}
@@ -704,20 +703,20 @@ func (p *ModelPromptBuilder) Variation(varType string) *promptVariationsBuilder 
 }
 
 // BuildLocale generates a ModelPrompt for the locale.
-func (p *ModelPromptBuilder) BuildLocale(locale string) (alexa.ModelPrompt, error) {
+func (p *ModelPromptBuilder) BuildLocale(locale string) (ModelPrompt, error) {
 	if len(p.variations) == 0 {
-		return alexa.ModelPrompt{}, fmt.Errorf(
+		return ModelPrompt{}, fmt.Errorf(
 			"prompt '%s' requires variations (%s)",
 			p.id, locale)
 	}
-	mp := alexa.ModelPrompt{
+	mp := ModelPrompt{
 		ID:         p.id,
-		Variations: []alexa.PromptVariation{},
+		Variations: []PromptVariation{},
 	}
 	for _, v := range p.variations {
 		pv, err := v.BuildLocale(locale)
 		if err != nil {
-			return alexa.ModelPrompt{}, err
+			return ModelPrompt{}, err
 		}
 		mp.Variations = append(mp.Variations, pv...)
 	}
@@ -783,8 +782,8 @@ func (v *promptVariationsBuilder) WithLocaleTypeValue(locale, varType string, va
 }
 
 // BuildLocale generates a PromptVariation for the locale.
-func (v *promptVariationsBuilder) BuildLocale(locale string) ([]alexa.PromptVariation, error) {
-	var vs []alexa.PromptVariation
+func (v *promptVariationsBuilder) BuildLocale(locale string) ([]PromptVariation, error) {
+	var vs []PromptVariation
 	if v.error != nil {
 		return vs, v.error
 	}
@@ -794,21 +793,21 @@ func (v *promptVariationsBuilder) BuildLocale(locale string) ([]alexa.PromptVari
 	}
 	// only useful with content, can never happen as you must use NewPromptVariationsBuilder.
 	if len(v.vars) == 0 {
-		return []alexa.PromptVariation{}, fmt.Errorf(
+		return []PromptVariation{}, fmt.Errorf(
 			"prompt requires variations (%s: %s-%s-%s)",
 			locale, v.promptType, v.intent, v.slot)
 	}
 	// loop over variation types
 	for t, n := range v.vars {
 		for _, val := range loc.GetAll(n) {
-			vs = append(vs, alexa.PromptVariation{
+			vs = append(vs, PromptVariation{
 				Type:  t,
 				Value: val,
 			})
 		}
 	}
 	if len(vs) == 0 {
-		return []alexa.PromptVariation{}, fmt.Errorf(
+		return []PromptVariation{}, fmt.Errorf(
 			"prompt requires variations with values (%s: %s-%s-%s)",
 			locale, v.promptType, v.intent, v.slot)
 	}

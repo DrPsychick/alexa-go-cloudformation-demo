@@ -1,5 +1,5 @@
-// Package alexa enables parsing request and building responses as well as generating the skill and model.
-package alexa
+// Package skill serves generating the skill and model.
+package skill
 
 // https://developer.amazon.com/en-US/docs/alexa/smapi/interaction-model-schema.html#dialog_intents
 

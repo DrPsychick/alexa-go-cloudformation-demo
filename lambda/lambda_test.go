@@ -6,8 +6,9 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda/middleware"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/ssml"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
 	"github.com/stretchr/testify/assert"
@@ -23,13 +24,16 @@ func initLocaleRegistry(t *testing.T) {
 
 	loc.Set(l10n.KeyErrorTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorText, []string{"An error occurred: %s"})
-	loc.Set(l10n.KeyErrorSSML, []string{l10n.Speak("An error occurred.")})
+	loc.Set(l10n.KeyErrorSSML, []string{ssml.Speak("An error occurred.")})
 	loc.Set(l10n.KeyErrorLocaleNotFoundTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorLocaleNotFoundText, []string{"Locale '%s' not found!"})
 	loc.Set(l10n.KeyErrorLocaleNotFoundSSML, []string{"<speak>Locale '%s' not found!<speak>"})
 	loc.Set(l10n.KeyErrorNoTranslationTitle, []string{"error"})
 	loc.Set(l10n.KeyErrorNoTranslationText, []string{"Key '%s' not found!"})
 	loc.Set(l10n.KeyErrorNoTranslationSSML, []string{"<speak>Key '%s' not found!<speak>"})
+	loc.Set(l10n.KeyErrorTranslationTitle, []string{"Translation error"})
+	loc.Set(l10n.KeyErrorTranslationText, []string{"An error occurred in translation. The developer is informed."})
+	loc.Set(l10n.KeyErrorTranslationSSML, []string{"<speak>An error occurred during translation. The developer is informed.<speak>"})
 }
 
 func TestLambda_HandleLaunch(t *testing.T) {
@@ -48,7 +52,7 @@ func TestLambda_HandleLaunch(t *testing.T) {
 		},
 	}
 
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	b := &alexa.ResponseBuilder{}
 	m := lambda.NewMux(app, sb)
 	m = middleware.WithRequestStats(m, app)
@@ -58,8 +62,8 @@ func TestLambda_HandleLaunch(t *testing.T) {
 
 	// locale not found
 	assert.NotEmpty(t, resp.Response.Card)
-	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Contains(t, resp.Response.Card.Content, "de-DE")
+	assert.Equal(t, "Error", resp.Response.Card.Title)
+	assert.Equal(t, resp.Response.Card.Content, "Locale not found!")
 
 	// now with locale
 	r.Request.Locale = "en-US"
@@ -67,20 +71,25 @@ func TestLambda_HandleLaunch(t *testing.T) {
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Contains(t, resp.Response.Card.Content, loca.LaunchText)
-	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.NotEmpty(t, loc.GetErrors())
+	assert.Contains(t, loc.GetErrors()[0].Error(), l10n.KeyLaunchTitle)
+	assert.Equal(t, "Translation error", resp.Response.Card.Title)
+	loc.ResetErrors()
 
 	// now with loca
-	loc.Set(loca.LaunchTitle, []string{"Start"})
-	loc.Set(loca.LaunchText, []string{"Und los..."})
-	assert.NotEmpty(t, loc.Get(loca.LaunchTitle))
-	assert.NotEmpty(t, loc.GetAny(loca.LaunchText))
+	loc.Set(l10n.KeyLaunchTitle, []string{"Start"})
+	loc.Set(l10n.KeyLaunchText, []string{"Und los..."})
+	loc.Set(l10n.KeyLaunchSSML, []string{ssml.Speak("Und los.")})
+	assert.NotEmpty(t, loc.Get(l10n.KeyLaunchTitle))
+	assert.NotEmpty(t, loc.GetAny(l10n.KeyLaunchText))
+	assert.NotEmpty(t, loc.GetAny(l10n.KeyLaunchSSML))
 
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, loc.Get(loca.LaunchTitle), resp.Response.Card.Title)
+	assert.Equal(t, loc.Get(l10n.KeyLaunchTitle), resp.Response.Card.Title)
+	assert.Equal(t, loc.Get(l10n.KeyLaunchText), resp.Response.Card.Content)
 }
 
 func TestLambda_HandleEnd(t *testing.T) {
@@ -96,7 +105,7 @@ func TestLambda_HandleEnd(t *testing.T) {
 		},
 	}
 
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	b := &alexa.ResponseBuilder{}
 	m := lambda.NewMux(app, sb)
 	m = middleware.WithRequestStats(m, app)
@@ -106,30 +115,34 @@ func TestLambda_HandleEnd(t *testing.T) {
 	resp := b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Contains(t, resp.Response.Card.Content, "de-DE")
+	assert.Equal(t, "Error", resp.Response.Card.Title)
+	assert.Equal(t, resp.Response.Card.Content, "Locale not found!")
 
 	// with existing locale, but missing text
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
+
 	r.Request.Locale = "en-US"
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Contains(t, resp.Response.Card.Content, loca.Stop)
-	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.NotEmpty(t, loc.GetErrors())
+	assert.Contains(t, loc.GetErrors()[0].Error(), l10n.KeyStopTitle)
+	assert.Equal(t, "Translation error", resp.Response.Card.Title)
+	loc.ResetErrors()
 
 	// with translations
-	loc, err := loca.Registry.Resolve("en-US")
-	assert.NoError(t, err)
-	loc.Set(loca.StopTitle, []string{"Stop"})
-	loc.Set(loca.Stop, []string{"Alright, it's over now."})
+	loc.Set(l10n.KeyStopTitle, []string{"Stop"})
+	loc.Set(l10n.KeyStopText, []string{"Alright, it's over now."})
+	loc.Set(l10n.KeyStopSSML, []string{ssml.Speak("Alright, it's over now.")})
 
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, loc.Get(loca.StopTitle), resp.Response.Card.Title)
-	assert.Equal(t, loc.Get(loca.Stop), resp.Response.Card.Content)
+	assert.Equal(t, loc.Get(l10n.KeyStopTitle), resp.Response.Card.Title)
+	assert.Equal(t, loc.Get(l10n.KeyStopText), resp.Response.Card.Content)
 }
 
 func TestLambda_HandleHelp(t *testing.T) {
@@ -148,7 +161,7 @@ func TestLambda_HandleHelp(t *testing.T) {
 		},
 	}
 
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	b := &alexa.ResponseBuilder{}
 	m := lambda.NewMux(app, sb)
 	m = middleware.WithRequestStats(m, app)
@@ -158,29 +171,33 @@ func TestLambda_HandleHelp(t *testing.T) {
 	resp := b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.Equal(t, "Error", resp.Response.Card.Title)
+	assert.Equal(t, resp.Response.Card.Content, "Locale not found!")
 
 	// with existing locale, but missing text
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
 	r.Request.Locale = "en-US"
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Contains(t, resp.Response.Card.Content, loca.Help)
-	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.NotEmpty(t, loc.GetErrors())
+	assert.Contains(t, loc.GetErrors()[0].Error(), l10n.KeyHelpTitle)
+	assert.Equal(t, "Translation error", resp.Response.Card.Title)
+	loc.ResetErrors()
 
 	// with translations
-	loc, err := loca.Registry.Resolve("en-US")
-	assert.NoError(t, err)
-	loc.Set(loca.HelpTitle, []string{"Help"})
-	loc.Set(loca.Help, []string{"I'd love to help you"})
+	loc.Set(l10n.KeyHelpTitle, []string{"Help"})
+	loc.Set(l10n.KeyHelpText, []string{"I'd love to help you"})
+	loc.Set(l10n.KeyHelpSSML, []string{ssml.Speak("I'd love to help you")})
 
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, loc.Get(loca.HelpTitle), resp.Response.Card.Title)
-	assert.Equal(t, loc.Get(loca.Help), resp.Response.Card.Content)
+	assert.Equal(t, loc.Get(l10n.KeyHelpTitle), resp.Response.Card.Title)
+	assert.Equal(t, loc.Get(l10n.KeyHelpText), resp.Response.Card.Content)
 }
 
 func TestLambda_HandleStop(t *testing.T) {
@@ -199,7 +216,7 @@ func TestLambda_HandleStop(t *testing.T) {
 		},
 	}
 
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	b := &alexa.ResponseBuilder{}
 	m := lambda.NewMux(app, sb)
 	m = middleware.WithRequestStats(m, app)
@@ -209,29 +226,33 @@ func TestLambda_HandleStop(t *testing.T) {
 	resp := b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.Equal(t, "Error", resp.Response.Card.Title)
+	assert.Equal(t, resp.Response.Card.Content, "Locale not found!")
 
 	// with existing locale, but missing text
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
 	r.Request.Locale = "en-US"
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Contains(t, resp.Response.Card.Content, loca.Stop)
+	assert.NotEmpty(t, loc.GetErrors())
+	assert.Equal(t, "Translation error", resp.Response.Card.Title)
+	assert.Contains(t, loc.GetErrors()[0].Error(), l10n.KeyStopTitle)
+	loc.ResetErrors()
 
 	// with translations
-	loc, err := loca.Registry.Resolve("en-US")
-	assert.NoError(t, err)
-	loc.Set(loca.StopTitle, []string{"Stop"})
-	loc.Set(loca.Stop, []string{"Alright, it's over now."})
+	loc.Set(l10n.KeyStopTitle, []string{"Stop"})
+	loc.Set(l10n.KeyStopText, []string{"Alright, it's over now."})
+	loc.Set(l10n.KeyStopSSML, []string{ssml.Speak("Alright, it's over now.")})
 
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, loc.Get(loca.StopTitle), resp.Response.Card.Title)
-	assert.Equal(t, loc.Get(loca.Stop), resp.Response.Card.Content)
+	assert.Equal(t, loc.Get(l10n.KeyStopTitle), resp.Response.Card.Title)
+	assert.Equal(t, loc.Get(l10n.KeyStopText), resp.Response.Card.Content)
 }
 
 func TestLambda_HandleSaySomething2(t *testing.T) {
@@ -257,7 +278,7 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 			},
 		},
 	}
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	b := &alexa.ResponseBuilder{}
 	m := lambda.NewMux(app, sb)
 	m = middleware.WithRequestStats(m, app)
@@ -266,8 +287,8 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 	resp := b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Equal(t, "Locale 'de-DE' not found!", resp.Response.Card.Content)
+	assert.Equal(t, "Error", resp.Response.Card.Title)
+	assert.Equal(t, resp.Response.Card.Content, "Locale not found!")
 
 	// with existing locale, but missing text
 	r.Request.Locale = "en-US"
@@ -283,7 +304,7 @@ func TestLambda_HandleSaySomething2(t *testing.T) {
 	assert.NoError(t, err)
 	loc.Set(loca.SaySomethingUserTitle, []string{"Hi %s!"})
 	loc.Set(loca.SaySomethingUserText, []string{"Sadly, I have nothing to tell you %s."})
-	loc.Set(loca.SaySomethingUserSSML, []string{l10n.Speak(l10n.UseVoiceLang("Kendra", "en-US", "%s do you like the Autobahn?"))})
+	loc.Set(loca.SaySomethingUserSSML, []string{ssml.Speak(ssml.UseVoiceLang("Kendra", "en-US", "%s do you like the Autobahn?"))})
 
 	m.Serve(b, r)
 	resp = b.Build()
@@ -309,7 +330,7 @@ func TestLambda_HandleAWSStatus(t *testing.T) {
 		},
 	}
 
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	b := &alexa.ResponseBuilder{}
 	m := lambda.NewMux(app, sb)
 	m = middleware.WithRequestStats(m, app)
@@ -319,22 +340,24 @@ func TestLambda_HandleAWSStatus(t *testing.T) {
 	resp := b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
+	assert.Equal(t, "Error", resp.Response.Card.Title)
+	assert.Equal(t, resp.Response.Card.Content, "Locale not found!")
 
 	// with existing locale, but missing text
+	loc, err := loca.Registry.Resolve("en-US")
+	assert.NoError(t, err)
 	r.Request.Locale = "en-US"
 	m.Serve(b, r)
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Contains(t, resp.Response.Card.Content, loca.AWSStatusAreaElicitSSML)
+	assert.NotEmpty(t, loc.GetErrors())
+	assert.Equal(t, "Translation error", resp.Response.Card.Title)
+	assert.Contains(t, loc.GetErrors()[0].Error(), loca.AWSStatusTitle)
+	loc.ResetErrors()
 
 	// with translations
-	loc, err := loca.Registry.Resolve("en-US")
-	assert.NoError(t, err)
 	loc.Set(loca.AWSStatusTitle, []string{"Status"})
-	//loc.Set(loca.AWSStatusText, []string{"Everything alright!"})
 	loc.Set(loca.AWSStatusAreaElicitText, []string{"Elicit Area"})
 	loc.Set(loca.AWSStatusAreaElicitSSML, []string{"<speak>Elicit Area<speak>"})
 
@@ -387,7 +410,7 @@ func TestLambda_HandleAWSStatus_WithSlots(t *testing.T) {
 		},
 	}
 
-	sb := gen.NewSkillBuilder()
+	sb := skill.NewSkillBuilder()
 	b := &alexa.ResponseBuilder{}
 	m := lambda.NewMux(app, sb)
 	m = middleware.WithRequestStats(m, app)
@@ -435,8 +458,10 @@ func TestLambda_HandleAWSStatus_WithSlots(t *testing.T) {
 	resp = b.Build()
 
 	assert.NotEmpty(t, resp)
-	assert.Equal(t, "error", resp.Response.Card.Title)
-	assert.Contains(t, resp.Response.Card.Content, loca.AWSStatusSSML)
+	assert.NotEmpty(t, loc.GetErrors())
+	assert.Equal(t, "Translation error", resp.Response.Card.Title)
+	assert.Contains(t, loc.GetErrors()[0].Error(), loca.AWSStatusText)
+	loc.ResetErrors()
 
 	// with Region and loca
 	loc.Set(loca.AWSStatusText, []string{"Everything alright in %s %s"})

@@ -3,6 +3,7 @@ package alfalfa
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
 	"github.com/hamba/pkg/log"
 	"github.com/hamba/pkg/stats"
@@ -13,7 +14,7 @@ type Config struct {
 	User string
 }
 
-// type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error)
+// type AppResponseFunc func(locale l10n.LocaleInstance, opts ...ResponseFunc) (Response, error)
 
 // ResponseFunc defines the function that can optionally be passed to responses.
 type ResponseFunc func(cfg *Config)
@@ -23,15 +24,6 @@ func WithUser(user string) ResponseFunc {
 	return func(cfg *Config) {
 		cfg.User = user
 	}
-}
-
-// ApplicationResponse defines the response returned to lambda.
-type ApplicationResponse struct {
-	Title  string
-	Text   string
-	Speech string
-	Image  string
-	End    bool
 }
 
 // Application defines the base application.
@@ -49,32 +41,57 @@ func NewApplication(l log.Logger, s stats.Statter) *Application {
 }
 
 // Launch is the response to the launch request.
-func (a *Application) Launch(l l10n.LocaleInstance) (string, string) {
-	return l.Get(loca.LaunchTitle), l.GetAny(loca.LaunchText)
+func (a *Application) Launch(l l10n.LocaleInstance) (alexa.Response, error) {
+	return alexa.Response{
+		Title:  l.GetAny(l10n.KeyLaunchTitle),
+		Text:   l.GetAny(l10n.KeyLaunchText),
+		Speech: l.GetAny(l10n.KeyLaunchSSML),
+		End:    false,
+	}, nil
 }
 
 // Help is the response to a help request.
-func (a *Application) Help(l l10n.LocaleInstance) (string, string, string) {
-	return l.GetAny(loca.HelpTitle), l.GetAny(loca.Help), ""
+func (a *Application) Help(l l10n.LocaleInstance) (alexa.Response, error) {
+	return alexa.Response{
+		Title:  l.GetAny(l10n.KeyHelpTitle),
+		Text:   l.GetAny(l10n.KeyHelpText),
+		Speech: l.GetAny(l10n.KeyHelpSSML),
+		End:    false,
+	}, nil
 }
 
 // Stop is the response to stop the skill.
-func (a *Application) Stop(l l10n.LocaleInstance) (string, string, string) {
-	return l.GetAny(loca.StopTitle), l.GetAny(loca.Stop), ""
+func (a *Application) Stop(l l10n.LocaleInstance) (alexa.Response, error) {
+	return alexa.Response{
+		Title:  l.GetAny(l10n.KeyStopTitle),
+		Text:   l.GetAny(l10n.KeyStopText),
+		Speech: l.GetAny(l10n.KeyStopSSML),
+		End:    true,
+	}, nil
 }
 
 // SSMLDemo is the intent to demonstrate SSML output with Alexa.
-func (a *Application) SSMLDemo(l l10n.LocaleInstance) (string, string, string) {
-	return l.GetAny(loca.LaunchTitle), l.GetAny(loca.LaunchText), l.GetAny(loca.LaunchSSML)
+func (a *Application) SSMLDemo(l l10n.LocaleInstance) (alexa.Response, error) {
+	return alexa.Response{
+		Title:  l.GetAny(l10n.KeyLaunchTitle),
+		Text:   l.GetAny(l10n.KeyLaunchText),
+		Speech: l.GetAny(l10n.KeyLaunchSSML),
+		End:    true,
+	}, nil
 }
 
 // Demo is a simple demo response.
-func (a *Application) Demo(l l10n.LocaleInstance) (string, string, string) {
-	return l.Get(loca.DemoIntentTitle), l.GetAny(loca.DemoIntentText), l.GetAny(loca.DemoIntentSSML)
+func (a *Application) Demo(l l10n.LocaleInstance) (alexa.Response, error) {
+	return alexa.Response{
+		Title:  l.Get(loca.DemoIntentTitle),
+		Text:   l.GetAny(loca.DemoIntentText),
+		Speech: l.GetAny(loca.DemoIntentSSML),
+		End:    true,
+	}, nil
 }
 
 // SaySomething handles simple title + text response.
-func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc) (ApplicationResponse, error) {
+func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc) (alexa.Response, error) {
 	// run all ResponseFuncs
 	cfg := &Config{}
 	for _, opt := range opts {
@@ -95,12 +112,12 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 
 	if msg == "" {
 		if cfg.User != "" {
-			return ApplicationResponse{}, &l10n.NoTranslationError{Locale: loc.GetName(), Key: loca.SaySomethingUserText}
+			return alexa.Response{}, &l10n.NoTranslationError{Locale: loc.GetName(), Key: loca.SaySomethingUserText}
 		}
-		return ApplicationResponse{}, &l10n.NoTranslationError{Locale: loc.GetName(), Key: loca.SaySomethingText}
+		return alexa.Response{}, &l10n.NoTranslationError{Locale: loc.GetName(), Key: loca.SaySomethingText}
 	}
 
-	return ApplicationResponse{
+	return alexa.Response{
 		Title:  tit,
 		Text:   msg,
 		Speech: msgSSML,
@@ -109,12 +126,12 @@ func (a *Application) SaySomething(loc l10n.LocaleInstance, opts ...ResponseFunc
 }
 
 // AWSStatus responds with messages containing 2 slots.
-func (a *Application) AWSStatus(loc l10n.LocaleInstance, area, region string) (ApplicationResponse, error) {
+func (a *Application) AWSStatus(loc l10n.LocaleInstance, area, region string) (alexa.Response, error) {
 	title := loc.GetAny(loca.AWSStatusTitle)
 	msg := loc.GetAny(loca.AWSStatusText, area, region)
 	msgSSML := loc.GetAny(loca.AWSStatusSSML, area, region)
 
-	return ApplicationResponse{
+	return alexa.Response{
 		Title:  title,
 		Text:   msg,
 		Speech: msgSSML,
@@ -124,8 +141,8 @@ func (a *Application) AWSStatus(loc l10n.LocaleInstance, area, region string) (A
 }
 
 // AWSStatusRegionElicit will ask for the Region value.
-func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (ApplicationResponse, error) {
-	return ApplicationResponse{
+func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (alexa.Response, error) {
+	return alexa.Response{
 		Title:  l.GetAny(loca.AWSStatusTitle),
 		Text:   l.GetAny(loca.AWSStatusRegionElicitText),
 		Speech: l.GetAny(loca.AWSStatusRegionElicitSSML),
@@ -134,8 +151,8 @@ func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string
 }
 
 // AWSStatusAreaElicit will ask for the Area value.
-func (a *Application) AWSStatusAreaElicit(l l10n.LocaleInstance, region string) (ApplicationResponse, error) {
-	return ApplicationResponse{
+func (a *Application) AWSStatusAreaElicit(l l10n.LocaleInstance, area string) (alexa.Response, error) {
+	return alexa.Response{
 		Title:  l.GetAny(loca.AWSStatusTitle),
 		Text:   l.GetAny(loca.AWSStatusAreaElicitText),
 		Speech: l.GetAny(loca.AWSStatusAreaElicitSSML),

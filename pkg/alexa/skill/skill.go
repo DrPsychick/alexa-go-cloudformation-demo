@@ -1,4 +1,4 @@
-package alexa
+package skill
 
 // Skill is the Alexa `skill.json` top element.
 type Skill struct {

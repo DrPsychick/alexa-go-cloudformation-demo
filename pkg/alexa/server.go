@@ -39,6 +39,7 @@ func (s *Server) Invoke(ctx context.Context, payload []byte) ([]byte, error) {
 	builder := &ResponseBuilder{}
 	s.Handler.Serve(builder, req)
 
+	// Idea: BuildJson -> then the `build()` can be private
 	return jsoniter.Marshal(builder.Build())
 }
 

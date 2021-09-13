@@ -1,7 +1,7 @@
 package alexa
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/ssml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -20,11 +20,11 @@ func TestWith_Functions(t *testing.T) {
 	assert.Equal(t, "speech", res.Response.OutputSpeech.Text)
 	assert.Equal(t, "reprompt", res.Response.Reprompt.OutputSpeech.Text)
 
-	b.WithSpeech(l10n.Speak("speech"))
-	b.WithReprompt(l10n.Speak("reprompt"))
+	b.WithSpeech(ssml.Speak("speech"))
+	b.WithReprompt(ssml.Speak("reprompt"))
 	res = b.Build()
-	assert.Equal(t, l10n.Speak("speech"), res.Response.OutputSpeech.SSML)
-	assert.Equal(t, l10n.Speak("reprompt"), res.Response.Reprompt.OutputSpeech.SSML)
+	assert.Equal(t, ssml.Speak("speech"), res.Response.OutputSpeech.SSML)
+	assert.Equal(t, ssml.Speak("reprompt"), res.Response.Reprompt.OutputSpeech.SSML)
 
 	b.WithStandardCard("title", "text", &Image{})
 	res = b.Build()

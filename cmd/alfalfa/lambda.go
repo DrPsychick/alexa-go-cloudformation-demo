@@ -10,7 +10,7 @@ import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda/middleware"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
 	"github.com/hamba/cmd"
 	"github.com/hamba/logger"
 	"github.com/hamba/pkg/log"
@@ -70,7 +70,7 @@ func runLambda(c *cli.Context) error {
 	return errors.New("Serve() should not have returned")
 }
 
-func newLambda(app *alfalfa.Application, sb *gen.SkillBuilder) alexa.Handler {
+func newLambda(app *alfalfa.Application, sb *skill.SkillBuilder) alexa.Handler {
 	h := lambda.NewMux(app, sb)
 
 	h = middleware.WithRequestStats(h, app)
