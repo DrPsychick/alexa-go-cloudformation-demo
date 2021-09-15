@@ -135,7 +135,7 @@ var enUS = &l10n.Locale{
 			ssml.Speak("A.W.S. status in %s: everything <emphasis level=\"strong\">perfect</emphasis>"),
 			ssml.Speak("In %s everything's running smoothly"),
 		},
-		AWSStatusAreaSamples: {"in {Area}", "of {Area}"},
+		AWSStatusAreaSamples: {"in {Area}", "of {Area}", "{Area}"},
 		AWSStatusAreaElicitText: {
 			"In which area? (Europe, North America, ...)",
 			"What area are you interested in? (Europe, North America, ...)",
@@ -147,7 +147,7 @@ var enUS = &l10n.Locale{
 		AWSStatusAreaConfirmSSML: {
 			ssml.Speak("Are you sure about area {Area}?"),
 		},
-		AWSStatusRegionSamples: {"in {Region}", "of {Region}"},
+		AWSStatusRegionSamples: {"in {Region}", "of {Region}", "{Region}"},
 		AWSStatusRegionElicitText: {
 			"In which region? (Frankfurt, North Virginia, ...)",
 			"What region are you interested in? (Ireland, Frankfurt, ...)",

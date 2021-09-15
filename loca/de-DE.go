@@ -132,7 +132,7 @@ var deDE = &l10n.Locale{
 			ssml.Speak("A.W.S. Status in %s: alles <emphasis level=\"strong\">super</emphasis>"),
 			ssml.Speak("In %s: alles " + ssml.UseVoiceLang("Kendra", "en-US", "geil")),
 		},
-		AWSStatusAreaSamples: {"in {Area}", "von {Area}"},
+		AWSStatusAreaSamples: {"in {Area}", "von {Area}", "{Area}"},
 		AWSStatusAreaElicitText: {
 			"In welchem Gebiet? (Europa, Nordamerika, ...)",
 			"Welches Gebiet interessiert dich? (Europa, Nordamerika, ...)",
@@ -144,7 +144,7 @@ var deDE = &l10n.Locale{
 		AWSStatusAreaConfirmSSML: {
 			ssml.Speak("Sicher in {Area}?"),
 		},
-		AWSStatusRegionSamples: {"in {Region}", "der {Region}"},
+		AWSStatusRegionSamples: {"in {Region}", "der {Region}", "{Region}"},
 		AWSStatusRegionElicitText: {
 			"In welcher Region? (Frankfurt, Irland, ...)",
 			"Zu welcher Region möchtest du den Status wissen? (Frankfurt, Nord Virginia, ...)",
