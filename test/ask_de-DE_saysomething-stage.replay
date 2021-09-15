@@ -3,9 +3,9 @@
   "locale": "de-DE",
   "type": "text",
   "userInput": [
-    "Alexa öffne alfalfa demo stage",
+    "Alexa öffne alfalfa demo test",
     "sag' etwas",
-    "Alexa öffne alfalfa demo stage und erzähl' mir was",
+    "Alexa öffne alfalfa demo test und erzähl' mir was",
     ".quit"
   ]
 }
