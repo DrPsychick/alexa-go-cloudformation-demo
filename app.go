@@ -143,20 +143,22 @@ func (a *Application) AWSStatus(loc l10n.LocaleInstance, area, region string) (a
 // AWSStatusRegionElicit will ask for the Region value.
 func (a *Application) AWSStatusRegionElicit(l l10n.LocaleInstance, region string) (alexa.Response, error) {
 	return alexa.Response{
-		Title:  l.GetAny(loca.AWSStatusTitle),
-		Text:   l.GetAny(loca.AWSStatusRegionElicitText),
-		Speech: l.GetAny(loca.AWSStatusRegionElicitSSML),
-		End:    false,
+		Title:    l.GetAny(loca.AWSStatusTitle),
+		Text:     l.GetAny(loca.AWSStatusRegionElicitText),
+		Speech:   l.GetAny(loca.AWSStatusRegionElicitSSML),
+		Reprompt: true,
+		End:      false,
 	}, nil
 }
 
 // AWSStatusAreaElicit will ask for the Area value.
 func (a *Application) AWSStatusAreaElicit(l l10n.LocaleInstance, area string) (alexa.Response, error) {
 	return alexa.Response{
-		Title:  l.GetAny(loca.AWSStatusTitle),
-		Text:   l.GetAny(loca.AWSStatusAreaElicitText),
-		Speech: l.GetAny(loca.AWSStatusAreaElicitSSML),
-		End:    false,
+		Title:    l.GetAny(loca.AWSStatusTitle),
+		Text:     l.GetAny(loca.AWSStatusAreaElicitText),
+		Speech:   l.GetAny(loca.AWSStatusAreaElicitSSML),
+		Reprompt: true,
+		End:      false,
 	}, nil
 }
 

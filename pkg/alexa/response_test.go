@@ -3,6 +3,7 @@ package alexa
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/ssml"
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -68,4 +69,65 @@ func TestSessionAttributes(t *testing.T) {
 	})
 	res := b.Build()
 	assert.Equal(t, "Bar", res.SessionAttributes["foo"])
+}
+
+func TestResponseBuilder_With(t *testing.T) {
+	type fields struct {
+		speech           *OutputSpeech
+		card             *Card
+		reprompt         *OutputSpeech
+		directives       []*Directive
+		shouldEndSession bool
+		sessionAttr      map[string]interface{}
+		canFulfillIntent *CanFulfillIntent
+	}
+	type args struct {
+		resp Response
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{"WithEmptyResponse", fields{}, args{}},
+		{"WithTextResponse", fields{}, args{Response{Title: "title", Text: "text"}}},
+		{"WithSpeechResponse", fields{}, args{Response{Text: "text", Speech: "<speak>hello</speak>"}}},
+		{"WithRepromptResponse", fields{}, args{Response{Text: "text", Speech: "<speak>hello</speak>", Reprompt: true}}},
+		{"WithTextSpeechResponse", fields{}, args{Response{Text: "text", Speech: "hello", Reprompt: true}}},
+		{"WithEndResponse", fields{}, args{Response{End: true}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &ResponseBuilder{}
+			b.With(tt.args.resp)
+
+			if tt.args.resp.Title == "" {
+				assert.Equal(t, "", b.card.Title)
+			}
+			if tt.args.resp.Title != "" {
+				assert.Equal(t, tt.args.resp.Title, b.card.Title)
+			}
+			if tt.args.resp.Text != "" {
+				assert.Equal(t, tt.args.resp.Text, b.card.Content)
+			}
+			if tt.args.resp.End {
+				assert.True(t, b.shouldEndSession)
+			}
+			if tt.args.resp.Speech != "" {
+				if strings.HasPrefix(tt.args.resp.Speech, `<speak>`) {
+					if tt.args.resp.Reprompt {
+						assert.Equal(t, tt.args.resp.Speech, b.reprompt.SSML)
+					} else {
+						assert.Equal(t, tt.args.resp.Speech, b.speech.SSML)
+					}
+				} else {
+					if tt.args.resp.Reprompt {
+						assert.Equal(t, tt.args.resp.Speech, b.reprompt.Text)
+					} else {
+						assert.Equal(t, tt.args.resp.Speech, b.speech.Text)
+					}
+				}
+			}
+		})
+	}
 }

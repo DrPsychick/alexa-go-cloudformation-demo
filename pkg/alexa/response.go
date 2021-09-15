@@ -116,7 +116,11 @@ func (b *ResponseBuilder) With(resp Response) {
 	}
 	b.WithSimpleCard(resp.Title, resp.Text)
 	if resp.Speech != "" {
-		b.WithSpeech(resp.Speech)
+		if resp.Reprompt {
+			b.WithReprompt(resp.Speech)
+		} else {
+			b.WithSpeech(resp.Speech)
+		}
 	}
 	b.WithShouldEndSession(resp.End)
 }
