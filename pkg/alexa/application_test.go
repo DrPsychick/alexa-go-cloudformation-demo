@@ -82,8 +82,8 @@ func TestHandleError(t *testing.T) {
 	loc, _ := l10n.DefaultRegistry.Resolve("en-US")
 	myTextErr := TextError{"en-US", "Text Error"}
 	myTransErr := TranslationError{"en-US", "foo"}
-	myNoTransErr := l10n.NoTranslationError{"en-US", "foo", ""}
-	myNoTransPlceholderErr := l10n.NoTranslationError{"en-US", "key", "placeholder"}
+	myNoTransErr := l10n.NoTranslationError{Locale: "en-US", Key: "foo", Placeholder: ""}
+	myNoTransPlceholderErr := l10n.NoTranslationError{Locale: "en-US", Key: "key", Placeholder: "placeholder"}
 	tests := []struct {
 		name string
 		args args
@@ -212,7 +212,6 @@ func TestTranslationError_Response(t *testing.T) {
 		args   args
 		want   Response
 	}{
-		// TODO: Add test cases.
 		{"TransErrorResponse", fields{"en-US", key}, args{en}, Response{
 			Title:  en.GetAny(l10n.KeyErrorTranslationTitle),
 			Text:   en.GetAny(l10n.KeyErrorTranslationText),

@@ -85,7 +85,7 @@ const (
 // Break adds a break to speech.
 // only use `strength` or `time`, not both.
 // time in `ms` or `s` - may not exceed 10s.
-func Break(strength BreakStrength, time, text string) string {
+func Break(strength BreakStrength, time string) string {
 	params := []string{""}
 	if strength != "" {
 		params = append(params, `strength="`+string(strength)+`"`)
@@ -144,17 +144,51 @@ func Phoneme(alphabet PhonemeAlphabet, ph, text string) string {
 	return `<phoneme alphabet="` + string(alphabet) + `" ph="` + ph + `">` + text + `</phoneme>`
 }
 
+// ProsodyRate defines the speed of the voice. Can be provided in %: 100% is normal speed.
+type ProsodyRate string
+
+const (
+	ProsodyRateXSlow  ProsodyRate = "x-slow" //nolint:revive
+	ProsodyRateSlow   ProsodyRate = "slow"
+	ProsodyRateMedium ProsodyRate = "medium"
+	ProsodyRateFast   ProsodyRate = "fast"
+	ProsodyRateXFast  ProsodyRate = "x-fast"
+)
+
+// ProsodyPitch defines the pitch of the voice. Can be provided in %: positiv is higher, negative lower.
+type ProsodyPitch string
+
+const (
+	ProsodyPitchXLow   ProsodyPitch = "x-low" //nolint:revive
+	ProsodyPitchLow    ProsodyPitch = "low"
+	ProsodyPitchMedium ProsodyPitch = "medium"
+	ProsodyPitchHigh   ProsodyPitch = "high"
+	ProsodyPitchXHigh  ProsodyPitch = "x-high"
+)
+
+// ProsodyVolume defines the volume of the voice. Can be provided in +/-dB, e.g. "+2dB".
+type ProsodyVolume string
+
+const (
+	ProsodyVolumeSilent ProsodyVolume = "silent" //nolint:revive
+	ProsodyVolumeXSoft  ProsodyVolume = "x-soft"
+	ProsodyVolumeSoft   ProsodyVolume = "soft"
+	ProsodyVolumeMedium ProsodyVolume = "medium"
+	ProsodyVolumeLoud   ProsodyVolume = "loud"
+	ProsodyVolumeXLoud  ProsodyVolume = "x-loud"
+)
+
 // Prosody modifies the volume, pitch, and rate of the tagged speech.
-func Prosody(rate, pitch, volume, text string) string {
+func Prosody(rate ProsodyRate, pitch ProsodyPitch, volume ProsodyVolume, text string) string {
 	params := []string{""}
 	if rate != "" {
-		params = append(params, `rate="`+rate+`"`)
+		params = append(params, `rate="`+string(rate)+`"`)
 	}
 	if pitch != "" {
-		params = append(params, `pitch="`+pitch+`"`)
+		params = append(params, `pitch="`+string(pitch)+`"`)
 	}
 	if volume != "" {
-		params = append(params, `volume="`+volume+`"`)
+		params = append(params, `volume="`+string(volume)+`"`)
 	}
 	return fmt.Sprintf(`<prosody%s>%s</prosody>`, strings.Join(params, " "), text)
 }
@@ -202,6 +236,9 @@ const (
 // SayAs instructs the voice to "read" the text in a specific way.
 // <say-as interpret-as="cardinal">12345</say-as>.
 func SayAs(interpretAs SayAsInterpretAs, format, text string) string {
+	if interpretAs == SayAsInterpretAsDate && format != "" {
+		return `<say-as interpret-as="` + string(interpretAs) + `" format="` + format + `">` + text + `</say-as>`
+	}
 	return `<say-as interpret-as="` + string(interpretAs) + `">` + text + `</say-as>`
 }
 
