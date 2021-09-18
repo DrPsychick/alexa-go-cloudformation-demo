@@ -48,6 +48,9 @@ issues:
     - text: "G301:"
       linters:
         - gosec
+    - path: pkg/alexa/ssml
+      linters:
+        - lll
 #    - text: "G404:"
 ##      path: pkg/alexa/l10n/
 #      linters:

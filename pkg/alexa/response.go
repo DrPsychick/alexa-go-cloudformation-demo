@@ -1,6 +1,9 @@
 package alexa
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // Stream represents a response directive audio item stream.
 type Stream struct {
@@ -79,11 +82,11 @@ type CanFulfillIntent struct {
 type ResponseEnvelope struct {
 	Version           string                 `json:"version"`
 	SessionAttributes map[string]interface{} `json:"sessionAttributes,omitempty"`
-	Response          Response               `json:"response"`
+	Response          response               `json:"response"`
 }
 
-// Response represents the response.
-type Response struct {
+// response represents the response.
+type response struct {
 	OutputSpeech     *OutputSpeech     `json:"outputSpeech,omitempty"`
 	Card             *Card             `json:"card,omitempty"`
 	Reprompt         *Reprompt         `json:"reprompt,omitempty"`
@@ -101,6 +104,25 @@ type ResponseBuilder struct {
 	shouldEndSession bool
 	sessionAttr      map[string]interface{}
 	canFulfillIntent *CanFulfillIntent
+}
+
+// With applies an Response.
+func (b *ResponseBuilder) With(resp Response) {
+	if resp.Image != "" {
+		b.WithStandardCard(resp.Title, resp.Text, &Image{
+			SmallImageURL: fmt.Sprintf(resp.Image, "small"),
+			LargeImageURL: fmt.Sprintf(resp.Image, "large"),
+		})
+	}
+	b.WithSimpleCard(resp.Title, resp.Text)
+	if resp.Speech != "" {
+		if resp.Reprompt {
+			b.WithReprompt(resp.Speech)
+		} else {
+			b.WithSpeech(resp.Speech)
+		}
+	}
+	b.WithShouldEndSession(resp.End)
 }
 
 // WithSpeech sets the output speech on the response.
@@ -195,7 +217,7 @@ func (b *ResponseBuilder) Build() *ResponseEnvelope {
 	r := &ResponseEnvelope{
 		Version:           "1.0",
 		SessionAttributes: b.sessionAttr,
-		Response: Response{
+		Response: response{
 			OutputSpeech:     b.speech,
 			Card:             b.card,
 			Directives:       b.directives,

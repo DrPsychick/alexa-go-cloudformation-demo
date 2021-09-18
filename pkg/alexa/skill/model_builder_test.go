@@ -1,9 +1,8 @@
-package gen_test
+package skill_test
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
 	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -14,7 +13,7 @@ func TestModelBuilder_WithInvocation(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mb := gen.NewModelBuilder().
+	mb := skill.NewModelBuilder().
 		WithLocaleRegistry(registry)
 
 	// uses default invocation key
@@ -39,14 +38,14 @@ func TestModelBuilder_WithInvocation(t *testing.T) {
 // modelBuilder with delegation is covered.
 func TestModelBuilder_WithDelegationStrategy(t *testing.T) {
 	assert.NotNil(t, registry)
-	mb := gen.NewModelBuilder().
+	mb := skill.NewModelBuilder().
 		WithLocaleRegistry(registry)
 
-	mb.WithDelegationStrategy(alexa.DelegationSkillResponse)
+	mb.WithDelegationStrategy(skill.DelegationSkillResponse)
 	ms2, err2 := mb.Build()
 
 	assert.NoError(t, err2)
-	assert.Equal(t, alexa.DelegationSkillResponse, ms2["en-US"].Model.Dialog.Delegation)
+	assert.Equal(t, skill.DelegationSkillResponse, ms2["en-US"].Model.Dialog.Delegation)
 
 	mb.WithDelegationStrategy("foo")
 	_, err1 := mb.Build()
@@ -57,7 +56,7 @@ func TestModelBuilder_WithDelegationStrategy(t *testing.T) {
 // modelBuilder with locale is covered.
 func TestModelBuilder_WithLocale(t *testing.T) {
 	r := l10n.NewRegistry()
-	mb := gen.NewModelBuilder().
+	mb := skill.NewModelBuilder().
 		WithLocaleRegistry(r)
 
 	// add two locales
@@ -84,7 +83,7 @@ func TestModelBuilder_WithIntent(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mb := gen.NewModelBuilder().
+	mb := skill.NewModelBuilder().
 		WithLocaleRegistry(registry)
 
 	// add intent
@@ -122,7 +121,7 @@ func TestModelBuilder_WithType(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mb := gen.NewModelBuilder().
+	mb := skill.NewModelBuilder().
 		WithLocaleRegistry(registry)
 
 	// add type
@@ -158,14 +157,14 @@ func TestModelBuilder_WithType(t *testing.T) {
 // modelBuilder with slot prompts are covered.
 func TestModelBuilder_WithSlotPrompt(t *testing.T) {
 	// no matching intent
-	mb := gen.NewModelBuilder()
+	mb := skill.NewModelBuilder()
 	mb.WithConfirmationSlotPrompt("Intent", "Slot")
 	mb.WithElicitationSlotPrompt("Intent", "Slot")
 	_, err1 := mb.Build()
 	_, err2 := mb.BuildLocale("en-US")
 
 	// with matching intent
-	mb = gen.NewModelBuilder()
+	mb = skill.NewModelBuilder()
 	mb.WithIntent("Intent").Intent("Intent").
 		WithSlot("Slot", "Foo")
 	mb.WithConfirmationSlotPrompt("Intent", "Slot")
@@ -188,7 +187,7 @@ func TestModelBuilder_WithSlotPrompt(t *testing.T) {
 
 // modelBuilder errors if no locale is covered.
 func TestModelBuilder_ErrorsIfNoLocale(t *testing.T) {
-	mb := gen.NewModelBuilder()
+	mb := skill.NewModelBuilder()
 
 	ms1, err1 := mb.Build()
 	m2, err2 := mb.BuildLocale("en-US")
@@ -197,7 +196,7 @@ func TestModelBuilder_ErrorsIfNoLocale(t *testing.T) {
 	assert.Empty(t, ms1)
 
 	assert.Error(t, err2)
-	assert.Equal(t, &alexa.Model{}, m2)
+	assert.Equal(t, &skill.Model{}, m2)
 }
 
 // modelIntentBuilder with samples is covered.
@@ -207,7 +206,7 @@ func TestModelIntentBuilder_WithSamples(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mib := gen.NewModelIntentBuilder("MyIntent").
+	mib := skill.NewModelIntentBuilder("MyIntent").
 		WithLocaleRegistry(registry)
 
 	// uses default key
@@ -237,7 +236,7 @@ func TestModelIntentBuilder_WithLocaleSamples(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mib := gen.NewModelIntentBuilder("MyIntent").
+	mib := skill.NewModelIntentBuilder("MyIntent").
 		WithLocaleRegistry(registry)
 
 	// uses default key
@@ -257,7 +256,7 @@ func TestModelIntentBuilder_WithLocaleSamples(t *testing.T) {
 // modelIntentBuilder with slot is covered.
 func TestModelIntentBuilder_WithSlot(t *testing.T) {
 	assert.NotNil(t, registry)
-	mib := gen.NewModelIntentBuilder("Intent").
+	mib := skill.NewModelIntentBuilder("Intent").
 		WithLocaleRegistry(registry)
 
 	// same name -> overwrites
@@ -282,7 +281,7 @@ func TestModelIntentBuilder_WithSlot(t *testing.T) {
 
 // modelIntentBuilder errors if no locale is covered.
 func TestModelIntentBuilder_ErrorsIfNoLocale(t *testing.T) {
-	mib := gen.NewModelIntentBuilder("Intent").
+	mib := skill.NewModelIntentBuilder("Intent").
 		WithSlot("Foo", "FooType")
 
 	_, err1 := mib.BuildLanguageIntent("en-US")
@@ -303,7 +302,7 @@ func TestModelSlotBuilder_WithSamples(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	msb := gen.NewModelSlotBuilder("SlotIntent", "SlotName", "MyType").
+	msb := skill.NewModelSlotBuilder("SlotIntent", "SlotName", "MyType").
 		WithLocaleRegistry(registry)
 
 	// uses default key
@@ -333,7 +332,7 @@ func TestModelSlotBuilder_WithLocaleSamples(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	msb := gen.NewModelSlotBuilder("SlotIntent", "SlotName", "SlotType").
+	msb := skill.NewModelSlotBuilder("SlotIntent", "SlotName", "SlotType").
 		WithLocaleRegistry(registry)
 
 	// uses default key
@@ -357,7 +356,7 @@ func TestModelSlotBuilder_WithPrompt(t *testing.T) {
 	registry := l10n.NewRegistry()
 	err := registry.Register(en)
 	assert.NoError(t, err)
-	msb := gen.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType").
+	msb := skill.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType").
 		WithLocaleRegistry(registry).
 		WithElicitationPrompt("elicitation_id").
 		WithConfirmationPrompt("confirmation_id").
@@ -375,7 +374,7 @@ func TestModelSlotBuilder_WithPrompt(t *testing.T) {
 
 // modelSlotBuilder with intent confirmation prompt is covered.
 func TestModelSlotBuilder_WithIntentConfirmationPrompt(t *testing.T) {
-	msb := gen.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType")
+	msb := skill.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType")
 
 	msb2 := msb.WithIntentConfirmationPrompt("foo")
 
@@ -386,7 +385,7 @@ func TestModelSlotBuilder_WithIntentConfirmationPrompt(t *testing.T) {
 
 // modelSlotBuilder errors if no locale is covered.
 func TestModelSlotBuilder_ErrorsIfNoLocale(t *testing.T) {
-	msb := gen.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType")
+	msb := skill.NewModelSlotBuilder("MyIntent", "MySlot", "SlotType")
 
 	_, err1 := msb.BuildIntentSlot("en-US")
 	_, err2 := msb.BuildDialogSlot("en-US")
@@ -402,7 +401,7 @@ func TestModelSlotBuilder_ErrorsIfNoLocale(t *testing.T) {
 // modelTypeBuilder with values is covered.
 func TestModelTypeBuilder_WithValues(t *testing.T) {
 	assert.NotNil(t, registry)
-	mtb := gen.NewModelTypeBuilder("FooBar").
+	mtb := skill.NewModelTypeBuilder("FooBar").
 		WithLocaleRegistry(registry)
 
 	// default lookup key does not exist
@@ -422,7 +421,7 @@ func TestModelTypeBuilder_WithLocaleValues(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mtb := gen.NewModelTypeBuilder("MyType").
+	mtb := skill.NewModelTypeBuilder("MyType").
 		WithLocaleRegistry(registry)
 
 	// uses default key
@@ -441,7 +440,7 @@ func TestModelTypeBuilder_WithLocaleValues(t *testing.T) {
 
 // modelTypeBuilder errors if no locale is covered.
 func TestModelTypeBuilder_ErrorsIfNoLocale(t *testing.T) {
-	mtb := gen.NewModelTypeBuilder("Type").
+	mtb := skill.NewModelTypeBuilder("Type").
 		WithLocaleRegistry(l10n.NewRegistry())
 
 	_, err := mtb.Build("en-US")
@@ -457,7 +456,7 @@ func TestNewElicitationPromptBuilder(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mpb := gen.NewElicitationPromptBuilder("SlotIntent", "SlotName").
+	mpb := skill.NewElicitationPromptBuilder("SlotIntent", "SlotName").
 		WithLocaleRegistry(registry).
 		WithVariation("PlainText")
 
@@ -473,7 +472,7 @@ func TestNewConfirmationPromptBuilder(t *testing.T) {
 	assert.NotNil(t, registry)
 	en, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
-	mpb := gen.NewConfirmationPromptBuilder("SlotIntent", "SlotName").
+	mpb := skill.NewConfirmationPromptBuilder("SlotIntent", "SlotName").
 		WithLocaleRegistry(registry).
 		WithVariation("SSML")
 
@@ -487,7 +486,7 @@ func TestNewConfirmationPromptBuilder(t *testing.T) {
 // ModelPromptBuilder with variation is covered.
 func TestModelPromptBuilder_WithVariation(t *testing.T) {
 	assert.NotNil(t, registry)
-	mpb := gen.NewElicitationPromptBuilder("SlotIntent", "SlotName").
+	mpb := skill.NewElicitationPromptBuilder("SlotIntent", "SlotName").
 		WithLocaleRegistry(registry)
 
 	// add "PlainText" with 2 texts
@@ -521,7 +520,7 @@ func TestModelPromptBuilder_WithVariation(t *testing.T) {
 // ModelPromptBuilder errors if no variations is covered.
 func TestModelPromptBuilder_ErrorsIfNoVariations(t *testing.T) {
 	assert.NotNil(t, registry)
-	mpb := gen.NewConfirmationPromptBuilder("MyIntent", "MySlot").
+	mpb := skill.NewConfirmationPromptBuilder("MyIntent", "MySlot").
 		WithLocaleRegistry(registry)
 
 	_, err := mpb.BuildLocale("en-US")
@@ -531,7 +530,7 @@ func TestModelPromptBuilder_ErrorsIfNoVariations(t *testing.T) {
 
 // ModelPromptBuilder errors if no locale is covered.
 func TestModelPromptBuilder_ErrorsIfNoLocale(t *testing.T) {
-	mpb := gen.NewElicitationPromptBuilder("MyIntent", "MySlot").
+	mpb := skill.NewElicitationPromptBuilder("MyIntent", "MySlot").
 		WithVariation("PlainText")
 
 	_, err := mpb.BuildLocale("de-DE")
@@ -542,7 +541,7 @@ func TestModelPromptBuilder_ErrorsIfNoLocale(t *testing.T) {
 // promptVariationsBuilder defining our own lookup key is covered.
 func TestPromptVariationsBuilder_WithTypeValue(t *testing.T) {
 	assert.NotNil(t, registry)
-	pvb := gen.NewPromptVariations("SlotIntent", "SlotName", "Elicit", "SSML").
+	pvb := skill.NewPromptVariations("SlotIntent", "SlotName", "Elicit", "SSML").
 		WithLocaleRegistry(registry)
 	l, err := registry.Resolve("en-US")
 	assert.NoError(t, err)
@@ -561,7 +560,7 @@ func TestPromptVariationsBuilder_WithLocaleTypeValue(t *testing.T) {
 	r := l10n.NewRegistry()
 	err := r.Register(l10n.NewLocale("en-US"))
 	assert.NoError(t, err)
-	pvb := gen.NewPromptVariations("MyIntent", "MySLot", "Elicit", "PlainText").
+	pvb := skill.NewPromptVariations("MyIntent", "MySLot", "Elicit", "PlainText").
 		WithLocaleRegistry(r).
 		WithLocaleTypeValue("en-US", "PlainText", []string{"bar", "foo"})
 
@@ -574,7 +573,7 @@ func TestPromptVariationsBuilder_WithLocaleTypeValue(t *testing.T) {
 // promptVariationsBuilder with variations is covered.
 func TestPromptVariationsBuilder_WithVariation(t *testing.T) {
 	assert.NotNil(t, registry)
-	pvb := gen.NewPromptVariations("SlotIntent", "SlotName", "Elicit", "SSML").
+	pvb := skill.NewPromptVariations("SlotIntent", "SlotName", "Elicit", "SSML").
 		WithLocaleRegistry(registry)
 
 	_, err := pvb.BuildLocale("en-US")
@@ -591,7 +590,7 @@ func TestPromptVariationsBuilder_WithVariation(t *testing.T) {
 
 // promptVariationsBuilder errors if no locale is registered is covered.
 func TestPromptVariationsBuilder_ErrorsIfNoLocale(t *testing.T) {
-	pvb := gen.NewPromptVariations("MyIntent", "MySlot", "Elicit", "PlainText")
+	pvb := skill.NewPromptVariations("MyIntent", "MySlot", "Elicit", "PlainText")
 
 	_, err := pvb.BuildLocale("en-US")
 	pvb.WithLocaleTypeValue("en-US", "PlainText", []string{"foo", "bar"})
@@ -603,7 +602,7 @@ func TestPromptVariationsBuilder_ErrorsIfNoLocale(t *testing.T) {
 
 // promtVariationsBuilder errors if translations are missing is covered.
 func TestPromptVariationsBuilder_ErrorsIfNoTranslations(t *testing.T) {
-	pvb := gen.NewPromptVariations("MyIntent", "NoSlot", "Elicit", "PlainText").
+	pvb := skill.NewPromptVariations("MyIntent", "NoSlot", "Elicit", "PlainText").
 		WithLocaleRegistry(registry)
 
 	_, err := pvb.BuildLocale("en-US")

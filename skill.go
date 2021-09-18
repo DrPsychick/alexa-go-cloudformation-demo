@@ -2,22 +2,21 @@ package alfalfa
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
 )
 
 // NewSkill returns a configured SkillBuilder.
-func NewSkill() *gen.SkillBuilder {
-	return gen.NewSkillBuilder().
+func NewSkill() *skill.SkillBuilder {
+	return skill.NewSkillBuilder().
 		WithLocaleRegistry(loca.Registry).
-		WithCategory(alexa.CategoryOrganizersAndAssistants).
-		WithPrivacyFlag(gen.FlagIsExportCompliant, true)
+		WithCategory(skill.CategoryOrganizersAndAssistants).
+		WithPrivacyFlag(skill.FlagIsExportCompliant, true)
 }
 
 // CreateSkillModels generates and returns a list of Models.
-func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
+func CreateSkillModels(s *skill.SkillBuilder) (map[string]*skill.Model, error) {
 	m := s.Model().
-		WithDelegationStrategy(alexa.DelegationSkillResponse)
+		WithDelegationStrategy(skill.DelegationSkillResponse)
 
 	// we define intents, slots, types in lambda,
 	// that's why `newLambda` must be called before this, if not it will panic.
@@ -40,13 +39,13 @@ func CreateSkillModels(s *gen.SkillBuilder) (map[string]*alexa.Model, error) {
 	//	WithVariation("SSML")
 
 	// create a Validation prompt, connected to type-values
-	m.WithValidationSlotPrompt(loca.TypeRegionName, alexa.ValidationTypeHasMatch)
-	m.ValidationPrompt(loca.TypeRegionName, alexa.ValidationTypeHasMatch).
+	m.WithValidationSlotPrompt(loca.TypeRegionName, skill.ValidationTypeHasMatch)
+	m.ValidationPrompt(loca.TypeRegionName, skill.ValidationTypeHasMatch).
 		WithVariation("PlainText")
 
 	// ValidationTypeInSet requires values -> we need to pass a key
-	m.WithValidationSlotPrompt(loca.TypeRegionName, alexa.ValidationTypeInSet, loca.TypeRegionValues)
-	m.ValidationPrompt(loca.TypeRegionName, alexa.ValidationTypeInSet).
+	m.WithValidationSlotPrompt(loca.TypeRegionName, skill.ValidationTypeInSet, loca.TypeRegionValues)
+	m.ValidationPrompt(loca.TypeRegionName, skill.ValidationTypeInSet).
 		WithVariation("PlainText")
 
 	// m.Intent(loca.AWSStatus).Slot(loca.TypeRegionName).

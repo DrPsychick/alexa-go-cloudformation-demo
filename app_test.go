@@ -25,10 +25,11 @@ func TestApplication_Launch(t *testing.T) {
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
 
-	title, text := app.Launch(loc)
+	resp, err := app.Launch(loc)
 
-	assert.NotEmpty(t, title)
-	assert.NotEmpty(t, text)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.Title)
+	assert.NotEmpty(t, resp.Text)
 }
 
 func TestApplication_Help(t *testing.T) {
@@ -36,10 +37,11 @@ func TestApplication_Help(t *testing.T) {
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
 
-	title, text, _ := app.Help(loc)
+	resp, err := app.Help(loc)
 
-	assert.NotEmpty(t, title)
-	assert.NotEmpty(t, text)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.Title)
+	assert.NotEmpty(t, resp.Text)
 }
 
 func TestApplication_Stop(t *testing.T) {
@@ -47,10 +49,11 @@ func TestApplication_Stop(t *testing.T) {
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
 
-	title, text, _ := app.Stop(loc)
+	resp, err := app.Stop(loc)
 
-	assert.NotEmpty(t, title)
-	assert.NotEmpty(t, text)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.Title)
+	assert.NotEmpty(t, resp.Text)
 }
 
 func TestApplication_SSLDemo(t *testing.T) {
@@ -58,11 +61,12 @@ func TestApplication_SSLDemo(t *testing.T) {
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
 
-	title, text, ssml := app.SSMLDemo(loc)
+	resp, err := app.SSMLDemo(loc)
 
-	assert.NotEmpty(t, title)
-	assert.NotEmpty(t, text)
-	assert.NotEmpty(t, ssml)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.Title)
+	assert.NotEmpty(t, resp.Text)
+	assert.NotEmpty(t, resp.Speech)
 }
 
 func TestApplication_Demo(t *testing.T) {
@@ -70,11 +74,12 @@ func TestApplication_Demo(t *testing.T) {
 	loc, err := loca.Registry.Resolve("en-US")
 	assert.NoError(t, err)
 
-	title, text, ssml := app.Demo(loc)
+	resp, err := app.Demo(loc)
 
-	assert.NotEmpty(t, title)
-	assert.NotEmpty(t, text)
-	assert.NotEmpty(t, ssml)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.Title)
+	assert.NotEmpty(t, resp.Text)
+	assert.NotEmpty(t, resp.Speech)
 }
 
 func TestApplication_SaySomething(t *testing.T) {

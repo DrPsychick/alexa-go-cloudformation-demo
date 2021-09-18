@@ -51,10 +51,10 @@ export ASKSkillTestingInstructions="Demo Alexa skill... $(date +%Y-%m-%d\ %H:%M)
 mkdir -p ./alexa/interactionModels/custom
 ./alfalfa make --skill
 ./alfalfa make --models
-# TODO: rename skill on stage deploy
+# change skill name and invocations/samples on stage deploy
 if [ $production -eq 0 ]; then
-    sed -i"" -e 's#"name": "\(.*\)"#"name": "\1 (stage)"#' ./alexa/skill.json
-    sed -i"" -e 's#"invocationName": "\(.*\)"#"invocationName": "\1 stage"#' ./alexa/interactionModels/custom/*.json
+    sed -i"" -e 's#"name": "\(.*\)"#"name": "\1 (test)"#' ./alexa/skill.json
+    sed -i"" -e 's#"invocationName": "\(.*\)"#"invocationName": "\1 test"#' ./alexa/interactionModels/custom/*.json
 fi
 
 # zip and upload it to S3

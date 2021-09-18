@@ -241,7 +241,7 @@ func TestLocale_KeyNotExists(t *testing.T) {
 	txs := l.GetAll("not exists")
 	assert.Empty(t, txs)
 	assert.Len(t, l.GetErrors(), 3)
-	assert.Equal(t, "locale de-DE: translation for key 'not exists' is missing", l.GetErrors()[1].Error())
+	assert.Equal(t, "locale de-DE: no translation for key 'not exists'", l.GetErrors()[1].Error())
 }
 
 // Locale empty locale is covered.
