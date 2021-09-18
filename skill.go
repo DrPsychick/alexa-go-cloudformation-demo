@@ -2,7 +2,7 @@ package alfalfa
 
 import (
 	"github.com/drpsychick/alexa-go-cloudformation-demo/loca"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
+	"github.com/drpsychick/go-alexa-lambda/skill"
 )
 
 // NewSkill returns a configured SkillBuilder.

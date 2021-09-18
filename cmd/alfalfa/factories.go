@@ -2,7 +2,7 @@ package main
 
 import (
 	alfalfa "github.com/drpsychick/alexa-go-cloudformation-demo"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
+	"github.com/drpsychick/go-alexa-lambda/skill"
 	"github.com/hamba/cmd"
 )
 

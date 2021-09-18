@@ -5,8 +5,8 @@ Building the skill
 ```go
 package demo
 import (
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+    "github.com/drpsychick/go-alexa-lambda"
+    "github.com/drpsychick/go-alexa-lambda/gen"
     "encoding/json"
     "fmt"
 )
@@ -43,9 +43,9 @@ Building the model
 ```go
 package demo
 import (
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+    "github.com/drpsychick/go-alexa-lambda"
+    "github.com/drpsychick/go-alexa-lambda/l10n"
+    "github.com/drpsychick/go-alexa-lambda/gen"
 )
 func demo() {
     // you can still use l10n.LocaleRegistry to resolve translations if you wish
@@ -99,7 +99,7 @@ Definining locales
 ```go
 package demo
 import (
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"	
+    "github.com/drpsychick/go-alexa-lambda/l10n"	
 )
 var enUS = &l10n.Locale{
     Name: "en-US",
@@ -137,9 +137,9 @@ Building the skill
 ```go
 package demo
 import (
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"	
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"	
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"	
+    "github.com/drpsychick/go-alexa-lambda"	
+    "github.com/drpsychick/go-alexa-lambda/l10n"	
+    "github.com/drpsychick/go-alexa-lambda/gen"	
 )
 var enUS = &l10n.Locale{}
 func demo() {
@@ -162,9 +162,9 @@ Building the models
 ```go
 package demo
 import (
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"	
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"	
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"	
+    "github.com/drpsychick/go-alexa-lambda"	
+    "github.com/drpsychick/go-alexa-lambda/l10n"	
+    "github.com/drpsychick/go-alexa-lambda/gen"	
 )
 var registry = &l10n.Registry{}
 func demo() {
@@ -191,7 +191,7 @@ func demo() {
 Simply build your own JSON
 ```go
 package demo
-import ("github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa")
+import ("github.com/drpsychick/go-alexa-lambda")
 var skill = &alexa.Skill{}
 var modelEnUs = &alexa.Model{}
 ```
@@ -206,7 +206,7 @@ package alfalfa
 
 import (
     "github.com/drpsychick/alexa-go-cloudformation-demo/loca"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+    "github.com/drpsychick/go-alexa-lambda/l10n"
     "github.com/hamba/pkg/log"
     "github.com/hamba/pkg/stats"
     "log"
@@ -376,9 +376,9 @@ package lambda
 
 import (
     "github.com/drpsychick/alexa-go-cloudformation-demo/loca"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/gen"
+    "github.com/drpsychick/go-alexa-lambda"
+    "github.com/drpsychick/go-alexa-lambda/l10n"
+    "github.com/drpsychick/go-alexa-lambda/gen"
     "strings"
     "fmt"
 )
@@ -555,7 +555,7 @@ Simple `key -> []value` lookups
 ```go
 package demo
 import (    
-    "github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+    "github.com/drpsychick/go-alexa-lambda/l10n"
 )
 // de-DE.go
 // only key -> value. Convention defines the structure

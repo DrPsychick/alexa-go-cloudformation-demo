@@ -1,3 +1,6 @@
+# OBSOLETE!
+see https://github.com/DrPsychick/go-alexa-lambda
+
 ### Alexa Dialog
 Example lambda request: Alexa asked, but could not match the user response to a valid slot value: `ER_SUCCESS_NO_MATCH`
 ```json

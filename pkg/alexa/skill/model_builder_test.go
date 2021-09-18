@@ -1,8 +1,8 @@
 package skill_test
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/skill"
+	"github.com/drpsychick/go-alexa-lambda/l10n"
+	"github.com/drpsychick/go-alexa-lambda/skill"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
