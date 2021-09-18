@@ -69,12 +69,15 @@ var deDE = &l10n.Locale{
 		},
 
 		// Intent "AMAZON.StopIntent"
-		l10n.KeyStopTitle: {"Ende Gelände"},
-		l10n.KeyStopText:  {"Ende.", "Tschüss.", "Bis bald."},
-		l10n.KeyStopSSML:  {ssml.Speak("Ok, bis bald.")},
-		l10n.KeyHelpTitle: {"Hilfe"},
-		l10n.KeyHelpText:  {"Probier mal 'hopp hopp' oder 'sag etwas' oder 'erzähl mir was'"},
-		l10n.KeyHelpSSML:  {ssml.Speak("Versuch' es mit 'hopp hopp' oder 'sag etwas'")},
+		l10n.KeyStopTitle:   {"Ende Gelände"},
+		l10n.KeyStopText:    {"Ende.", "Tschüss.", "Bis bald."},
+		l10n.KeyStopSSML:    {ssml.Speak("Ok, bis bald.")},
+		l10n.KeyHelpTitle:   {"Hilfe"},
+		l10n.KeyHelpText:    {"Probier mal 'hopp hopp' oder 'sag etwas' oder 'erzähl mir was'"},
+		l10n.KeyHelpSSML:    {ssml.Speak("Versuch' es mit 'hopp hopp' oder 'sag etwas'")},
+		l10n.KeyCancelTitle: {"Abbruch"},
+		l10n.KeyCancelText:  {"Ich breche ab."},
+		l10n.KeyCancelSSML:  {ssml.Speak("Ok, ich breche ab.")},
 
 		// Intent: "DemoIntent"
 		DemoIntentSamples: {"schiess' los", "auf geht's", "hopp hopp"},

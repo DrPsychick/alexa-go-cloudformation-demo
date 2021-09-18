@@ -82,12 +82,15 @@ var enUS = &l10n.Locale{
 		},
 
 		// default intents
-		l10n.KeyStopTitle: {"Ending"},
-		l10n.KeyStopText:  {"End.", "Good bye.", "See U!"},
-		l10n.KeyStopSSML:  {ssml.Speak("Bye."), ssml.Speak("Ok, I'll stop.")},
-		l10n.KeyHelpTitle: {"Help"},
-		l10n.KeyHelpText:  {"Try saying 'here we go' or 'go ahead'"},
-		l10n.KeyHelpSSML:  {ssml.Speak("Try saying 'here we go' or 'go ahead'")},
+		l10n.KeyStopTitle:   {"Ending"},
+		l10n.KeyStopText:    {"End.", "Good bye.", "See U!"},
+		l10n.KeyStopSSML:    {ssml.Speak("Bye."), ssml.Speak("Ok, I'll stop.")},
+		l10n.KeyHelpTitle:   {"Help"},
+		l10n.KeyHelpText:    {"Try saying 'here we go' or 'go ahead'"},
+		l10n.KeyHelpSSML:    {ssml.Speak("Try saying 'here we go' or 'go ahead'")},
+		l10n.KeyCancelTitle: {"Abort"},
+		l10n.KeyCancelText:  {"Aborting."},
+		l10n.KeyCancelSSML:  {ssml.Speak("Alright, aborting.")},
 
 		// Intent: "DemoIntent"
 		DemoIntentSamples: {"here we go", "go ahead"},

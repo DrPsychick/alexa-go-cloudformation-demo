@@ -65,6 +65,9 @@ const (
 	KeyStopTitle   string = "Stop_Title"
 	KeyStopText    string = "Stop_Text"
 	KeyStopSSML    string = "Stop_SSML"
+	KeyCancelTitle string = "Cancel_Title"
+	KeyCancelText  string = "Cancel_Text"
+	KeyCancelSSML  string = "Cancel_SSML"
 )
 
 func init() {

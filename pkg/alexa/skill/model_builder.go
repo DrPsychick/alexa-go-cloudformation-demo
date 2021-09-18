@@ -794,8 +794,8 @@ func (v *promptVariationsBuilder) BuildLocale(locale string) ([]PromptVariation,
 	// only useful with content, can never happen as you must use NewPromptVariationsBuilder.
 	if len(v.vars) == 0 {
 		return []PromptVariation{}, fmt.Errorf(
-			"prompt requires variations (%s: %s-%s-%s)",
-			locale, v.promptType, v.intent, v.slot)
+			"prompt requires variations (%s: %s_%s_%s)",
+			locale, v.intent, v.slot, v.promptType)
 	}
 	// loop over variation types
 	for t, n := range v.vars {
@@ -808,8 +808,8 @@ func (v *promptVariationsBuilder) BuildLocale(locale string) ([]PromptVariation,
 	}
 	if len(vs) == 0 {
 		return []PromptVariation{}, fmt.Errorf(
-			"prompt requires variations with values (%s: %s-%s-%s)",
-			locale, v.promptType, v.intent, v.slot)
+			"prompt requires variations with values (%s: %s_%s_%s)",
+			locale, v.intent, v.slot, v.promptType)
 	}
 	return vs, nil
 }
