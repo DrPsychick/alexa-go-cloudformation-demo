@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/drpsychick/alexa-go-cloudformation-demo/lambda/middleware"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"github.com/drpsychick/go-alexa-lambda"
 	"github.com/hamba/pkg/stats"
 )
 

@@ -1,7 +1,7 @@
 package loca
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/go-alexa-lambda/l10n"
 )
 
 // just register the locale and fallback to enUS.

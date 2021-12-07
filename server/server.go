@@ -2,7 +2,7 @@
 package server
 
 import (
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa"
+	"github.com/drpsychick/go-alexa-lambda"
 )
 
 // Application defines the interface to the app.

@@ -3,7 +3,7 @@ package alexa
 import (
 	"errors"
 	"fmt"
-	"github.com/drpsychick/alexa-go-cloudformation-demo/pkg/alexa/l10n"
+	"github.com/drpsychick/go-alexa-lambda/l10n"
 	"reflect"
 	"testing"
 )
